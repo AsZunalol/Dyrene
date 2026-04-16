@@ -29,7 +29,7 @@ function hasRole(member: { roles?: string[] }, roleId: string) {
   return Array.isArray(member.roles) && member.roles.includes(roleId);
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request,
   });
