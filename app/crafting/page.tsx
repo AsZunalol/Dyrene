@@ -28,16 +28,9 @@ export default async function CraftingPage() {
     <div className="relative min-h-screen overflow-hidden bg-[#07203a] text-white">
       <Navbar />
 
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: "url('/bg.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0a223d] via-[#103b63] to-[#06111f]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_35%),radial-gradient(circle_at_top_right,rgba(6,182,212,0.18),transparent_30%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.65),transparent_45%)]" />
+      <div className="absolute inset-0 bg-black/45" />
 
       <div className="relative z-10 px-6 pt-32 pb-12">
         <div className="max-w-7xl mx-auto">
@@ -46,6 +39,7 @@ export default async function CraftingPage() {
             style={{
               background:
                 "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
+              backdropFilter: "blur(10px)",
             }}
           >
             <p className="text-sm uppercase tracking-[0.3em] text-white/70">
