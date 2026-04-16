@@ -62,6 +62,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublic =
+    pathname === "/" ||
     pathname === "/login" ||
     pathname === "/denied" ||
     pathname.startsWith("/auth/callback") ||
@@ -127,7 +128,7 @@ export async function proxy(request: NextRequest) {
       last_seen: new Date().toISOString(),
     });
   } catch (err) {
-    console.error("Middleware error:", err);
+    console.error("Proxy error:", err);
     await supabase.auth.signOut();
     return NextResponse.redirect(new URL("/denied", request.url));
   }
