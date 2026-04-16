@@ -21,6 +21,10 @@ async function getGuildMemberWithBot(guildId: string, userId: string) {
     cache: "no-store",
   });
 
+  if (res.status === 404) {
+    return null;
+  }
+
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to fetch guild member: ${res.status} ${text}`);
@@ -29,8 +33,8 @@ async function getGuildMemberWithBot(guildId: string, userId: string) {
   return res.json();
 }
 
-function hasRole(member: { roles?: string[] }, roleId: string) {
-  return Array.isArray(member.roles) && member.roles.includes(roleId);
+function hasRole(member: { roles?: string[] } | null, roleId: string) {
+  return Array.isArray(member?.roles) && member!.roles.includes(roleId);
 }
 
 export async function proxy(request: NextRequest) {
@@ -92,21 +96,38 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/denied", request.url));
   }
 
-  try {
-    const guildId = process.env.DISCORD_GUILD_ID!;
-    const requiredRole = process.env.DISCORD_REQUIRED_ROLE_ID!;
-    const adminRole = process.env.DISCORD_ADMIN_ROLE_ID!;
+  const guildId = process.env.DISCORD_GUILD_ID!;
+  const requiredRole = process.env.DISCORD_REQUIRED_ROLE_ID!;
+  const adminRole = process.env.DISCORD_ADMIN_ROLE_ID!;
 
+  let isAdmin = user.user_metadata?.is_admin === true;
+
+  // Only use Discord to decide access.
+  // If Discord has a temporary issue, keep the session alive.
+  try {
     const member = await getGuildMemberWithBot(guildId, discordUserId);
 
+    // User is definitely not in the guild anymore
+    if (member === null) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(new URL("/denied", request.url));
+    }
+
     const hasAccess = hasRole(member, requiredRole);
-    const isAdmin = hasRole(member, adminRole);
+    isAdmin = hasRole(member, adminRole);
 
     if (!hasAccess) {
       await supabase.auth.signOut();
       return NextResponse.redirect(new URL("/denied", request.url));
     }
+  } catch (err) {
+    console.error("Discord access check failed:", err);
+    return response;
+  }
 
+  // Keep profile/admin sync separate from access control.
+  // A DB write error should never log the user out.
+  try {
     const currentAdmin = user.user_metadata?.is_admin === true;
 
     if (currentAdmin !== isAdmin) {
@@ -115,7 +136,7 @@ export async function proxy(request: NextRequest) {
       });
     }
 
-    await supabase.from("profiles").upsert({
+    const { error } = await supabase.from("profiles").upsert({
       id: user.id,
       discord_id: discordUserId,
       discord_username:
@@ -131,10 +152,12 @@ export async function proxy(request: NextRequest) {
       is_admin: isAdmin,
       last_seen: new Date().toISOString(),
     });
+
+    if (error) {
+      console.error("Profile upsert failed:", error);
+    }
   } catch (err) {
-    console.error("Proxy error:", err);
-    await supabase.auth.signOut();
-    return NextResponse.redirect(new URL("/denied", request.url));
+    console.error("Profile/admin sync failed:", err);
   }
 
   return response;
