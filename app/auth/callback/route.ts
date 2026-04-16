@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getGuildMemberWithBot, memberHasRole } from "@/lib/discord";
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
@@ -13,31 +18,31 @@ export async function GET(request: Request) {
 
   let response = NextResponse.redirect(new URL("/", origin));
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          const cookieHeader = request.headers.get("cookie") ?? "";
-          if (!cookieHeader) return [];
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        const cookieHeader = request.headers.get("cookie") ?? "";
+        if (!cookieHeader) return [];
 
-          return cookieHeader.split(";").map((cookie) => {
-            const [name, ...rest] = cookie.trim().split("=");
-            return {
-              name,
-              value: rest.join("="),
-            };
-          });
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
+        return cookieHeader.split(";").map((cookie) => {
+          const [name, ...rest] = cookie.trim().split("=");
+          return {
+            name,
+            value: rest.join("="),
+          };
+        });
       },
-    }
-  );
+      setAll(cookiesToSet, headers) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+
+        Object.entries(headers ?? {}).forEach(([key, value]) => {
+          response.headers.set(key, value);
+        });
+      },
+    },
+  });
 
   try {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);

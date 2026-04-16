@@ -2,10 +2,17 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 const DISCORD_API = "https://discord.com/api/v10";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 async function getGuildMemberWithBot(guildId: string, userId: string) {
   const botToken = process.env.DISCORD_BOT_TOKEN;
-  if (!botToken) throw new Error("Missing DISCORD_BOT_TOKEN");
+
+  if (!botToken) {
+    throw new Error("Missing DISCORD_BOT_TOKEN");
+  }
 
   const res = await fetch(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, {
     headers: {
@@ -27,34 +34,34 @@ function hasRole(member: { roles?: string[] }, roleId: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  let response = NextResponse.next({
+    request,
+  });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
-
-          response = NextResponse.next({ request });
-
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-
-          Object.entries(headers).forEach(([key, value]) => {
-            response.headers.set(key, value);
-          });
-        },
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet, headers) {
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
+
+        response = NextResponse.next({
+          request,
+        });
+
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+
+        Object.entries(headers ?? {}).forEach(([key, value]) => {
+          response.headers.set(key, value);
+        });
+      },
+    },
+  });
 
   const { pathname } = request.nextUrl;
 
@@ -66,7 +73,9 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico";
 
-  if (isPublic) return response;
+  if (isPublic) {
+    return response;
+  }
 
   const {
     data: { user },
