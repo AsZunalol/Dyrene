@@ -88,21 +88,9 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const guildId = process.env.DISCORD_GUILD_ID;
-    const requiredRole = process.env.DISCORD_REQUIRED_ROLE_ID;
-    const adminRole = process.env.DISCORD_ADMIN_ROLE_ID;
-
-    if (!guildId) {
-      throw new Error("Missing DISCORD_GUILD_ID");
-    }
-
-    if (!requiredRole) {
-      throw new Error("Missing DISCORD_REQUIRED_ROLE_ID");
-    }
-
-    if (!adminRole) {
-      throw new Error("Missing DISCORD_ADMIN_ROLE_ID");
-    }
+    const guildId = process.env.DISCORD_GUILD_ID!;
+    const requiredRole = process.env.DISCORD_REQUIRED_ROLE_ID!;
+    const adminRole = process.env.DISCORD_ADMIN_ROLE_ID!;
 
     const member = await getGuildMemberWithBot(guildId, discordUserId);
 

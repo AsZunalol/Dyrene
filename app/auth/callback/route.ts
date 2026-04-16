@@ -19,12 +19,16 @@ export async function GET(request: Request) {
     {
       cookies: {
         getAll() {
-          return request.headers.get("cookie")
-            ?.split(";")
-            .map((cookie) => {
-              const [name, ...rest] = cookie.trim().split("=");
-              return { name, value: rest.join("=") };
-            }) ?? [];
+          const cookieHeader = request.headers.get("cookie") ?? "";
+          if (!cookieHeader) return [];
+
+          return cookieHeader.split(";").map((cookie) => {
+            const [name, ...rest] = cookie.trim().split("=");
+            return {
+              name,
+              value: rest.join("="),
+            };
+          });
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
@@ -69,7 +73,10 @@ export async function GET(request: Request) {
 
     if (!hasAccess) {
       await supabase.auth.signOut();
-      return NextResponse.redirect(new URL("/denied", origin));
+      const deniedResponse = NextResponse.redirect(new URL("/denied", origin));
+      deniedResponse.cookies.set("sb-access-token", "", { maxAge: 0, path: "/" });
+      deniedResponse.cookies.set("sb-refresh-token", "", { maxAge: 0, path: "/" });
+      return deniedResponse;
     }
 
     await supabase.auth.updateUser({
