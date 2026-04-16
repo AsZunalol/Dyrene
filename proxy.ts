@@ -1,13 +1,46 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const DISCORD_API = "https://discord.com/api/v10";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+async function getGuildMemberWithBot(guildId: string, userId: string) {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+
+  if (!botToken) {
+    throw new Error("Missing DISCORD_BOT_TOKEN");
+  }
+
+  const res = await fetch(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, {
+    headers: {
+      Authorization: `Bot ${botToken}`,
+    },
+    cache: "no-store",
+  });
+
+  if (res.status === 404) {
+    return null;
+  }
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch guild member: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+function hasRole(member: { roles?: string[] } | null, roleId: string) {
+  return Array.isArray(member?.roles) && member!.roles.includes(roleId);
+}
+
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  let response = NextResponse.next({
+    request,
+  });
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
@@ -19,7 +52,9 @@ export async function proxy(request: NextRequest) {
           request.cookies.set(name, value);
         });
 
-        response = NextResponse.next({ request });
+        response = NextResponse.next({
+          request,
+        });
 
         cookiesToSet.forEach(({ name, value, options }) => {
           response.cookies.set(name, value, options);
@@ -52,6 +87,77 @@ export async function proxy(request: NextRequest) {
 
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  const discordUserId = user.user_metadata?.provider_id;
+
+  if (!discordUserId) {
+    await supabase.auth.signOut();
+    return NextResponse.redirect(new URL("/denied", request.url));
+  }
+
+  const guildId = process.env.DISCORD_GUILD_ID!;
+  const requiredRole = process.env.DISCORD_REQUIRED_ROLE_ID!;
+  const adminRole = process.env.DISCORD_ADMIN_ROLE_ID!;
+
+  let isAdmin = user.user_metadata?.is_admin === true;
+
+  // Only use Discord to decide access.
+  // If Discord has a temporary issue, keep the session alive.
+  try {
+    const member = await getGuildMemberWithBot(guildId, discordUserId);
+
+    // User is definitely not in the guild anymore
+    if (member === null) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(new URL("/denied", request.url));
+    }
+
+    const hasAccess = hasRole(member, requiredRole);
+    isAdmin = hasRole(member, adminRole);
+
+    if (!hasAccess) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(new URL("/denied", request.url));
+    }
+  } catch (err) {
+    console.error("Discord access check failed:", err);
+    return response;
+  }
+
+  // Keep profile/admin sync separate from access control.
+  // A DB write error should never log the user out.
+  try {
+    const currentAdmin = user.user_metadata?.is_admin === true;
+
+    if (currentAdmin !== isAdmin) {
+      await supabase.auth.updateUser({
+        data: { is_admin: isAdmin },
+      });
+    }
+
+    const { error } = await supabase.from("profiles").upsert({
+      id: user.id,
+      discord_id: discordUserId,
+      discord_username:
+        user.user_metadata?.user_name ||
+        user.user_metadata?.preferred_username ||
+        user.user_metadata?.name ||
+        null,
+      global_name:
+        user.user_metadata?.full_name ||
+        user.user_metadata?.custom_claims?.global_name ||
+        null,
+      avatar_url: user.user_metadata?.avatar_url || null,
+      is_admin: isAdmin,
+      last_seen: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error("Profile upsert failed:", error);
+    }
+  } catch (err) {
+    console.error("Profile/admin sync failed:", err);
   }
 
   return response;
