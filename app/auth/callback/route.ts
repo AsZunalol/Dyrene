@@ -1,18 +1,41 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { getGuildMemberWithBot, memberHasRole } from "@/lib/discord";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+  const origin = requestUrl.origin;
 
   if (!code) {
     return NextResponse.redirect(new URL("/denied", origin));
   }
 
-  try {
-    const supabase = await createClient();
+  let response = NextResponse.redirect(new URL("/", origin));
 
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.headers.get("cookie")
+            ?.split(";")
+            .map((cookie) => {
+              const [name, ...rest] = cookie.trim().split("=");
+              return { name, value: rest.join("=") };
+            }) ?? [];
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
+  try {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error || !data.session) {
@@ -72,7 +95,7 @@ export async function GET(request: Request) {
       last_seen: new Date().toISOString(),
     });
 
-    return NextResponse.redirect(new URL("/", origin));
+    return response;
   } catch (err) {
     console.error("Discord callback error:", err);
     return NextResponse.redirect(new URL("/denied", origin));
