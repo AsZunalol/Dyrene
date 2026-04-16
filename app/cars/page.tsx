@@ -24,20 +24,13 @@ export default async function CarsPage() {
   if (profErr || !profile || !profile.is_admin) return redirect("/denied");
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-[#07203a] text-white">
       <Navbar />
 
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: "url('/bg.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
-
-      <div className="absolute inset-0 bg-black/60" />
+      {/* SAME BACKGROUND AS OTHER PAGES */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0a223d] via-[#103b63] to-[#06111f]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_35%),radial-gradient(circle_at_top_right,rgba(6,182,212,0.18),transparent_30%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.65),transparent_45%)]" />
+      <div className="absolute inset-0 bg-black/45" />
 
       <div className="relative z-10 px-6 pt-32 pb-12">
         <div className="max-w-6xl mx-auto">
@@ -45,9 +38,10 @@ export default async function CarsPage() {
           <div
             className="rounded-2xl p-8 border border-white/10 shadow-lg mb-8"
             style={{
-  background:
-    "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
-}}
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
+              backdropFilter: "blur(10px)",
+            }}
           >
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -56,12 +50,10 @@ export default async function CarsPage() {
                 </p>
                 <h1 className="text-4xl font-bold text-white mt-2">Cars</h1>
                 <p className="text-gray-300 mt-2 text-lg max-w-2xl">
-                  Browse vehicles
-                  VIN-Scratch and store cars.
+                  Browse vehicles VIN-Scratch and store cars.
                 </p>
               </div>
 
-              {/* Add Car Button moved here */}
               <div className="flex justify-start lg:justify-end">
                 <AddCarModal />
               </div>
@@ -79,9 +71,7 @@ export default async function CarsPage() {
           >
             <div className="mb-4">
               <h2 className="text-2xl font-bold text-white">Garage</h2>
-              <p className="text-gray-300 mt-2">
-                Search and filter.
-              </p>
+              <p className="text-gray-300 mt-2">Search and filter.</p>
             </div>
 
             <CarsList />
