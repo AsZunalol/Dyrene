@@ -74,8 +74,6 @@ export async function GET(request: Request) {
     if (!hasAccess) {
       await supabase.auth.signOut();
       const deniedResponse = NextResponse.redirect(new URL("/denied", origin));
-      deniedResponse.cookies.set("sb-access-token", "", { maxAge: 0, path: "/" });
-      deniedResponse.cookies.set("sb-refresh-token", "", { maxAge: 0, path: "/" });
       return deniedResponse;
     }
 
