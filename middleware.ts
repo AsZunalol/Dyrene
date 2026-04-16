@@ -30,21 +30,30 @@ function hasRole(member: { roles?: string[] }, roleId: string) {
 }
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  let response = NextResponse.next({
+    request,
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
+        getAll() {
+          return request.cookies.getAll();
         },
-        set(name: string, value: string, options) {
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options) {
-          response.cookies.set({ name, value: "", ...options });
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value);
+          });
+
+          response = NextResponse.next({
+            request,
+          });
+
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
         },
       },
     }
@@ -59,7 +68,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico";
 
-  if (isPublic) return response;
+  if (isPublic) {
+    return response;
+  }
 
   const {
     data: { user },
@@ -77,9 +88,21 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const guildId = process.env.DISCORD_GUILD_ID!;
-    const requiredRole = process.env.DISCORD_REQUIRED_ROLE_ID!;
-    const adminRole = process.env.DISCORD_ADMIN_ROLE_ID!;
+    const guildId = process.env.DISCORD_GUILD_ID;
+    const requiredRole = process.env.DISCORD_REQUIRED_ROLE_ID;
+    const adminRole = process.env.DISCORD_ADMIN_ROLE_ID;
+
+    if (!guildId) {
+      throw new Error("Missing DISCORD_GUILD_ID");
+    }
+
+    if (!requiredRole) {
+      throw new Error("Missing DISCORD_REQUIRED_ROLE_ID");
+    }
+
+    if (!adminRole) {
+      throw new Error("Missing DISCORD_ADMIN_ROLE_ID");
+    }
 
     const member = await getGuildMemberWithBot(guildId, discordUserId);
 
