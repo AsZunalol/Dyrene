@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 type MethColor = "green" | "red" | "blue";
 type SortOption =
@@ -174,6 +175,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rouletteKey, setRouletteKey] = useState(0);
 
@@ -205,6 +207,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const rouletteViewportRef = useRef<HTMLDivElement | null>(null);
+  const supabaseRef = useRef(createClient());
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -344,6 +347,47 @@ export default function MethRecipesTable({ isAdmin }: Props) {
     [buildMethUrl]
   );
 
+
+  const refreshCurrentView = useCallback(async () => {
+    const loadedCount = Math.max(PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+    setIsSyncing(true);
+
+    try {
+      const params = new URLSearchParams({
+        color,
+        limit: String(loadedCount),
+        offset: "0",
+        sort: sortBy,
+        status: statusFilter,
+      });
+
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
+      }
+
+      const res = await fetch(`/api/meth?${params.toString()}`);
+      const json: MethListResponse = await res.json();
+
+      if (!res.ok) {
+        throw new Error((json as any)?.error || "Failed to refresh recipes");
+      }
+
+      const nextItems = Array.isArray(json?.items) ? json.items : [];
+
+      setRecipes(nextItems);
+      setPage(Math.max(0, Math.ceil(nextItems.length / PAGE_SIZE) - 1));
+      setHasMore(nextItems.length < (json?.total ?? 0));
+      setTotal(json?.total ?? 0);
+      setCompletedCount(json?.completedCount ?? 0);
+      setMissingCount(json?.missingCount ?? 0);
+    } catch (err) {
+      console.error("Failed to refresh meth recipes in realtime", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [color, debouncedSearch, page, sortBy, statusFilter]);
+
   const resetAndFetch = useCallback(() => {
     clearMethCache();
     setRecipes([]);
@@ -476,6 +520,39 @@ export default function MethRecipesTable({ isAdmin }: Props) {
       setShouldRestoreScroll(false);
     }
   }, [recipes.length, shouldRestoreScroll]);
+
+
+  useEffect(() => {
+    if (!hydratedFromCache) return;
+
+    const channel = supabaseRef.current
+      .channel(`meth-recipes-realtime:${color}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "meth_recipes",
+        },
+        (payload) => {
+          const newRow = payload.new as Partial<Recipe> | null;
+          const oldRow = payload.old as Partial<Recipe> | null;
+          const touchesCurrentColor =
+            newRow?.fosfor_color === color || oldRow?.fosfor_color === color;
+
+          if (!touchesCurrentColor) {
+            return;
+          }
+
+          refreshCurrentView();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabaseRef.current.removeChannel(channel);
+    };
+  }, [color, hydratedFromCache, refreshCurrentView]);
 
   useEffect(() => {
     const markInteracted = () => setHasUserInteracted(true);
@@ -792,6 +869,12 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         {isAdmin && (
           <div className="rounded-xl bg-amber-500/10 border border-amber-400/20 px-4 py-3 text-sm text-amber-200">
             Admin mode: you can edit renhed and stabiliseringstid
+          </div>
+        )}
+
+        {isSyncing && (
+          <div className="rounded-xl bg-sky-500/10 border border-sky-400/20 px-4 py-3 text-sm text-sky-200">
+            Live update received. Refreshing visible recipes…
           </div>
         )}
       </div>
