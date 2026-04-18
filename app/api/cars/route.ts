@@ -51,8 +51,13 @@ export async function GET(req: Request) {
   const status = searchParams.get("status");
   const search = searchParams.get("search")?.trim();
 
-  const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 100)) : 6;
-  const offset = Number.isFinite(offsetParam) ? Math.max(0, offsetParam) : 0;
+  const limit = Number.isFinite(limitParam)
+    ? Math.max(1, Math.min(limitParam, 100))
+    : 6;
+
+  const offset = Number.isFinite(offsetParam)
+    ? Math.max(0, offsetParam)
+    : 0;
 
   let query = supabase
     .from("cars")
@@ -155,7 +160,10 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Missing car id" }, { status: 400 });
     }
 
-    const { error } = await auth.supabase.from("cars").delete().eq("id", body.id);
+    const { error } = await auth.supabase
+      .from("cars")
+      .delete()
+      .eq("id", body.id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
