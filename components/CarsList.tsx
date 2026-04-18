@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type Car = {
@@ -15,6 +15,8 @@ type Car = {
 };
 
 type Filter = "all" | "store" | "vin-scratch";
+
+const PAGE_SIZE = 6;
 
 function formatPrice(price?: number | null) {
   if (typeof price !== "number") return null;
@@ -32,6 +34,87 @@ type EditModalProps = {
   onClose: () => void;
   onSaved: () => void;
 };
+
+function CarCardSkeleton() {
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border border-white/10 shadow-lg animate-pulse"
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
+        backdropFilter: "blur(10px)",
+      }}
+    >
+      <div className="relative h-56 overflow-hidden bg-white/[0.08]">
+        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+          <div className="h-7 w-20 rounded-full bg-white/10" />
+          <div className="h-7 w-24 rounded-full bg-white/10" />
+        </div>
+
+        <div className="absolute top-3 right-3 h-7 w-24 rounded-full bg-white/10" />
+        <div className="absolute bottom-3 left-3 h-7 w-24 rounded-full bg-white/10" />
+      </div>
+
+      <div className="p-5 flex items-center justify-between gap-3">
+        <div className="space-y-2 flex-1 min-w-0">
+          <div className="h-6 w-40 max-w-full rounded-lg bg-white/10" />
+          <div className="h-4 w-24 rounded-lg bg-white/10" />
+        </div>
+
+        <div className="h-10 w-20 rounded-xl bg-white/10 shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+function CarsGridSkeleton({ count = PAGE_SIZE }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: count }).map((_, index) => (
+        <CarCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+}
+
+function CarImage({ src, alt }: { src?: string | null; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+  }, [src]);
+
+  if (!src || failed) {
+    return (
+      <div className="w-full h-full bg-white/5 flex items-center justify-center text-gray-300">
+        No image
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
+        className={`absolute inset-0 bg-white/5 transition-opacity duration-500 ${
+          loaded ? "opacity-0" : "opacity-100"
+        }`}
+      />
+
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+        className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
+          loaded ? "scale-100 blur-0 opacity-100" : "scale-105 blur-md opacity-70"
+        }`}
+      />
+    </>
+  );
+}
 
 function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
   const [mounted, setMounted] = useState(false);
@@ -232,36 +315,99 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
 }
 
 export default function CarsList() {
-  const [cars, setCars] = useState<Car[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [cars, setCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [editingCar, setEditingCar] = useState<Car | null>(null);
-
-  async function fetchCars() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/cars");
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json?.error || "Failed to fetch cars");
-      }
-      setCars(json);
-    } catch (err: any) {
-      console.error("Failed to fetch cars", err);
-      setCars(null);
-      setError(String(err?.message ?? err));
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    fetchCars();
+    const timeout = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
 
-    const refresh = () => fetchCars();
+    return () => window.clearTimeout(timeout);
+  }, [search]);
+
+  const buildCarsUrl = useCallback(
+    (pageNumber: number) => {
+      const params = new URLSearchParams({
+        limit: String(PAGE_SIZE),
+        offset: String(pageNumber * PAGE_SIZE),
+      });
+
+      if (filter !== "all") {
+        params.set("status", filter);
+      }
+
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
+      }
+
+      return `/api/cars?${params.toString()}`;
+    },
+    [debouncedSearch, filter]
+  );
+
+  const fetchCarsPage = useCallback(
+    async (pageNumber: number, replace = false) => {
+      if (replace) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      setError(null);
+
+      try {
+        const res = await fetch(buildCarsUrl(pageNumber));
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json?.error || "Failed to fetch cars");
+        }
+
+        const nextCars = Array.isArray(json) ? json : [];
+
+        setCars((current) => (replace ? nextCars : [...current, ...nextCars]));
+        setPage(pageNumber);
+        setHasMore(nextCars.length === PAGE_SIZE);
+      } catch (err: any) {
+        console.error("Failed to fetch cars", err);
+        if (replace) {
+          setCars([]);
+        }
+        setError(String(err?.message ?? err));
+      } finally {
+        if (replace) {
+          setLoading(false);
+        } else {
+          setLoadingMore(false);
+        }
+      }
+    },
+    [buildCarsUrl]
+  );
+
+  const resetAndFetch = useCallback(() => {
+    setCars([]);
+    setPage(0);
+    setHasMore(true);
+    fetchCarsPage(0, true);
+  }, [fetchCarsPage]);
+
+  useEffect(() => {
+    resetAndFetch();
+  }, [resetAndFetch]);
+
+  useEffect(() => {
+    const refresh = () => resetAndFetch();
     window.addEventListener("carAdded", refresh as EventListener);
     window.addEventListener("carUpdated", refresh as EventListener);
     window.addEventListener("carDeleted", refresh as EventListener);
@@ -271,28 +417,51 @@ export default function CarsList() {
       window.removeEventListener("carUpdated", refresh as EventListener);
       window.removeEventListener("carDeleted", refresh as EventListener);
     };
-  }, []);
+  }, [resetAndFetch]);
 
-  const filteredCars = useMemo(() => {
-    if (!cars) return [];
+  useEffect(() => {
+    const target = loadMoreRef.current;
 
-    const query = search.trim().toLowerCase();
+    if (!target || !hasMore || loading || loadingMore) {
+      return;
+    }
 
-    return cars.filter((car) => {
-      const matchesSearch =
-        !query ||
-        car.name.toLowerCase().includes(query) ||
-        (car.brand ?? "").toLowerCase().includes(query);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
 
-      const matchesFilter =
-        filter === "all" ? true : (car.status ?? "").toLowerCase() === filter;
+        if (firstEntry?.isIntersecting && hasMore && !loadingMore && !loading) {
+          fetchCarsPage(page + 1);
+        }
+      },
+      {
+        rootMargin: "300px 0px",
+      }
+    );
 
-      return matchesSearch && matchesFilter;
-    });
-  }, [cars, search, filter]);
+    observer.observe(target);
 
-  if (loading) return <div className="p-4 text-gray-300">Loading cars…</div>;
-  if (error) return <div className="p-4 text-red-400">Error: {error}</div>;
+    return () => observer.disconnect();
+  }, [fetchCarsPage, hasMore, loading, loadingMore, page]);
+
+  const resultText = useMemo(() => {
+    if (!cars.length) return "No cars loaded yet";
+    return `${cars.length} car${cars.length === 1 ? "" : "s"} loaded`;
+  }, [cars]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col gap-2 text-sm text-gray-300 sm:flex-row sm:items-center sm:justify-between">
+          <p>Loading cars…</p>
+          <p>Showing highest price first</p>
+        </div>
+        <CarsGridSkeleton />
+      </div>
+    );
+  }
+
+  if (error && !cars.length) return <div className="p-4 text-red-400">Error: {error}</div>;
 
   return (
     <div className="space-y-6">
@@ -357,95 +526,108 @@ export default function CarsList() {
         </div>
       </div>
 
-      {!filteredCars.length ? (
+      <div className="flex flex-col gap-2 text-sm text-gray-300 sm:flex-row sm:items-center sm:justify-between">
+        <p>{resultText}</p>
+        <p>Showing highest price first</p>
+      </div>
+
+      {!cars.length ? (
         <div className="p-6 rounded-xl border border-white/10 bg-white/5 text-gray-400">
           No cars found.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredCars.map((car) => (
-            <div
-              key={car.id}
-              className="overflow-hidden rounded-2xl border border-white/10 shadow-lg transition duration-300 hover:scale-[1.01]"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              <div className="relative h-56 overflow-hidden">
-                {car.image ? (
-                  <img
-                    src={car.image}
-                    alt={car.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-white/5 flex items-center justify-center text-gray-300">
-                    No image
-                  </div>
-                )}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {cars.map((car) => (
+              <div
+                key={car.id}
+                className="group overflow-hidden rounded-2xl border border-white/10 shadow-lg transition duration-300 hover:-translate-y-1 hover:border-white/20"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                <div className="relative h-56 overflow-hidden bg-black/20">
+                  <CarImage src={car.image} alt={car.name} />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/20" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 transition-opacity duration-300 group-hover:from-black/85" />
+                  <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),transparent_45%)]" />
 
-                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                  {car.brand ? (
-                    <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-                      {car.brand}
+                  <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                    {car.brand ? (
+                      <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                        {car.brand}
+                      </span>
+                    ) : null}
+
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold text-white backdrop-blur-md ${
+                        car.status === "vin-scratch"
+                          ? "border-red-400/30 bg-red-500/20"
+                          : "border-sky-400/30 bg-sky-500/20"
+                      }`}
+                    >
+                      {prettyStatus(car.status)}
                     </span>
+                  </div>
+
+                  {typeof car.price === "number" ? (
+                    <div className="absolute top-3 right-3">
+                      <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md shadow-lg shadow-black/20">
+                        {formatPrice(car.price)}
+                      </span>
+                    </div>
                   ) : null}
 
-                  <span
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold text-white backdrop-blur-md ${
-                      car.status === "vin-scratch"
-                        ? "border-red-400/30 bg-red-500/20"
-                        : "border-sky-400/30 bg-sky-500/20"
-                    }`}
-                  >
-                    {prettyStatus(car.status)}
-                  </span>
+                  {car.featured ? (
+                    <div className="absolute bottom-3 left-3">
+                      <span className="rounded-full border border-yellow-400/30 bg-yellow-500/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                        Featured
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
 
-                {typeof car.price === "number" ? (
-                  <div className="absolute top-3 right-3">
-                    <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-                      {formatPrice(car.price)}
-                    </span>
+                <div className="p-5 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate text-xl font-bold text-white">{car.name}</h3>
+                    <p className="mt-1 text-sm text-gray-400">{prettyStatus(car.status)}</p>
                   </div>
-                ) : null}
 
-                {car.featured ? (
-                  <div className="absolute bottom-3 left-3">
-                    <span className="rounded-full border border-yellow-400/30 bg-yellow-500/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-                      Featured
-                    </span>
-                  </div>
-                ) : null}
+                  <button
+                    onClick={() => setEditingCar(car)}
+                    className="shrink-0 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-transform duration-200 hover:scale-105"
+                    style={{
+                      background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                    }}
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
+            ))}
+          </div>
 
-              <div className="p-5 flex items-center justify-between gap-3">
-                <h3 className="text-xl font-bold text-white">{car.name}</h3>
-
-                <button
-                  onClick={() => setEditingCar(car)}
-                  className="px-3 py-2 rounded-xl text-sm font-semibold text-white"
-                  style={{
-                    background: "linear-gradient(90deg,#5865F2,#6772E5)",
-                  }}
-                >
-                  Edit
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+          {loadingMore ? <CarsGridSkeleton /> : null}
+        </>
       )}
+
+      {error ? <div className="text-sm text-red-400">Error: {error}</div> : null}
+
+      <div ref={loadMoreRef} className="h-1" />
+
+      {!hasMore && cars.length ? (
+        <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-gray-400">
+          You’ve reached the end of the garage.
+        </div>
+      ) : null}
 
       {editingCar ? (
         <EditCarModal
           car={editingCar}
           onClose={() => setEditingCar(null)}
-          onSaved={fetchCars}
+          onSaved={resetAndFetch}
         />
       ) : null}
     </div>
