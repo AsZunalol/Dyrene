@@ -41,29 +41,173 @@ async function getCurrentUserAndProfile() {
   };
 }
 
+type StatusFilter = "all" | "completed" | "missing";
+type SortOption =
+  | "default"
+  | "renhed-desc"
+  | "renhed-asc"
+  | "stabiliseringstid-desc"
+  | "stabiliseringstid-asc";
+
+function applySharedFilters(
+  query: any,
+  color: string,
+  status: StatusFilter,
+  search: string
+) {
+  let nextQuery = query.eq("fosfor_color", color);
+
+  if (search) {
+    const sanitized = search.replace(/,/g, "-").trim();
+    nextQuery = nextQuery.or(
+      `lithium::text.ilike.%${sanitized}%,pseudoephedrin::text.ilike.%${sanitized}%,fosfor_amount::text.ilike.%${sanitized}%`
+    );
+  }
+
+  if (status === "completed") {
+    nextQuery = nextQuery.not("renhed", "is", null).not("stabiliseringstid", "is", null);
+  }
+
+  if (status === "missing") {
+    nextQuery = nextQuery.or("renhed.is.null,stabiliseringstid.is.null");
+  }
+
+  return nextQuery;
+}
+
+function applySort(query: any, sort: SortOption) {
+  switch (sort) {
+    case "renhed-desc":
+      return query
+        .order("renhed", { ascending: false, nullsFirst: false })
+        .order("fosfor_amount", { ascending: true })
+        .order("pseudoephedrin", { ascending: true })
+        .order("lithium", { ascending: true });
+    case "renhed-asc":
+      return query
+        .order("renhed", { ascending: true, nullsFirst: false })
+        .order("fosfor_amount", { ascending: true })
+        .order("pseudoephedrin", { ascending: true })
+        .order("lithium", { ascending: true });
+    case "stabiliseringstid-desc":
+      return query
+        .order("stabiliseringstid", { ascending: false, nullsFirst: false })
+        .order("fosfor_amount", { ascending: true })
+        .order("pseudoephedrin", { ascending: true })
+        .order("lithium", { ascending: true });
+    case "stabiliseringstid-asc":
+      return query
+        .order("stabiliseringstid", { ascending: true, nullsFirst: false })
+        .order("fosfor_amount", { ascending: true })
+        .order("pseudoephedrin", { ascending: true })
+        .order("lithium", { ascending: true });
+    default:
+      return query
+        .order("fosfor_amount", { ascending: true })
+        .order("pseudoephedrin", { ascending: true })
+        .order("lithium", { ascending: true });
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const color = searchParams.get("color") || "green";
+  const status = (searchParams.get("status") || "all") as StatusFilter;
+  const sort = (searchParams.get("sort") || "default") as SortOption;
+  const search = searchParams.get("search")?.trim() || "";
+  const randomMissing = searchParams.get("randomMissing") === "true";
+
+  const limitParam = Number(searchParams.get("limit") || "50");
+  const offsetParam = Number(searchParams.get("offset") || "0");
+
+  const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 200)) : 50;
+  const offset = Number.isFinite(offsetParam) ? Math.max(0, offsetParam) : 0;
 
   if (!["green", "red", "blue"].includes(color)) {
     return NextResponse.json({ error: "Invalid color" }, { status: 400 });
   }
 
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("meth_recipes")
-    .select("*")
-    .eq("fosfor_color", color)
-    .order("lithium", { ascending: true })
-    .order("pseudoephedrin", { ascending: true })
-    .order("fosfor_amount", { ascending: true });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!["all", "completed", "missing"].includes(status)) {
+    return NextResponse.json({ error: "Invalid status filter" }, { status: 400 });
   }
 
-  return NextResponse.json(data);
+  if (
+    ![
+      "default",
+      "renhed-desc",
+      "renhed-asc",
+      "stabiliseringstid-desc",
+      "stabiliseringstid-asc",
+    ].includes(sort)
+  ) {
+    return NextResponse.json({ error: "Invalid sort option" }, { status: 400 });
+  }
+
+  const supabase = await createClient();
+
+  if (randomMissing) {
+    const randomQuery = applySharedFilters(
+      supabase.from("meth_recipes").select("*"),
+      color,
+      "missing",
+      search
+    );
+
+    const { data, error } = await randomQuery.limit(200);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const items = data ?? [];
+    const item = items.length > 0 ? items[Math.floor(Math.random() * items.length)] : null;
+
+    return NextResponse.json({ item });
+  }
+
+  let itemsQuery = applySharedFilters(
+    supabase.from("meth_recipes").select("*"),
+    color,
+    status,
+    search
+  );
+  itemsQuery = applySort(itemsQuery, sort);
+
+  const [{ data: items, error: itemsError }, { count: total, error: totalError }, { count: completedCount, error: completedError }, { count: missingCount, error: missingError }] =
+    await Promise.all([
+      itemsQuery.range(offset, offset + limit - 1),
+      applySharedFilters(
+        supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+        color,
+        status,
+        search
+      ),
+      applySharedFilters(
+        supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+        color,
+        "completed",
+        search
+      ),
+      applySharedFilters(
+        supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+        color,
+        "missing",
+        search
+      ),
+    ]);
+
+  const firstError = itemsError || totalError || completedError || missingError;
+
+  if (firstError) {
+    return NextResponse.json({ error: firstError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    items: items ?? [],
+    total: total ?? 0,
+    completedCount: completedCount ?? 0,
+    missingCount: missingCount ?? 0,
+  });
 }
 
 export async function PATCH(req: Request) {

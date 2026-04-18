@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type MethColor = "green" | "red" | "blue";
 type SortOption =
@@ -23,9 +23,18 @@ type Recipe = {
   updated_at?: string | null;
 };
 
+type MethListResponse = {
+  items: Recipe[];
+  total: number;
+  completedCount: number;
+  missingCount: number;
+};
+
 type Props = {
   isAdmin: boolean;
 };
+
+const PAGE_SIZE = 50;
 
 function colorClasses(color: MethColor) {
   if (color === "green") return "bg-emerald-500/20 text-emerald-300 border-emerald-400/20";
@@ -50,12 +59,49 @@ function colorTabClasses(active: boolean, color: MethColor) {
 }
 
 function comboLabel(recipe: Recipe) {
-  return `${recipe.lithium}-${recipe.pseudoephedrin}-${recipe.fosfor_amount}`;
+  return `${recipe.fosfor_amount}-${recipe.pseudoephedrin}-${recipe.lithium}`;
+}
+
+function RecipesTableSkeleton({ isAdmin, rows = 12 }: { isAdmin: boolean; rows?: number }) {
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-white/10 animate-pulse">
+      <table className="w-full text-left text-sm text-white">
+        <thead className="border-b border-white/10 text-gray-300 bg-white/5">
+          <tr>
+            <th className="px-4 py-4">Color</th>
+            <th className="px-4 py-4">Fosfor</th>
+            <th className="px-4 py-4">Pseudoephedrin</th>
+            <th className="px-4 py-4">Lithium</th>
+            <th className="px-4 py-4">Renhed</th>
+            <th className="px-4 py-4">Stabiliseringstid</th>
+            <th className="px-4 py-4">Status</th>
+            {isAdmin && <th className="px-4 py-4">Actions</th>}
+          </tr>
+        </thead>
+
+        <tbody>
+          {Array.from({ length: rows }).map((_, index) => (
+            <tr key={index} className="border-b border-white/5">
+              <td className="px-4 py-4"><div className="h-7 w-16 rounded-full bg-white/10" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-12 rounded bg-white/10" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-16 rounded bg-white/10" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-10 rounded bg-white/10" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-14 rounded bg-white/10" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-20 rounded bg-white/10" /></td>
+              <td className="px-4 py-4"><div className="h-7 w-24 rounded-full bg-white/10" /></td>
+              {isAdmin && <td className="px-4 py-4"><div className="h-9 w-16 rounded-lg bg-white/10" /></td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default function MethRecipesTable({ isAdmin }: Props) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rouletteKey, setRouletteKey] = useState(0);
 
@@ -63,6 +109,15 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
+  const [total, setTotal] = useState(0);
+  const [completedCount, setCompletedCount] = useState(0);
+  const [missingCount, setMissingCount] = useState(0);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [renhedInput, setRenhedInput] = useState("");
@@ -74,111 +129,152 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
 
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
-
-  async function fetchRecipes(selectedColor: MethColor) {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`/api/meth?color=${selectedColor}`);
-      const json = await res.json();
-
-      if (!res.ok) {
-        throw new Error(json?.error || "Failed to fetch recipes");
-      }
-
-      setRecipes(json);
-      setSelectedRecipeId(null);
-      setRouletteItems([]);
-      setRouletteOffset(0);
-    } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : "Failed to fetch recipes");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    fetchRecipes(color);
-  }, [color]);
+    const timeout = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
 
-  const filteredRecipes = useMemo(() => {
-    let list = [...recipes];
+    return () => window.clearTimeout(timeout);
+  }, [search]);
 
-    if (search.trim()) {
-      const term = search.trim().toLowerCase();
-      list = list.filter((recipe) =>
-        comboLabel(recipe).toLowerCase().includes(term)
-      );
+  const buildMethUrl = useCallback(
+    (pageNumber: number) => {
+      const params = new URLSearchParams({
+        color,
+        limit: String(PAGE_SIZE),
+        offset: String(pageNumber * PAGE_SIZE),
+        sort: sortBy,
+        status: statusFilter,
+      });
+
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
+      }
+
+      return `/api/meth?${params.toString()}`;
+    },
+    [color, debouncedSearch, sortBy, statusFilter]
+  );
+
+  const fetchRecipesPage = useCallback(
+    async (pageNumber: number, replace = false) => {
+      if (replace) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      setError(null);
+
+      try {
+        const res = await fetch(buildMethUrl(pageNumber));
+        const json: MethListResponse = await res.json();
+
+        if (!res.ok) {
+          throw new Error((json as any)?.error || "Failed to fetch recipes");
+        }
+
+        const nextItems = Array.isArray(json?.items) ? json.items : [];
+
+        setRecipes((current) => (replace ? nextItems : [...current, ...nextItems]));
+        setPage(pageNumber);
+        setHasMore(nextItems.length === PAGE_SIZE);
+        setTotal(json?.total ?? 0);
+        setCompletedCount(json?.completedCount ?? 0);
+        setMissingCount(json?.missingCount ?? 0);
+
+        if (replace) {
+          setSelectedRecipeId(null);
+          setRouletteItems([]);
+          setRouletteOffset(0);
+        }
+      } catch (err) {
+        console.error(err);
+        if (replace) {
+          setRecipes([]);
+          setTotal(0);
+          setCompletedCount(0);
+          setMissingCount(0);
+        }
+        setError(err instanceof Error ? err.message : "Failed to fetch recipes");
+      } finally {
+        if (replace) {
+          setLoading(false);
+        } else {
+          setLoadingMore(false);
+        }
+      }
+    },
+    [buildMethUrl]
+  );
+
+  const resetAndFetch = useCallback(() => {
+    setRecipes([]);
+    setPage(0);
+    setHasMore(true);
+    setSelectedRecipeId(null);
+    setRouletteItems([]);
+    setRouletteOffset(0);
+    fetchRecipesPage(0, true);
+  }, [fetchRecipesPage]);
+
+  useEffect(() => {
+    resetAndFetch();
+  }, [resetAndFetch]);
+
+  useEffect(() => {
+    const markInteracted = () => setHasUserInteracted(true);
+
+    window.addEventListener("wheel", markInteracted, { passive: true });
+    window.addEventListener("touchmove", markInteracted, { passive: true });
+    window.addEventListener("keydown", markInteracted);
+    window.addEventListener("scroll", markInteracted, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", markInteracted);
+      window.removeEventListener("touchmove", markInteracted);
+      window.removeEventListener("keydown", markInteracted);
+      window.removeEventListener("scroll", markInteracted);
+    };
+  }, []);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+
+    if (!target || !hasMore || loading || loadingMore || !hasUserInteracted) {
+      return;
     }
 
-    if (statusFilter === "completed") {
-      list = list.filter(
-        (recipe) =>
-          recipe.renhed !== null && recipe.stabiliseringstid !== null
-      );
-    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
 
-    if (statusFilter === "missing") {
-      list = list.filter(
-        (recipe) =>
-          recipe.renhed === null || recipe.stabiliseringstid === null
-      );
-    }
-
-    switch (sortBy) {
-      case "renhed-desc":
-        list.sort((a, b) => (b.renhed ?? -Infinity) - (a.renhed ?? -Infinity));
-        break;
-      case "renhed-asc":
-        list.sort((a, b) => (a.renhed ?? Infinity) - (b.renhed ?? Infinity));
-        break;
-      case "stabiliseringstid-desc":
-        list.sort(
-          (a, b) =>
-            (b.stabiliseringstid ?? -Infinity) - (a.stabiliseringstid ?? -Infinity)
-        );
-        break;
-      case "stabiliseringstid-asc":
-        list.sort(
-          (a, b) =>
-            (a.stabiliseringstid ?? Infinity) - (b.stabiliseringstid ?? Infinity)
-        );
-        break;
-      default:
-        list.sort((a, b) => {
-          if (a.lithium !== b.lithium) return a.lithium - b.lithium;
-          if (a.pseudoephedrin !== b.pseudoephedrin) {
-            return a.pseudoephedrin - b.pseudoephedrin;
-          }
-          return a.fosfor_amount - b.fosfor_amount;
-        });
-        break;
-    }
-
-    return list;
-  }, [recipes, search, sortBy, statusFilter]);
-
-  const missingRecipes = useMemo(() => {
-    return recipes.filter(
-      (recipe) =>
-        recipe.renhed === null || recipe.stabiliseringstid === null
+        if (
+          firstEntry?.isIntersecting &&
+          hasMore &&
+          !loadingMore &&
+          !loading &&
+          hasUserInteracted
+        ) {
+          fetchRecipesPage(page + 1);
+        }
+      },
+      {
+        rootMargin: "600px 0px",
+      }
     );
-  }, [recipes]);
 
-  const completedCount = useMemo(() => {
-    return recipes.filter(
-      (recipe) =>
-        recipe.renhed !== null && recipe.stabiliseringstid !== null
-    ).length;
-  }, [recipes]);
+    observer.observe(target);
 
-  const missingCount = useMemo(() => {
+    return () => observer.disconnect();
+  }, [fetchRecipesPage, hasMore, hasUserInteracted, loading, loadingMore, page]);
+
+  const missingRecipesOnPage = useMemo(() => {
     return recipes.filter(
-      (recipe) =>
-        recipe.renhed === null || recipe.stabiliseringstid === null
-    ).length;
+      (recipe) => recipe.renhed === null || recipe.stabiliseringstid === null
+    );
   }, [recipes]);
 
   function startEdit(recipe: Recipe) {
@@ -218,6 +314,28 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         prev.map((recipe) => (recipe.id === id ? json : recipe))
       );
 
+      setCompletedCount((prev) => {
+        const oldRecipe = recipes.find((recipe) => recipe.id === id);
+        const wasCompleted =
+          oldRecipe?.renhed !== null && oldRecipe?.stabiliseringstid !== null;
+        const isCompletedNow =
+          json.renhed !== null && json.stabiliseringstid !== null;
+
+        if (wasCompleted === isCompletedNow) return prev;
+        return isCompletedNow ? prev + 1 : Math.max(0, prev - 1);
+      });
+
+      setMissingCount((prev) => {
+        const oldRecipe = recipes.find((recipe) => recipe.id === id);
+        const wasMissing =
+          oldRecipe?.renhed === null || oldRecipe?.stabiliseringstid === null;
+        const isMissingNow =
+          json.renhed === null || json.stabiliseringstid === null;
+
+        if (wasMissing === isMissingNow) return prev;
+        return isMissingNow ? prev + 1 : Math.max(0, prev - 1);
+      });
+
       if (
         json.renhed !== null &&
         json.stabiliseringstid !== null &&
@@ -249,59 +367,79 @@ export default function MethRecipesTable({ isAdmin }: Props) {
     return { built, winnerIndex };
   }
 
-  function pickRandomMissingRecipe() {
-  if (isRolling) return;
+  async function pickRandomMissingRecipe() {
+    if (isRolling) return;
 
-  if (missingRecipes.length === 0) {
-    alert("No missing recipes left for this color.");
-    return;
-  }
-
-  const winner =
-    missingRecipes[Math.floor(Math.random() * missingRecipes.length)];
-
-  const { built, winnerIndex } = buildRouletteList(missingRecipes, winner);
-
-  const itemWidth = 220;
-  const centerIndex = 1;
-  const finalOffset = winnerIndex * itemWidth - centerIndex * itemWidth;
-
-  setSelectedRecipeId(null);
-  setIsRolling(false);
-  setRouletteItems([]);
-  setRouletteOffset(0);
-
-  // force a fresh render before starting the next roll
-  window.setTimeout(() => {
-    setRouletteItems(built);
-    setRouletteOffset(0);
-
-    window.setTimeout(() => {
-      setIsRolling(true);
-      setRouletteOffset(finalOffset);
-    }, 50);
-  }, 50);
-
-  window.setTimeout(() => {
-    setIsRolling(false);
-    setSelectedRecipeId(winner.id);
-
-    const row = rowRefs.current[winner.id];
-    if (row) {
-      row.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
+    try {
+      const params = new URLSearchParams({
+        color,
+        randomMissing: "true",
       });
+
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
+      }
+
+      const res = await fetch(`/api/meth?${params.toString()}`);
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error || "Failed to pick a missing recipe");
+      }
+
+      const winner = json?.item as Recipe | null;
+
+      if (!winner) {
+        alert("No missing recipes left for this color.");
+        return;
+      }
+
+      const pool = missingRecipesOnPage.length > 0 ? missingRecipesOnPage : [winner];
+      const { built, winnerIndex } = buildRouletteList(pool, winner);
+
+      const itemWidth = 220;
+      const centerIndex = 1;
+      const finalOffset = winnerIndex * itemWidth - centerIndex * itemWidth;
+
+      setSelectedRecipeId(null);
+      setIsRolling(false);
+      setRouletteItems([]);
+      setRouletteOffset(0);
+      setRouletteKey((prev) => prev + 1);
+
+      window.setTimeout(() => {
+        setRouletteItems(built);
+        setRouletteOffset(0);
+
+        window.setTimeout(() => {
+          setIsRolling(true);
+          setRouletteOffset(finalOffset);
+        }, 50);
+      }, 50);
+
+      window.setTimeout(() => {
+        setIsRolling(false);
+        setSelectedRecipeId(winner.id);
+
+        const row = rowRefs.current[winner.id];
+        if (row) {
+          row.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 4300);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to pick a missing recipe");
     }
-  }, 4300);
-}
+  }
 
   return (
     <div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-white">Recipes</h2>
         <p className="text-gray-300 mt-2">
-          Browse all 1000 combinations for the selected fosfor color.
+          Browse recipes 50 at a time for the selected fosfor color.
         </p>
       </div>
 
@@ -354,7 +492,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Example: 50-20-100"
+            placeholder="Example: 100-20-50"
             className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none"
           />
         </div>
@@ -362,7 +500,8 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-gray-200">
-          Color recipes: <span className="font-bold text-white">{recipes.length}</span>
+          Loaded: <span className="font-bold text-white">{recipes.length}</span>
+          <span className="text-gray-400"> / {total}</span>
         </div>
 
         <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-gray-200">
@@ -371,11 +510,6 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
         <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-gray-200">
           Missing: <span className="font-bold text-white">{missingCount}</span>
-        </div>
-
-        <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-gray-200">
-          Visible after filters:{" "}
-          <span className="font-bold text-white">{filteredRecipes.length}</span>
         </div>
 
         {isAdmin && (
@@ -396,7 +530,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
           <button
             onClick={pickRandomMissingRecipe}
-            disabled={isRolling || missingRecipes.length === 0}
+            disabled={isRolling || missingCount === 0}
             className="px-5 py-3 rounded-xl text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: "linear-gradient(90deg,#8b5cf6,#ec4899,#f59e0b)",
@@ -412,17 +546,17 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#06111f] to-transparent z-10" />
 
           <div
-  key={rouletteKey}
-  className="flex h-full items-center gap-3 px-3"
-  style={{
-    transform: `translateX(-${rouletteOffset}px)`,
-    transition: isRolling
-      ? "transform 4.2s cubic-bezier(0.08, 0.7, 0.15, 1)"
-      : "none",
-    width: "max-content",
-  }}
->
-            {(rouletteItems.length > 0 ? rouletteItems : missingRecipes.slice(0, 12)).map(
+            key={rouletteKey}
+            className="flex h-full items-center gap-3 px-3"
+            style={{
+              transform: `translateX(-${rouletteOffset}px)`,
+              transition: isRolling
+                ? "transform 4.2s cubic-bezier(0.08, 0.7, 0.15, 1)"
+                : "none",
+              width: "max-content",
+            }}
+          >
+            {(rouletteItems.length > 0 ? rouletteItems : missingRecipesOnPage.slice(0, 12)).map(
               (recipe, index) => {
                 const isWinner = selectedRecipeId === recipe.id;
 
@@ -473,147 +607,163 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         )}
       </div>
 
-      {loading && <div className="text-gray-300">Loading recipes...</div>}
-      {error && <div className="text-red-300">{error}</div>}
+      {loading ? <RecipesTableSkeleton isAdmin={isAdmin} /> : null}
+      {error ? <div className="text-red-300 mb-4">{error}</div> : null}
 
       {!loading && !error && (
-        <div className="overflow-x-auto rounded-2xl border border-white/10">
-          <table className="w-full text-left text-sm text-white">
-            <thead className="border-b border-white/10 text-gray-300 bg-white/5">
-              <tr>
-                <th className="px-4 py-4">Color</th>
-                <th className="px-4 py-4">Lithium</th>
-                <th className="px-4 py-4">Pseudoephedrin</th>
-                <th className="px-4 py-4">Fosfor</th>
-                <th className="px-4 py-4">Renhed</th>
-                <th className="px-4 py-4">Stabiliseringstid</th>
-                <th className="px-4 py-4">Status</th>
-                {isAdmin && <th className="px-4 py-4">Actions</th>}
-              </tr>
-            </thead>
+        <>
+          <div className="overflow-x-auto rounded-2xl border border-white/10">
+            <table className="w-full text-left text-sm text-white">
+              <thead className="border-b border-white/10 text-gray-300 bg-white/5">
+                <tr>
+                  <th className="px-4 py-4">Color</th>
+                  <th className="px-4 py-4">Fosfor</th>
+                  <th className="px-4 py-4">Pseudoephedrin</th>
+                  <th className="px-4 py-4">Lithium</th>
+                  <th className="px-4 py-4">Renhed</th>
+                  <th className="px-4 py-4">Stabiliseringstid</th>
+                  <th className="px-4 py-4">Status</th>
+                  {isAdmin && <th className="px-4 py-4">Actions</th>}
+                </tr>
+              </thead>
 
-            <tbody>
-              {filteredRecipes.map((recipe) => {
-                const isEditing = editingId === recipe.id;
-                const isCompleted =
-                  recipe.renhed !== null && recipe.stabiliseringstid !== null;
-                const isSelected = selectedRecipeId === recipe.id;
+              <tbody>
+                {recipes.map((recipe) => {
+                  const isEditing = editingId === recipe.id;
+                  const isCompleted =
+                    recipe.renhed !== null && recipe.stabiliseringstid !== null;
+                  const isSelected = selectedRecipeId === recipe.id;
 
-                return (
-                  <tr
-                    key={recipe.id}
-                    ref={(el) => {
-                      rowRefs.current[recipe.id] = el;
-                    }}
-                    className={`border-b border-white/5 hover:bg-white/5 ${
-                      isSelected ? "bg-yellow-500/10 ring-1 ring-yellow-400/30" : ""
-                    }`}
-                  >
-                    <td className="px-4 py-4">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold border ${colorClasses(
-                          recipe.fosfor_color
-                        )}`}
-                      >
-                        {recipe.fosfor_color}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-4 font-semibold">{recipe.lithium}</td>
-                    <td className="px-4 py-4 font-semibold">
-                      {recipe.pseudoephedrin}
-                    </td>
-                    <td className="px-4 py-4 font-semibold">{recipe.fosfor_amount}</td>
-
-                    <td className="px-4 py-4">
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={renhedInput}
-                          onChange={(e) => setRenhedInput(e.target.value)}
-                          className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white outline-none"
-                        />
-                      ) : (
-                        recipe.renhed ?? "—"
-                      )}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          value={stabiliseringstidInput}
-                          onChange={(e) => setStabiliseringstidInput(e.target.value)}
-                          className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white outline-none"
-                        />
-                      ) : (
-                        recipe.stabiliseringstid ?? "—"
-                      )}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      {isCompleted ? (
-                        <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-emerald-500/20 text-emerald-300 border-emerald-400/20">
-                          Completed
+                  return (
+                    <tr
+                      key={recipe.id}
+                      ref={(el) => {
+                        rowRefs.current[recipe.id] = el;
+                      }}
+                      className={`border-b border-white/5 hover:bg-white/5 ${
+                        isSelected ? "bg-yellow-500/10 ring-1 ring-yellow-400/30" : ""
+                      }`}
+                    >
+                      <td className="px-4 py-4">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold border ${colorClasses(
+                            recipe.fosfor_color
+                          )}`}
+                        >
+                          {recipe.fosfor_color}
                         </span>
-                      ) : (
-                        <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-yellow-500/20 text-yellow-300 border-yellow-400/20">
-                          Missing data
-                        </span>
-                      )}
-                    </td>
+                      </td>
 
-                    {isAdmin && (
+                      <td className="px-4 py-4 font-semibold">{recipe.fosfor_amount}</td>
+                      <td className="px-4 py-4 font-semibold">
+                        {recipe.pseudoephedrin}
+                      </td>
+                      <td className="px-4 py-4 font-semibold">{recipe.lithium}</td>
+
                       <td className="px-4 py-4">
                         {isEditing ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => saveEdit(recipe.id)}
-                              className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
-                              style={{
-                                background: "linear-gradient(90deg,#10b981,#059669)",
-                              }}
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={cancelEdit}
-                              className="px-3 py-2 rounded-lg text-sm font-semibold text-white bg-white/10 border border-white/10"
-                            >
-                              Cancel
-                            </button>
-                          </div>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={renhedInput}
+                            onChange={(e) => setRenhedInput(e.target.value)}
+                            className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white outline-none"
+                          />
                         ) : (
-                          <button
-                            onClick={() => startEdit(recipe)}
-                            className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
-                            style={{
-                              background: "linear-gradient(90deg,#5865F2,#6772E5)",
-                            }}
-                          >
-                            Edit
-                          </button>
+                          recipe.renhed ?? "—"
                         )}
                       </td>
-                    )}
-                  </tr>
-                );
-              })}
 
-              {filteredRecipes.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={isAdmin ? 8 : 7}
-                    className="px-4 py-8 text-center text-gray-400"
-                  >
-                    No recipes match your filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                      <td className="px-4 py-4">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={stabiliseringstidInput}
+                            onChange={(e) => setStabiliseringstidInput(e.target.value)}
+                            className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white outline-none"
+                          />
+                        ) : (
+                          recipe.stabiliseringstid ?? "—"
+                        )}
+                      </td>
+
+                      <td className="px-4 py-4">
+                        {isCompleted ? (
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-emerald-500/20 text-emerald-300 border-emerald-400/20">
+                            Completed
+                          </span>
+                        ) : (
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-yellow-500/20 text-yellow-300 border-yellow-400/20">
+                            Missing data
+                          </span>
+                        )}
+                      </td>
+
+                      {isAdmin && (
+                        <td className="px-4 py-4">
+                          {isEditing ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => saveEdit(recipe.id)}
+                                className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
+                                style={{
+                                  background: "linear-gradient(90deg,#10b981,#059669)",
+                                }}
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                className="px-3 py-2 rounded-lg text-sm font-semibold text-white bg-white/10 border border-white/10"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => startEdit(recipe)}
+                              className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
+                              style={{
+                                background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                              }}
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+
+                {recipes.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={isAdmin ? 8 : 7}
+                      className="px-4 py-8 text-center text-gray-400"
+                    >
+                      No recipes match your filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {loadingMore ? (
+            <div className="mt-4">
+              <RecipesTableSkeleton isAdmin={isAdmin} rows={6} />
+            </div>
+          ) : null}
+
+          <div ref={loadMoreRef} className="h-1" />
+
+          {!hasMore && recipes.length > 0 ? (
+            <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-gray-400">
+              You’ve reached the end of the recipes for this filter.
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   );
