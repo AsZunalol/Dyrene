@@ -16,7 +16,23 @@ type Car = {
 
 type Filter = "all" | "store" | "vin-scratch";
 
+type CarsCacheEntry = {
+  cars: Car[];
+  page: number;
+  hasMore: boolean;
+  savedAt: number;
+};
+
+type CarsUiCache = {
+  search: string;
+  filter: Filter;
+  scrollY: number;
+};
+
 const PAGE_SIZE = 6;
+const CACHE_TTL_MS = 1000 * 60 * 10;
+const CARS_CACHE_KEY = "dyrene-cars-pages-cache";
+const CARS_UI_CACHE_KEY = "dyrene-cars-ui-cache";
 
 function formatPrice(price?: number | null) {
   if (typeof price !== "number") return null;
@@ -27,6 +43,54 @@ function prettyStatus(status?: string | null) {
   if (status === "vin-scratch") return "VIN-Scratch";
   if (status === "store") return "Store";
   return "Unknown";
+}
+
+function buildCacheKey(filter: Filter, search: string) {
+  return `${filter}::${search.trim().toLowerCase()}`;
+}
+
+function readPagesCache() {
+  if (typeof window === "undefined") return {} as Record<string, CarsCacheEntry>;
+
+  try {
+    const raw = window.sessionStorage.getItem(CARS_CACHE_KEY);
+    if (!raw) return {} as Record<string, CarsCacheEntry>;
+
+    const parsed = JSON.parse(raw) as Record<string, CarsCacheEntry>;
+    const now = Date.now();
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter(([, value]) => {
+        return (
+          value &&
+          Array.isArray(value.cars) &&
+          typeof value.page === "number" &&
+          typeof value.hasMore === "boolean" &&
+          typeof value.savedAt === "number" &&
+          now - value.savedAt < CACHE_TTL_MS
+        );
+      })
+    );
+  } catch {
+    return {} as Record<string, CarsCacheEntry>;
+  }
+}
+
+function writePagesCache(cache: Record<string, CarsCacheEntry>) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(CARS_CACHE_KEY, JSON.stringify(cache));
+  } catch {}
+}
+
+function clearCarsCache() {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.removeItem(CARS_CACHE_KEY);
+    window.sessionStorage.removeItem(CARS_UI_CACHE_KEY);
+  } catch {}
 }
 
 type EditModalProps = {
@@ -325,7 +389,43 @@ export default function CarsList() {
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [hydratedFromCache, setHydratedFromCache] = useState(false);
+  const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const rawUi = window.sessionStorage.getItem(CARS_UI_CACHE_KEY);
+      const ui = rawUi ? (JSON.parse(rawUi) as CarsUiCache) : null;
+
+      if (ui?.search) {
+        setSearch(ui.search);
+        setDebouncedSearch(ui.search.trim());
+      }
+
+      if (ui?.filter === "all" || ui?.filter === "store" || ui?.filter === "vin-scratch") {
+        setFilter(ui.filter);
+      }
+
+      const cacheKey = buildCacheKey(ui?.filter ?? "all", ui?.search ?? "");
+      const pagesCache = readPagesCache();
+      const entry = pagesCache[cacheKey];
+
+      if (entry) {
+        setCars(entry.cars);
+        setPage(entry.page);
+        setHasMore(entry.hasMore);
+        setLoading(false);
+        setShouldRestoreScroll(true);
+      }
+    } catch {
+      // ignore bad cache data
+    } finally {
+      setHydratedFromCache(true);
+    }
+  }, []);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -396,15 +496,109 @@ export default function CarsList() {
   );
 
   const resetAndFetch = useCallback(() => {
+    clearCarsCache();
     setCars([]);
     setPage(0);
     setHasMore(true);
+    setShouldRestoreScroll(false);
     fetchCarsPage(0, true);
   }, [fetchCarsPage]);
 
   useEffect(() => {
-    resetAndFetch();
-  }, [resetAndFetch]);
+    if (!hydratedFromCache) return;
+
+    const cacheKey = buildCacheKey(filter, debouncedSearch);
+    const pagesCache = readPagesCache();
+    const cachedEntry = pagesCache[cacheKey];
+
+    if (cachedEntry) {
+      setCars(cachedEntry.cars);
+      setPage(cachedEntry.page);
+      setHasMore(cachedEntry.hasMore);
+      setLoading(false);
+      return;
+    }
+
+    setCars([]);
+    setPage(0);
+    setHasMore(true);
+    setShouldRestoreScroll(false);
+    fetchCarsPage(0, true);
+  }, [debouncedSearch, fetchCarsPage, filter, hydratedFromCache]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || typeof window === "undefined") return;
+
+    try {
+      window.sessionStorage.setItem(
+        CARS_UI_CACHE_KEY,
+        JSON.stringify({
+          search,
+          filter,
+          scrollY: window.scrollY,
+        } satisfies CarsUiCache)
+      );
+    } catch {}
+  }, [filter, hydratedFromCache, search]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || typeof window === "undefined") return;
+
+    const cacheKey = buildCacheKey(filter, debouncedSearch);
+    const pagesCache = readPagesCache();
+
+    pagesCache[cacheKey] = {
+      cars,
+      page,
+      hasMore,
+      savedAt: Date.now(),
+    };
+
+    writePagesCache(pagesCache);
+  }, [cars, debouncedSearch, filter, hasMore, hydratedFromCache, page]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || typeof window === "undefined") return;
+
+    const saveUiState = () => {
+      try {
+        window.sessionStorage.setItem(
+          CARS_UI_CACHE_KEY,
+          JSON.stringify({
+            search,
+            filter,
+            scrollY: window.scrollY,
+          } satisfies CarsUiCache)
+        );
+      } catch {}
+    };
+
+    window.addEventListener("scroll", saveUiState, { passive: true });
+    window.addEventListener("beforeunload", saveUiState);
+
+    return () => {
+      saveUiState();
+      window.removeEventListener("scroll", saveUiState);
+      window.removeEventListener("beforeunload", saveUiState);
+    };
+  }, [filter, hydratedFromCache, search]);
+
+  useEffect(() => {
+    if (!shouldRestoreScroll || typeof window === "undefined") return;
+
+    try {
+      const rawUi = window.sessionStorage.getItem(CARS_UI_CACHE_KEY);
+      const ui = rawUi ? (JSON.parse(rawUi) as CarsUiCache) : null;
+      const scrollY = typeof ui?.scrollY === "number" ? ui.scrollY : 0;
+
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollY, behavior: "auto" });
+        setShouldRestoreScroll(false);
+      });
+    } catch {
+      setShouldRestoreScroll(false);
+    }
+  }, [cars.length, shouldRestoreScroll]);
 
   useEffect(() => {
     const refresh = () => resetAndFetch();
