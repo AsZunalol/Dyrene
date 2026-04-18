@@ -35,6 +35,78 @@ type Props = {
 };
 
 const PAGE_SIZE = 50;
+const CACHE_TTL_MS = 1000 * 60 * 10;
+const METH_PAGES_CACHE_KEY = "dyrene-meth-pages-cache";
+const METH_UI_CACHE_KEY = "dyrene-meth-ui-cache";
+
+type MethCacheEntry = {
+  recipes: Recipe[];
+  page: number;
+  hasMore: boolean;
+  total: number;
+  completedCount: number;
+  missingCount: number;
+  savedAt: number;
+};
+
+type MethUiCache = {
+  color: MethColor;
+  sortBy: SortOption;
+  statusFilter: StatusFilter;
+  search: string;
+  scrollY: number;
+};
+
+function buildCacheKey(color: MethColor, sortBy: SortOption, statusFilter: StatusFilter, search: string) {
+  return `${color}::${sortBy}::${statusFilter}::${search.trim().toLowerCase()}`;
+}
+
+function readPagesCache() {
+  if (typeof window === "undefined") return {} as Record<string, MethCacheEntry>;
+
+  try {
+    const raw = window.sessionStorage.getItem(METH_PAGES_CACHE_KEY);
+    if (!raw) return {} as Record<string, MethCacheEntry>;
+
+    const parsed = JSON.parse(raw) as Record<string, MethCacheEntry>;
+    const now = Date.now();
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter(([, value]) => {
+        return (
+          value &&
+          Array.isArray(value.recipes) &&
+          typeof value.page === "number" &&
+          typeof value.hasMore === "boolean" &&
+          typeof value.total === "number" &&
+          typeof value.completedCount === "number" &&
+          typeof value.missingCount === "number" &&
+          typeof value.savedAt === "number" &&
+          now - value.savedAt < CACHE_TTL_MS
+        );
+      })
+    );
+  } catch {
+    return {} as Record<string, MethCacheEntry>;
+  }
+}
+
+function writePagesCache(cache: Record<string, MethCacheEntry>) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(METH_PAGES_CACHE_KEY, JSON.stringify(cache));
+  } catch {}
+}
+
+function clearMethCache() {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.removeItem(METH_PAGES_CACHE_KEY);
+    window.sessionStorage.removeItem(METH_UI_CACHE_KEY);
+  } catch {}
+}
 
 function colorClasses(color: MethColor) {
   if (color === "green") return "bg-emerald-500/20 text-emerald-300 border-emerald-400/20";
@@ -114,6 +186,8 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [hydratedFromCache, setHydratedFromCache] = useState(false);
+  const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
 
   const [total, setTotal] = useState(0);
   const [completedCount, setCompletedCount] = useState(0);
@@ -131,6 +205,65 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const rouletteViewportRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const rawUi = window.sessionStorage.getItem(METH_UI_CACHE_KEY);
+      const ui = rawUi ? (JSON.parse(rawUi) as MethUiCache) : null;
+
+      const cachedColor =
+        ui?.color === "green" || ui?.color === "red" || ui?.color === "blue"
+          ? ui.color
+          : "green";
+      const cachedSortBy =
+        ui?.sortBy === "default" ||
+        ui?.sortBy === "renhed-desc" ||
+        ui?.sortBy === "renhed-asc" ||
+        ui?.sortBy === "stabiliseringstid-desc" ||
+        ui?.sortBy === "stabiliseringstid-asc"
+          ? ui.sortBy
+          : "default";
+      const cachedStatus =
+        ui?.statusFilter === "all" ||
+        ui?.statusFilter === "completed" ||
+        ui?.statusFilter === "missing"
+          ? ui.statusFilter
+          : "all";
+      const cachedSearch = typeof ui?.search === "string" ? ui.search : "";
+
+      setColor(cachedColor);
+      setSortBy(cachedSortBy);
+      setStatusFilter(cachedStatus);
+      setSearch(cachedSearch);
+      setDebouncedSearch(cachedSearch.trim());
+
+      const cacheKey = buildCacheKey(
+        cachedColor,
+        cachedSortBy,
+        cachedStatus,
+        cachedSearch
+      );
+      const pagesCache = readPagesCache();
+      const entry = pagesCache[cacheKey];
+
+      if (entry) {
+        setRecipes(entry.recipes);
+        setPage(entry.page);
+        setHasMore(entry.hasMore);
+        setTotal(entry.total);
+        setCompletedCount(entry.completedCount);
+        setMissingCount(entry.missingCount);
+        setLoading(false);
+        setShouldRestoreScroll(true);
+      }
+    } catch {
+      // ignore bad cache data
+    } finally {
+      setHydratedFromCache(true);
+    }
+  }, []);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -212,18 +345,137 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   );
 
   const resetAndFetch = useCallback(() => {
+    clearMethCache();
     setRecipes([]);
     setPage(0);
     setHasMore(true);
     setSelectedRecipeId(null);
     setRouletteItems([]);
     setRouletteOffset(0);
+    setShouldRestoreScroll(false);
     fetchRecipesPage(0, true);
   }, [fetchRecipesPage]);
 
   useEffect(() => {
-    resetAndFetch();
-  }, [resetAndFetch]);
+    if (!hydratedFromCache) return;
+
+    const cacheKey = buildCacheKey(color, sortBy, statusFilter, debouncedSearch);
+    const pagesCache = readPagesCache();
+    const cachedEntry = pagesCache[cacheKey];
+
+    if (cachedEntry) {
+      setRecipes(cachedEntry.recipes);
+      setPage(cachedEntry.page);
+      setHasMore(cachedEntry.hasMore);
+      setTotal(cachedEntry.total);
+      setCompletedCount(cachedEntry.completedCount);
+      setMissingCount(cachedEntry.missingCount);
+      setLoading(false);
+      return;
+    }
+
+    setRecipes([]);
+    setPage(0);
+    setHasMore(true);
+    setSelectedRecipeId(null);
+    setRouletteItems([]);
+    setRouletteOffset(0);
+    setShouldRestoreScroll(false);
+    fetchRecipesPage(0, true);
+  }, [color, debouncedSearch, fetchRecipesPage, hydratedFromCache, sortBy, statusFilter]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || typeof window === "undefined") return;
+
+    try {
+      window.sessionStorage.setItem(
+        METH_UI_CACHE_KEY,
+        JSON.stringify({
+          color,
+          sortBy,
+          statusFilter,
+          search,
+          scrollY: window.scrollY,
+        } satisfies MethUiCache)
+      );
+    } catch {}
+  }, [color, hydratedFromCache, search, sortBy, statusFilter]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || typeof window === "undefined") return;
+
+    const cacheKey = buildCacheKey(color, sortBy, statusFilter, debouncedSearch);
+    const pagesCache = readPagesCache();
+
+    pagesCache[cacheKey] = {
+      recipes,
+      page,
+      hasMore,
+      total,
+      completedCount,
+      missingCount,
+      savedAt: Date.now(),
+    };
+
+    writePagesCache(pagesCache);
+  }, [
+    color,
+    completedCount,
+    debouncedSearch,
+    hasMore,
+    hydratedFromCache,
+    missingCount,
+    page,
+    recipes,
+    sortBy,
+    statusFilter,
+    total,
+  ]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || typeof window === "undefined") return;
+
+    const saveUiState = () => {
+      try {
+        window.sessionStorage.setItem(
+          METH_UI_CACHE_KEY,
+          JSON.stringify({
+            color,
+            sortBy,
+            statusFilter,
+            search,
+            scrollY: window.scrollY,
+          } satisfies MethUiCache)
+        );
+      } catch {}
+    };
+
+    window.addEventListener("scroll", saveUiState, { passive: true });
+    window.addEventListener("beforeunload", saveUiState);
+
+    return () => {
+      saveUiState();
+      window.removeEventListener("scroll", saveUiState);
+      window.removeEventListener("beforeunload", saveUiState);
+    };
+  }, [color, hydratedFromCache, search, sortBy, statusFilter]);
+
+  useEffect(() => {
+    if (!shouldRestoreScroll || typeof window === "undefined") return;
+
+    try {
+      const rawUi = window.sessionStorage.getItem(METH_UI_CACHE_KEY);
+      const ui = rawUi ? (JSON.parse(rawUi) as MethUiCache) : null;
+      const scrollY = typeof ui?.scrollY === "number" ? ui.scrollY : 0;
+
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollY, behavior: "auto" });
+        setShouldRestoreScroll(false);
+      });
+    } catch {
+      setShouldRestoreScroll(false);
+    }
+  }, [recipes.length, shouldRestoreScroll]);
 
   useEffect(() => {
     const markInteracted = () => setHasUserInteracted(true);
@@ -346,6 +598,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         setSelectedRecipeId(null);
       }
 
+      clearMethCache();
       cancelEdit();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to save recipe");
