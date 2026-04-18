@@ -419,15 +419,29 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
       window.setTimeout(() => {
         setIsRolling(false);
-        setSelectedRecipeId(winner.id);
 
-        const row = rowRefs.current[winner.id];
-        if (row) {
-          row.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
+        setRecipes((current) => {
+          const alreadyLoaded = current.some((recipe) => recipe.id === winner.id);
+          if (alreadyLoaded) {
+            return current;
+          }
+
+          return [winner, ...current];
+        });
+
+        window.requestAnimationFrame(() => {
+          setSelectedRecipeId(winner.id);
+
+          window.requestAnimationFrame(() => {
+            const row = rowRefs.current[winner.id];
+            if (row) {
+              row.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
           });
-        }
+        });
       }, 4300);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to pick a missing recipe");
