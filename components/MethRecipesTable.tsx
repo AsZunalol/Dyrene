@@ -478,13 +478,14 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none"
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+            style={{ colorScheme: "dark" }}
           >
-            <option value="default">Default</option>
-            <option value="renhed-desc">Highest renhed</option>
-            <option value="renhed-asc">Lowest renhed</option>
-            <option value="stabiliseringstid-desc">Highest stabiliseringstid</option>
-            <option value="stabiliseringstid-asc">Lowest stabiliseringstid</option>
+            <option value="default" className="bg-[#0b0f1a] text-white">Default</option>
+            <option value="renhed-desc" className="bg-[#0b0f1a] text-white">Highest renhed</option>
+            <option value="renhed-asc" className="bg-[#0b0f1a] text-white">Lowest renhed</option>
+            <option value="stabiliseringstid-desc" className="bg-[#0b0f1a] text-white">Highest stabiliseringstid</option>
+            <option value="stabiliseringstid-asc" className="bg-[#0b0f1a] text-white">Lowest stabiliseringstid</option>
           </select>
         </div>
 
@@ -493,11 +494,12 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none"
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+            style={{ colorScheme: "dark" }}
           >
-            <option value="all">All recipes</option>
-            <option value="completed">Only completed recipes</option>
-            <option value="missing">Only missing renhed/stabiliseringstid</option>
+            <option value="all" className="bg-[#0b0f1a] text-white">All recipes</option>
+            <option value="completed" className="bg-[#0b0f1a] text-white">Only completed recipes</option>
+            <option value="missing" className="bg-[#0b0f1a] text-white">Only missing renhed/stabiliseringstid</option>
           </select>
         </div>
 
