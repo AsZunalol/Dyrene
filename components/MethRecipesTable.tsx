@@ -130,6 +130,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const rouletteViewportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -397,9 +398,16 @@ export default function MethRecipesTable({ isAdmin }: Props) {
       const pool = missingRecipesOnPage.length > 0 ? missingRecipesOnPage : [winner];
       const { built, winnerIndex } = buildRouletteList(pool, winner);
 
-      const itemWidth = 220;
-      const centerIndex = 1;
-      const finalOffset = winnerIndex * itemWidth - centerIndex * itemWidth;
+      const cardWidth = 208;
+      const gapWidth = 12;
+      const containerPadding = 12;
+      const itemSpan = cardWidth + gapWidth;
+      const viewportWidth = rouletteViewportRef.current?.clientWidth ?? 0;
+      const centerOffset = viewportWidth > 0 ? viewportWidth / 2 - cardWidth / 2 : cardWidth;
+      const finalOffset = Math.max(
+        0,
+        winnerIndex * itemSpan - centerOffset + containerPadding
+      );
 
       setSelectedRecipeId(null);
       setIsRolling(false);
@@ -556,7 +564,10 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           </button>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#06111f] h-[118px]">
+        <div
+          ref={rouletteViewportRef}
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#06111f] h-[118px]"
+        >
           <div className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-[4px] bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.8)] z-20" />
           <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#06111f] to-transparent z-10" />
           <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#06111f] to-transparent z-10" />
