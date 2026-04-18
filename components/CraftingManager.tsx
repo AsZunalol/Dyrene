@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Ingredient = {
   id?: string;
@@ -38,6 +38,69 @@ const emptyIngredient = (): FormIngredient => ({
   ingredient_amount: "",
   ingredient_item_id: "",
 });
+
+
+type CraftingCacheEntry = {
+  items: CraftingItem[];
+  savedAt: number;
+};
+
+type CraftingUiCache = {
+  search: string;
+  selectedItemId: string;
+  cart: CartItem[];
+  scrollY: number;
+};
+
+const CRAFTING_CACHE_KEY = "dyrene-crafting-items-cache-v1";
+const CRAFTING_UI_CACHE_KEY = "dyrene-crafting-ui-cache-v1";
+const CRAFTING_CACHE_TTL_MS = 1000 * 60 * 10;
+
+function readCraftingItemsCache() {
+  if (typeof window === "undefined") return null as CraftingCacheEntry | null;
+
+  try {
+    const raw = window.sessionStorage.getItem(CRAFTING_CACHE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as CraftingCacheEntry;
+    if (
+      !parsed ||
+      !Array.isArray(parsed.items) ||
+      typeof parsed.savedAt !== "number" ||
+      Date.now() - parsed.savedAt > CRAFTING_CACHE_TTL_MS
+    ) {
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCraftingItemsCache(items: CraftingItem[]) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(
+      CRAFTING_CACHE_KEY,
+      JSON.stringify({
+        items,
+        savedAt: Date.now(),
+      })
+    );
+  } catch {}
+}
+
+function clearCraftingCache() {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.removeItem(CRAFTING_CACHE_KEY);
+    window.sessionStorage.removeItem(CRAFTING_UI_CACHE_KEY);
+  } catch {}
+}
 
 function roundAmount(value: number) {
   return Number(value.toFixed(2));
@@ -106,6 +169,9 @@ export default function CraftingManager({ isAdmin }: Props) {
   const [selectedItemId, setSelectedItemId] = useState<string>("");
 
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [hydratedFromCache, setHydratedFromCache] = useState(false);
+  const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
+  const hasFetchedRef = useRef(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -115,11 +181,20 @@ export default function CraftingManager({ isAdmin }: Props) {
     emptyIngredient(),
   ]);
 
-  async function fetchItems() {
+  async function fetchItems(forceRefresh = false) {
     setLoading(true);
     setError(null);
 
     try {
+      if (!forceRefresh) {
+        const cached = readCraftingItemsCache();
+        if (cached) {
+          setItems(cached.items);
+          setLoading(false);
+          return;
+        }
+      }
+
       const res = await fetch("/api/crafting");
       const json = await res.json();
 
@@ -128,10 +203,15 @@ export default function CraftingManager({ isAdmin }: Props) {
       }
 
       setItems(json);
+      writeCraftingItemsCache(json);
 
-      if (!selectedItemId && json.length > 0) {
-        setSelectedItemId(json[0].id);
-      }
+      setSelectedItemId((current) => {
+        if (current && json.some((item: CraftingItem) => item.id === current)) {
+          return current;
+        }
+
+        return json.length > 0 ? json[0].id : "";
+      });
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Failed to fetch crafting items");
@@ -141,8 +221,54 @@ export default function CraftingManager({ isAdmin }: Props) {
   }
 
   useEffect(() => {
-    fetchItems();
+    if (typeof window === "undefined") {
+      setHydratedFromCache(true);
+      return;
+    }
+
+    try {
+      const rawUi = window.sessionStorage.getItem(CRAFTING_UI_CACHE_KEY);
+      const ui = rawUi ? (JSON.parse(rawUi) as CraftingUiCache) : null;
+      const cached = readCraftingItemsCache();
+
+      if (ui?.search) {
+        setSearch(ui.search);
+      }
+
+      if (ui?.selectedItemId) {
+        setSelectedItemId(ui.selectedItemId);
+      }
+
+      if (Array.isArray(ui?.cart)) {
+        setCart(
+          ui.cart.filter(
+            (entry) =>
+              entry &&
+              typeof entry.itemId === "string" &&
+              typeof entry.quantity === "number" &&
+              entry.quantity > 0
+          )
+        );
+      }
+
+      if (cached) {
+        setItems(cached.items);
+        setLoading(false);
+        setShouldRestoreScroll(true);
+      }
+    } catch {
+      // ignore bad cache data
+    } finally {
+      setHydratedFromCache(true);
+    }
   }, []);
+
+  useEffect(() => {
+    if (!hydratedFromCache || hasFetchedRef.current) return;
+
+    hasFetchedRef.current = true;
+    fetchItems();
+  }, [hydratedFromCache]);
 
   const filteredItems = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -159,6 +285,62 @@ export default function CraftingManager({ isAdmin }: Props) {
       return haystack.includes(term);
     });
   }, [items, search]);
+
+  useEffect(() => {
+    if (!items.length) return;
+
+    setSelectedItemId((current) => {
+      if (current && items.some((item) => item.id === current)) {
+        return current;
+      }
+
+      return items[0]?.id || "";
+    });
+  }, [items]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || typeof window === "undefined") return;
+
+    const saveUiState = () => {
+      try {
+        window.sessionStorage.setItem(
+          CRAFTING_UI_CACHE_KEY,
+          JSON.stringify({
+            search,
+            selectedItemId,
+            cart,
+            scrollY: window.scrollY,
+          })
+        );
+      } catch {}
+    };
+
+    saveUiState();
+    window.addEventListener("scroll", saveUiState, { passive: true });
+    window.addEventListener("beforeunload", saveUiState);
+
+    return () => {
+      window.removeEventListener("scroll", saveUiState);
+      window.removeEventListener("beforeunload", saveUiState);
+    };
+  }, [cart, hydratedFromCache, search, selectedItemId]);
+
+  useEffect(() => {
+    if (!shouldRestoreScroll || typeof window === "undefined") return;
+
+    try {
+      const rawUi = window.sessionStorage.getItem(CRAFTING_UI_CACHE_KEY);
+      const ui = rawUi ? (JSON.parse(rawUi) as CraftingUiCache) : null;
+      const scrollY = typeof ui?.scrollY === "number" ? ui.scrollY : 0;
+
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollY, behavior: "auto" });
+        setShouldRestoreScroll(false);
+      });
+    } catch {
+      setShouldRestoreScroll(false);
+    }
+  }, [items.length, shouldRestoreScroll]);
 
   const shoppingSummary = useMemo(() => {
     const directTotals = new Map<string, number>();
@@ -237,6 +419,11 @@ export default function CraftingManager({ isAdmin }: Props) {
   const linkableItems = useMemo(() => {
     return items.filter((item) => item.id !== editingId);
   }, [items, editingId]);
+
+  useEffect(() => {
+    if (!hydratedFromCache || !items.length) return;
+    writeCraftingItemsCache(items);
+  }, [hydratedFromCache, items]);
 
   function resetForm() {
     setEditingId(null);
@@ -355,7 +542,8 @@ export default function CraftingManager({ isAdmin }: Props) {
         return;
       }
 
-      await fetchItems();
+      clearCraftingCache();
+      await fetchItems(true);
       resetForm();
     } catch (err) {
       console.error(err);
@@ -385,6 +573,7 @@ export default function CraftingManager({ isAdmin }: Props) {
         return;
       }
 
+      clearCraftingCache();
       setItems((prev) => prev.filter((item) => item.id !== id));
       setCart((prev) => prev.filter((entry) => entry.itemId !== id));
 
