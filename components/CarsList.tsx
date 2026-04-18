@@ -144,10 +144,17 @@ function CarsGridSkeleton({ count = PAGE_SIZE }: { count?: number }) {
 function CarImage({ src, alt }: { src?: string | null; alt: string }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     setLoaded(false);
     setFailed(false);
+  }, [src]);
+
+  useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      setLoaded(true);
+    }
   }, [src]);
 
   if (!src || failed) {
@@ -167,13 +174,15 @@ function CarImage({ src, alt }: { src?: string | null; alt: string }) {
       />
 
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         loading="lazy"
+        decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => setFailed(true)}
-        className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
-          loaded ? "scale-100 blur-0 opacity-100" : "scale-105 blur-md opacity-70"
+        className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
+          loaded ? "scale-100 opacity-100" : "scale-[1.02] opacity-0"
         }`}
       />
     </>
@@ -391,6 +400,7 @@ export default function CarsList() {
   const [hasMore, setHasMore] = useState(true);
   const [hydratedFromCache, setHydratedFromCache] = useState(false);
   const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -601,6 +611,22 @@ export default function CarsList() {
   }, [cars.length, shouldRestoreScroll]);
 
   useEffect(() => {
+    const markInteracted = () => setHasUserInteracted(true);
+
+    window.addEventListener("wheel", markInteracted, { passive: true });
+    window.addEventListener("touchmove", markInteracted, { passive: true });
+    window.addEventListener("keydown", markInteracted);
+    window.addEventListener("scroll", markInteracted, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", markInteracted);
+      window.removeEventListener("touchmove", markInteracted);
+      window.removeEventListener("keydown", markInteracted);
+      window.removeEventListener("scroll", markInteracted);
+    };
+  }, []);
+
+  useEffect(() => {
     const refresh = () => resetAndFetch();
     window.addEventListener("carAdded", refresh as EventListener);
     window.addEventListener("carUpdated", refresh as EventListener);
@@ -616,7 +642,7 @@ export default function CarsList() {
   useEffect(() => {
     const target = loadMoreRef.current;
 
-    if (!target || !hasMore || loading || loadingMore) {
+    if (!target || !hasMore || loading || loadingMore || !hasUserInteracted) {
       return;
     }
 
@@ -624,7 +650,13 @@ export default function CarsList() {
       (entries) => {
         const firstEntry = entries[0];
 
-        if (firstEntry?.isIntersecting && hasMore && !loadingMore && !loading) {
+        if (
+          firstEntry?.isIntersecting &&
+          hasMore &&
+          !loadingMore &&
+          !loading &&
+          hasUserInteracted
+        ) {
           fetchCarsPage(page + 1);
         }
       },
@@ -636,7 +668,7 @@ export default function CarsList() {
     observer.observe(target);
 
     return () => observer.disconnect();
-  }, [fetchCarsPage, hasMore, loading, loadingMore, page]);
+  }, [fetchCarsPage, hasMore, hasUserInteracted, loading, loadingMore, page]);
 
   const resultText = useMemo(() => {
     if (!cars.length) return "No cars loaded yet";

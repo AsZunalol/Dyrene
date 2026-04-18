@@ -42,19 +42,39 @@ async function requireAdmin() {
   return { error: null, supabase, user };
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const supabase = await createClient();
+  const { searchParams } = new URL(req.url);
 
-  const { data, error } = await supabase
+  const limitParam = Number(searchParams.get("limit") || "6");
+  const offsetParam = Number(searchParams.get("offset") || "0");
+  const status = searchParams.get("status");
+  const search = searchParams.get("search")?.trim();
+
+  const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 100)) : 6;
+  const offset = Number.isFinite(offsetParam) ? Math.max(0, offsetParam) : 0;
+
+  let query = supabase
     .from("cars")
     .select("*")
+    .order("price", { ascending: false })
     .order("created_at", { ascending: false });
+
+  if (status && status !== "all") {
+    query = query.eq("status", status);
+  }
+
+  if (search) {
+    query = query.or(`name.ilike.%${search}%,brand.ilike.%${search}%`);
+  }
+
+  const { data, error } = await query.range(offset, offset + limit - 1);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(data ?? []);
 }
 
 export async function POST(req: Request) {
