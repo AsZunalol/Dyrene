@@ -457,11 +457,12 @@ export default function CraftingManager({ isAdmin }: Props) {
                   <select
                     value={selectedItemId}
                     onChange={(e) => setSelectedItemId(e.target.value)}
-                    className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none"
+                    className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+                    style={{ colorScheme: "dark" }}
                   >
-                    <option value="">Select item</option>
+                    <option value="" className="bg-[#0b0f1a] text-white">Select item</option>
                     {items.map((item) => (
-                      <option key={item.id} value={item.id}>
+                      <option key={item.id} value={item.id} className="bg-[#0b0f1a] text-white">
                         {item.name}
                       </option>
                     ))}
@@ -646,7 +647,8 @@ export default function CraftingManager({ isAdmin }: Props) {
                             Math.max(0, Number(e.target.value) || 0)
                           )
                         }
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none"
+                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+                            style={{ colorScheme: "dark" }}
                       />
                     </div>
                   </div>
@@ -838,11 +840,12 @@ export default function CraftingManager({ isAdmin }: Props) {
                           <select
                             value={ingredient.ingredient_item_id}
                             onChange={(e) => handleLinkedItemChange(index, e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none"
+                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+                            style={{ colorScheme: "dark" }}
                           >
-                            <option value="">None / raw material</option>
+                            <option value="" className="bg-[#0b0f1a] text-white">None / raw material</option>
                             {linkableItems.map((item) => (
-                              <option key={item.id} value={item.id}>
+                              <option key={item.id} value={item.id} className="bg-[#0b0f1a] text-white">
                                 {item.name}
                               </option>
                             ))}
