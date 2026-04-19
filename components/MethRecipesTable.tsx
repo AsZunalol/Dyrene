@@ -1041,6 +1041,8 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                         {isEditing ? (
                           <input
                             type="number"
+                            step="0.1"
+                            inputMode="decimal"
                             value={stabiliseringstidInput}
                             onChange={(e) => setStabiliseringstidInput(e.target.value)}
                             className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white outline-none"
