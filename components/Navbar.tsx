@@ -66,10 +66,10 @@ export default function Navbar() {
       loadUser();
     });
 
+    // Prefetch main pages
     prefetchRoute("/crafting");
     prefetchRoute("/meth");
     prefetchRoute("/cars");
-    prefetchRoute("/admin");
 
     return () => {
       active = false;
@@ -99,6 +99,7 @@ export default function Navbar() {
           WebkitBackdropFilter: "blur(8px)",
         }}
       >
+        {/* Logo */}
         <LoadingLink
           href="/"
           prefetch
@@ -107,6 +108,7 @@ export default function Navbar() {
           Dyrene
         </LoadingLink>
 
+        {/* Navigation */}
         <nav className="flex flex-1 items-center justify-center gap-2 sm:gap-3">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
@@ -162,22 +164,24 @@ export default function Navbar() {
             })}
         </nav>
 
-        <button
-          onMouseEnter={() => {
-            prefetchRoute("/crafting");
-            prefetchRoute("/meth");
-            prefetchRoute("/cars");
-            if (isAdmin) prefetchRoute("/admin");
-          }}
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
-          style={{
-            background: "linear-gradient(90deg,#ef4444,#dc2626)",
-          }}
-        >
-          {loggingOut ? "Logging out..." : "Logout"}
-        </button>
+        {/* Right side (credit + logout) */}
+        <div className="flex items-center gap-4">
+          <span className="hidden sm:block text-xs text-gray-300/80">
+            made with love by{" "}
+            <span className="font-semibold text-white">AsZuna</span>
+          </span>
+
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+            style={{
+              background: "linear-gradient(90deg,#ef4444,#dc2626)",
+            }}
+          >
+            {loggingOut ? "Logging out..." : "Logout"}
+          </button>
+        </div>
       </div>
     </header>
   );
