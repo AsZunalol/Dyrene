@@ -1,50 +1,33 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function PageTransitionLoader() {
-  const [loading, setLoading] = useState(false);
+export default function PageTransitionLoader({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const handleStart = () => setLoading(true);
-    const handleStop = () => setLoading(false);
+    setVisible(false);
 
-    window.addEventListener("beforeunload", handleStart);
-    window.addEventListener("load", handleStop);
+    const id = requestAnimationFrame(() => {
+      setVisible(true);
+    });
 
-    return () => {
-      window.removeEventListener("beforeunload", handleStart);
-      window.removeEventListener("load", handleStop);
-    };
-  }, []);
-
-  if (!loading) return null;
+    return () => cancelAnimationFrame(id);
+  }, [pathname]);
 
   return (
-    <div style={overlayStyle}>
-      <div style={spinnerStyle}></div>
+    <div
+      className={`transition-all duration-300 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
+      }`}
+    >
+      {children}
     </div>
   );
 }
-
-const overlayStyle: React.CSSProperties = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0,0,0,0.5)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 9999,
-};
-
-const spinnerStyle: React.CSSProperties = {
-  width: "50px",
-  height: "50px",
-  border: "5px solid #ccc",
-  borderTop: "5px solid #fff",
-  borderRadius: "50%",
-  animation: "spin 1s linear infinite",
-};
