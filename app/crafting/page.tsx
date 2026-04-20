@@ -3,8 +3,6 @@ import Navbar from "@/components/Navbar";
 import CraftingManager from "@/components/CraftingManager";
 import { createServerClient } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
-
 export default async function CraftingPage() {
   const supabase = await createServerClient();
 
