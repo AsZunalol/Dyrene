@@ -3,7 +3,7 @@
 import LoadingLink from "@/components/LoadingLink";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 
 export default function Navbar() {
   const router = useRouter();
@@ -14,6 +14,21 @@ export default function Navbar() {
 
   const hiddenRoutes = ["/login", "/denied"];
   const shouldHideNavbar = hiddenRoutes.includes(pathname);
+
+  const navItems = [
+    { name: "Crafting", path: "/crafting" },
+    { name: "Meth", path: "/meth" },
+    { name: "Cars", path: "/cars" },
+  ];
+
+  const adminItems = [{ name: "Admin", path: "/admin" }];
+
+  const prefetchRoute = useCallback(
+    (path: string) => {
+      router.prefetch(path);
+    },
+    [router]
+  );
 
   useEffect(() => {
     if (shouldHideNavbar) return;
@@ -51,11 +66,16 @@ export default function Navbar() {
       loadUser();
     });
 
+    prefetchRoute("/crafting");
+    prefetchRoute("/meth");
+    prefetchRoute("/cars");
+    prefetchRoute("/admin");
+
     return () => {
       active = false;
       subscription.unsubscribe();
     };
-  }, [supabase, shouldHideNavbar]);
+  }, [supabase, shouldHideNavbar, prefetchRoute]);
 
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -67,14 +87,6 @@ export default function Navbar() {
   };
 
   if (shouldHideNavbar) return null;
-
-  const navItems = [
-    { name: "Crafting", path: "/crafting" },
-    { name: "Meth", path: "/meth" },
-    { name: "Cars", path: "/cars" },
-  ];
-
-  const adminItems = [{ name: "Admin", path: "/admin" }];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 sm:px-6">
@@ -89,6 +101,7 @@ export default function Navbar() {
       >
         <LoadingLink
           href="/"
+          prefetch
           className="shrink-0 text-lg font-bold text-white transition hover:text-gray-200"
         >
           Dyrene
@@ -102,6 +115,9 @@ export default function Navbar() {
               <LoadingLink
                 key={item.name}
                 href={item.path}
+                prefetch
+                onMouseEnter={() => prefetchRoute(item.path)}
+                onFocus={() => prefetchRoute(item.path)}
                 className={`rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
                   isActive
                     ? "text-white"
@@ -126,6 +142,9 @@ export default function Navbar() {
                 <LoadingLink
                   key={item.name}
                   href={item.path}
+                  prefetch
+                  onMouseEnter={() => prefetchRoute(item.path)}
+                  onFocus={() => prefetchRoute(item.path)}
                   className={`rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
                     isActive
                       ? "text-white"
@@ -144,6 +163,12 @@ export default function Navbar() {
         </nav>
 
         <button
+          onMouseEnter={() => {
+            prefetchRoute("/crafting");
+            prefetchRoute("/meth");
+            prefetchRoute("/cars");
+            if (isAdmin) prefetchRoute("/admin");
+          }}
           onClick={handleLogout}
           disabled={loggingOut}
           className="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
