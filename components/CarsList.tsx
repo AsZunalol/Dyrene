@@ -391,6 +391,7 @@ export default function CarsList() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -465,45 +466,52 @@ export default function CarsList() {
     [debouncedSearch, filter]
   );
 
-  const fetchCarsPage = useCallback(
-    async (pageNumber: number, replace = false) => {
-      if (replace) {
+const fetchCarsPage = useCallback(
+  async (pageNumber: number, replace = false) => {
+    const isInitialLoad = replace && pageNumber === 0 && cars.length === 0;
+
+    if (replace) {
+      if (isInitialLoad) {
         setLoading(true);
       } else {
-        setLoadingMore(true);
+        setIsRefreshing(true);
+      }
+    } else {
+      setLoadingMore(true);
+    }
+
+    setError(null);
+
+    try {
+      const res = await fetch(buildCarsUrl(pageNumber));
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error || "Failed to fetch cars");
       }
 
-      setError(null);
+      const nextCars = Array.isArray(json) ? json : [];
 
-      try {
-        const res = await fetch(buildCarsUrl(pageNumber));
-        const json = await res.json();
-
-        if (!res.ok) {
-          throw new Error(json?.error || "Failed to fetch cars");
-        }
-
-        const nextCars = Array.isArray(json) ? json : [];
-
-        setCars((current) => (replace ? nextCars : [...current, ...nextCars]));
-        setPage(pageNumber);
-        setHasMore(nextCars.length === PAGE_SIZE);
-      } catch (err: any) {
-        console.error("Failed to fetch cars", err);
-        if (replace) {
-          setCars([]);
-        }
-        setError(String(err?.message ?? err));
-      } finally {
-        if (replace) {
-          setLoading(false);
-        } else {
-          setLoadingMore(false);
-        }
+      setCars((current) => (replace ? nextCars : [...current, ...nextCars]));
+      setPage(pageNumber);
+      setHasMore(nextCars.length === PAGE_SIZE);
+    } catch (err: any) {
+      console.error("Failed to fetch cars", err);
+      if (replace) {
+        setCars([]);
       }
-    },
-    [buildCarsUrl]
-  );
+      setError(String(err?.message ?? err));
+    } finally {
+      if (replace) {
+        setLoading(false);
+        setIsRefreshing(false);
+      } else {
+        setLoadingMore(false);
+      }
+    }
+  },
+  [buildCarsUrl, cars.length]
+);
 
   const resetAndFetch = useCallback(() => {
     clearCarsCache();
@@ -514,27 +522,26 @@ export default function CarsList() {
     fetchCarsPage(0, true);
   }, [fetchCarsPage]);
 
-  useEffect(() => {
-    if (!hydratedFromCache) return;
+useEffect(() => {
+  if (!hydratedFromCache) return;
 
-    const cacheKey = buildCacheKey(filter, debouncedSearch);
-    const pagesCache = readPagesCache();
-    const cachedEntry = pagesCache[cacheKey];
+  const cacheKey = buildCacheKey(filter, debouncedSearch);
+  const pagesCache = readPagesCache();
+  const cachedEntry = pagesCache[cacheKey];
 
-    if (cachedEntry) {
-      setCars(cachedEntry.cars);
-      setPage(cachedEntry.page);
-      setHasMore(cachedEntry.hasMore);
-      setLoading(false);
-      return;
-    }
+  if (cachedEntry) {
+    setCars(cachedEntry.cars);
+    setPage(cachedEntry.page);
+    setHasMore(cachedEntry.hasMore);
+    setLoading(false);
+    return;
+  }
 
-    setCars([]);
-    setPage(0);
-    setHasMore(true);
-    setShouldRestoreScroll(false);
-    fetchCarsPage(0, true);
-  }, [debouncedSearch, fetchCarsPage, filter, hydratedFromCache]);
+  setPage(0);
+  setHasMore(true);
+  setShouldRestoreScroll(false);
+  fetchCarsPage(0, true);
+}, [debouncedSearch, fetchCarsPage, filter, hydratedFromCache]);
 
   useEffect(() => {
     if (!hydratedFromCache || typeof window === "undefined") return;
@@ -753,7 +760,7 @@ export default function CarsList() {
       </div>
 
       <div className="flex flex-col gap-2 text-sm text-gray-300 sm:flex-row sm:items-center sm:justify-between">
-        <p>{resultText}</p>
+        <p>{isRefreshing ? "Updating results…" : resultText}</p>
         <p>Showing highest price first</p>
       </div>
 
