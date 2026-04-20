@@ -1,7 +1,5 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import AddCarForm from "@/components/AddCarForm";
-import CarsList from "@/components/CarsList";
 
 const cards = [
   {
@@ -60,7 +58,6 @@ export default function HomePage() {
               Members dashboard for gang info, planning, and overview.
             </p>
           </div>
-          
 
           {/* Preview cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
