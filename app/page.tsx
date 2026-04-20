@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
 
 const cards = [
   {
@@ -25,9 +24,6 @@ const cards = [
 export default function HomePage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <Navbar />
-
-      {/* Background image */}
       <div
         className="absolute inset-0"
         style={{
@@ -38,13 +34,10 @@ export default function HomePage() {
         }}
       />
 
-      {/* Blur + dark overlay */}
       <div className="absolute inset-0 bg-black/60" />
 
-      {/* Content */}
       <div className="relative z-10 px-6 pt-32 pb-12">
         <div className="max-w-6xl mx-auto">
-          {/* Hero */}
           <div
             className="rounded-2xl p-8 border border-white/10 shadow-lg mb-8"
             style={{
@@ -59,7 +52,6 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Preview cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {cards.map((card) => (
               <Link key={card.title} href={card.href} className="group">

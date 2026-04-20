@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
-import Navbar from "@/components/Navbar";
 import AdminUsersTable from "@/components/AdminUsersTable";
 import { getGuildMemberWithBot, getGuildRolesWithBot } from "@/lib/discord";
 
@@ -111,8 +110,6 @@ export default async function AdminPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#07203a]">
-      <Navbar />
-
       <div
         className="absolute inset-0"
         style={{
