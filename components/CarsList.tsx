@@ -403,6 +403,7 @@ export default function CarsList() {
   const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const carsLengthRef = useRef(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -446,6 +447,10 @@ export default function CarsList() {
     return () => window.clearTimeout(timeout);
   }, [search]);
 
+  useEffect(() => {
+    carsLengthRef.current = cars.length;
+  }, [cars.length]);
+
   const buildCarsUrl = useCallback(
     (pageNumber: number) => {
       const params = new URLSearchParams({
@@ -468,7 +473,7 @@ export default function CarsList() {
 
 const fetchCarsPage = useCallback(
   async (pageNumber: number, replace = false) => {
-    const isInitialLoad = replace && pageNumber === 0 && cars.length === 0;
+    const isInitialLoad = replace && pageNumber === 0 && carsLengthRef.current === 0;
 
     if (replace) {
       if (isInitialLoad) {
@@ -510,7 +515,7 @@ const fetchCarsPage = useCallback(
       }
     }
   },
-  [buildCarsUrl, cars.length]
+  [buildCarsUrl]
 );
 
   const resetAndFetch = useCallback(() => {
