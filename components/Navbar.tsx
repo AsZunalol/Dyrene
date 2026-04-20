@@ -1,6 +1,6 @@
 "use client";
 
-import LoadingLink from "@/components/LoadingLink"; // ✅ changed
+import LoadingLink from "@/components/LoadingLink";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -8,19 +8,27 @@ import { useEffect, useMemo, useState } from "react";
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
   const supabase = useMemo(() => createClient(), []);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const hiddenRoutes = ["/login", "/denied"];
+  const shouldHideNavbar = hiddenRoutes.includes(pathname);
 
   useEffect(() => {
-    let mounted = true;
+    if (shouldHideNavbar) return;
+
+    let active = true;
 
     const loadUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
+      if (!active) return;
+
       if (!user) {
-        if (mounted) setIsAdmin(false);
+        setIsAdmin(false);
         return;
       }
 
@@ -30,23 +38,35 @@ export default function Navbar() {
         .eq("id", user.id)
         .single();
 
-      if (!mounted) return;
+      if (!active) return;
 
       setIsAdmin(profile?.is_admin === true);
     };
 
     loadUser();
 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadUser();
+    });
+
     return () => {
-      mounted = false;
+      active = false;
+      subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, shouldHideNavbar]);
 
   const handleLogout = async () => {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   };
+
+  if (shouldHideNavbar) return null;
 
   const navItems = [
     { name: "Crafting", path: "/crafting" },
@@ -67,7 +87,6 @@ export default function Navbar() {
           WebkitBackdropFilter: "blur(8px)",
         }}
       >
-        {/* LOGO */}
         <LoadingLink
           href="/"
           className="shrink-0 text-lg font-bold text-white transition hover:text-gray-200"
@@ -75,7 +94,6 @@ export default function Navbar() {
           Dyrene
         </LoadingLink>
 
-        {/* NAV ITEMS */}
         <nav className="flex flex-1 items-center justify-center gap-2 sm:gap-3">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
@@ -84,7 +102,7 @@ export default function Navbar() {
               <LoadingLink
                 key={item.name}
                 href={item.path}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
                   isActive
                     ? "text-white"
                     : "text-gray-300 hover:bg-white/10 hover:text-white"
@@ -100,8 +118,7 @@ export default function Navbar() {
             );
           })}
 
-          {/* ADMIN */}
-          {isAdmin &&
+          {isAdmin === true &&
             adminItems.map((item) => {
               const isActive = pathname === item.path;
 
@@ -109,7 +126,7 @@ export default function Navbar() {
                 <LoadingLink
                   key={item.name}
                   href={item.path}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
                     isActive
                       ? "text-white"
                       : "text-gray-300 hover:bg-white/10 hover:text-white"
@@ -126,15 +143,15 @@ export default function Navbar() {
             })}
         </nav>
 
-        {/* LOGOUT */}
         <button
           onClick={handleLogout}
-          className="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+          disabled={loggingOut}
+          className="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
           style={{
             background: "linear-gradient(90deg,#ef4444,#dc2626)",
           }}
         >
-          Logout
+          {loggingOut ? "Logging out..." : "Logout"}
         </button>
       </div>
     </header>
