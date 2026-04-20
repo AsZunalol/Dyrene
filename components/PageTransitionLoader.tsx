@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 export default function PageTransitionLoader({
   children,
 }: {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
