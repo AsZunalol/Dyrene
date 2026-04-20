@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import LoadingLink from "@/components/LoadingLink"; // ✅ changed
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -63,23 +63,25 @@ export default function Navbar() {
         style={{
           background:
             "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
-          backdropFilter: "blur(8px)", // lighter blur = smoother
+          backdropFilter: "blur(8px)",
           WebkitBackdropFilter: "blur(8px)",
         }}
       >
-        <Link
+        {/* LOGO */}
+        <LoadingLink
           href="/"
           className="shrink-0 text-lg font-bold text-white transition hover:text-gray-200"
         >
           Dyrene
-        </Link>
+        </LoadingLink>
 
+        {/* NAV ITEMS */}
         <nav className="flex flex-1 items-center justify-center gap-2 sm:gap-3">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
 
             return (
-              <Link
+              <LoadingLink
                 key={item.name}
                 href={item.path}
                 className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
@@ -94,16 +96,17 @@ export default function Navbar() {
                 }}
               >
                 {item.name}
-              </Link>
+              </LoadingLink>
             );
           })}
 
+          {/* ADMIN */}
           {isAdmin &&
             adminItems.map((item) => {
               const isActive = pathname === item.path;
 
               return (
-                <Link
+                <LoadingLink
                   key={item.name}
                   href={item.path}
                   className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
@@ -118,11 +121,12 @@ export default function Navbar() {
                   }}
                 >
                   {item.name}
-                </Link>
+                </LoadingLink>
               );
             })}
         </nav>
 
+        {/* LOGOUT */}
         <button
           onClick={handleLogout}
           className="shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
