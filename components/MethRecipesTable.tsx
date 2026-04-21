@@ -296,17 +296,19 @@ export default function MethRecipesTable({ isAdmin }: Props) {
   );
 
   const fetchRecipesPage = useCallback(
-    async (pageNumber: number, replace = false) => {
-      if (replace) {
-        setLoading(true);
-      } else {
-        setLoadingMore(true);
+    async (pageNumber: number, replace = false, silent = false) => {
+      if (!silent) {
+        if (replace) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
       }
 
       setError(null);
 
       try {
-        const res = await fetch(buildMethUrl(pageNumber));
+        const res = await fetch(buildMethUrl(pageNumber), { cache: "no-store" });
         const json: MethListResponse = await res.json();
 
         if (!res.ok) {
@@ -337,10 +339,12 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         }
         setError(err instanceof Error ? err.message : "Failed to fetch recipes");
       } finally {
-        if (replace) {
-          setLoading(false);
-        } else {
-          setLoadingMore(false);
+        if (!silent) {
+          if (replace) {
+            setLoading(false);
+          } else {
+            setLoadingMore(false);
+          }
         }
       }
     },
@@ -366,7 +370,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         params.set("search", debouncedSearch);
       }
 
-      const res = await fetch(`/api/meth?${params.toString()}`);
+      const res = await fetch(`/api/meth?${params.toString()}`, { cache: "no-store" });
       const json: MethListResponse = await res.json();
 
       if (!res.ok) {
@@ -415,6 +419,8 @@ export default function MethRecipesTable({ isAdmin }: Props) {
       setCompletedCount(cachedEntry.completedCount);
       setMissingCount(cachedEntry.missingCount);
       setLoading(false);
+
+      fetchRecipesPage(0, true, true);
       return;
     }
 
@@ -711,7 +717,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         params.set("search", debouncedSearch);
       }
 
-      const res = await fetch(`/api/meth?${params.toString()}`);
+      const res = await fetch(`/api/meth?${params.toString()}`, { cache: "no-store" });
       const json = await res.json();
 
       if (!res.ok) {
