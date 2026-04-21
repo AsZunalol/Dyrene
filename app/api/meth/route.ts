@@ -49,6 +49,29 @@ type SortOption =
   | "stabiliseringstid-desc"
   | "stabiliseringstid-asc";
 
+function escapeLike(value: string) {
+  return value.replace(/[%_]/g, "\\$&");
+}
+
+function normalizeSearch(value: string) {
+  return value.replace(/,/g, "-").trim();
+}
+
+function tryParseCombo(search: string) {
+  const normalized = normalizeSearch(search);
+  const match = normalized.match(/^(\d+)\s*-\s*(\d+)\s*-\s*(\d+)$/);
+
+  if (!match) return null;
+
+  const [, fosforAmount, pseudoephedrin, lithium] = match;
+
+  return {
+    fosfor_amount: Number(fosforAmount),
+    pseudoephedrin: Number(pseudoephedrin),
+    lithium: Number(lithium),
+  };
+}
+
 function applySharedFilters(
   query: any,
   color: string,
@@ -57,15 +80,29 @@ function applySharedFilters(
 ) {
   let nextQuery = query.eq("fosfor_color", color);
 
-  if (search) {
-    const sanitized = search.replace(/,/g, "-").trim();
-    nextQuery = nextQuery.or(
-      `lithium::text.ilike.%${sanitized}%,pseudoephedrin::text.ilike.%${sanitized}%,fosfor_amount::text.ilike.%${sanitized}%`
-    );
+  const normalizedSearch = normalizeSearch(search);
+
+  if (normalizedSearch) {
+    const combo = tryParseCombo(normalizedSearch);
+
+    if (combo) {
+      nextQuery = nextQuery
+        .eq("fosfor_amount", combo.fosfor_amount)
+        .eq("pseudoephedrin", combo.pseudoephedrin)
+        .eq("lithium", combo.lithium);
+    } else {
+      const escaped = escapeLike(normalizedSearch);
+
+      nextQuery = nextQuery.or(
+        `fosfor_amount.ilike.%${escaped}%,pseudoephedrin.ilike.%${escaped}%,lithium.ilike.%${escaped}%`
+      );
+    }
   }
 
   if (status === "completed") {
-    nextQuery = nextQuery.not("renhed", "is", null).not("stabiliseringstid", "is", null);
+    nextQuery = nextQuery
+      .not("renhed", "is", null)
+      .not("stabiliseringstid", "is", null);
   }
 
   if (status === "missing") {
@@ -83,24 +120,28 @@ function applySort(query: any, sort: SortOption) {
         .order("fosfor_amount", { ascending: true })
         .order("pseudoephedrin", { ascending: true })
         .order("lithium", { ascending: true });
+
     case "renhed-asc":
       return query
         .order("renhed", { ascending: true, nullsFirst: false })
         .order("fosfor_amount", { ascending: true })
         .order("pseudoephedrin", { ascending: true })
         .order("lithium", { ascending: true });
+
     case "stabiliseringstid-desc":
       return query
         .order("stabiliseringstid", { ascending: false, nullsFirst: false })
         .order("fosfor_amount", { ascending: true })
         .order("pseudoephedrin", { ascending: true })
         .order("lithium", { ascending: true });
+
     case "stabiliseringstid-asc":
       return query
         .order("stabiliseringstid", { ascending: true, nullsFirst: false })
         .order("fosfor_amount", { ascending: true })
         .order("pseudoephedrin", { ascending: true })
         .order("lithium", { ascending: true });
+
     default:
       return query
         .order("fosfor_amount", { ascending: true })
@@ -120,7 +161,9 @@ export async function GET(request: Request) {
   const limitParam = Number(searchParams.get("limit") || "50");
   const offsetParam = Number(searchParams.get("offset") || "0");
 
-  const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 200)) : 50;
+  const limit = Number.isFinite(limitParam)
+    ? Math.max(1, Math.min(limitParam, 200))
+    : 50;
   const offset = Number.isFinite(offsetParam) ? Math.max(0, offsetParam) : 0;
 
   if (!["green", "red", "blue"].includes(color)) {
@@ -160,7 +203,8 @@ export async function GET(request: Request) {
     }
 
     const items = data ?? [];
-    const item = items.length > 0 ? items[Math.floor(Math.random() * items.length)] : null;
+    const item =
+      items.length > 0 ? items[Math.floor(Math.random() * items.length)] : null;
 
     return NextResponse.json({ item });
   }
@@ -173,30 +217,35 @@ export async function GET(request: Request) {
   );
   itemsQuery = applySort(itemsQuery, sort);
 
-  const [{ data: items, error: itemsError }, { count: total, error: totalError }, { count: completedCount, error: completedError }, { count: missingCount, error: missingError }] =
-    await Promise.all([
-      itemsQuery.range(offset, offset + limit - 1),
-      applySharedFilters(
-        supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
-        color,
-        status,
-        search
-      ),
-      applySharedFilters(
-        supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
-        color,
-        "completed",
-        search
-      ),
-      applySharedFilters(
-        supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
-        color,
-        "missing",
-        search
-      ),
-    ]);
+  const [
+    { data: items, error: itemsError },
+    { count: total, error: totalError },
+    { count: completedCount, error: completedError },
+    { count: missingCount, error: missingError },
+  ] = await Promise.all([
+    itemsQuery.range(offset, offset + limit - 1),
+    applySharedFilters(
+      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+      color,
+      status,
+      search
+    ),
+    applySharedFilters(
+      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+      color,
+      "completed",
+      search
+    ),
+    applySharedFilters(
+      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+      color,
+      "missing",
+      search
+    ),
+  ]);
 
-  const firstError = itemsError || totalError || completedError || missingError;
+  const firstError =
+    itemsError || totalError || completedError || missingError;
 
   if (firstError) {
     return NextResponse.json({ error: firstError.message }, { status: 500 });
@@ -262,7 +311,13 @@ export async function PATCH(req: Request) {
     }
 
     return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Unexpected server error",
+      },
+      { status: 500 }
+    );
   }
 }
