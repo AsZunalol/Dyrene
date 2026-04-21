@@ -49,10 +49,6 @@ type SortOption =
   | "stabiliseringstid-desc"
   | "stabiliseringstid-asc";
 
-function escapeLike(value: string) {
-  return value.replace(/[%_]/g, "\\$&");
-}
-
 function normalizeSearch(value: string) {
   return value.replace(/,/g, "-").trim();
 }
@@ -85,17 +81,12 @@ function applySharedFilters(
   if (normalizedSearch) {
     const combo = tryParseCombo(normalizedSearch);
 
+    // ✅ ONLY allow exact combo search (no ilike on integers)
     if (combo) {
       nextQuery = nextQuery
         .eq("fosfor_amount", combo.fosfor_amount)
         .eq("pseudoephedrin", combo.pseudoephedrin)
         .eq("lithium", combo.lithium);
-    } else {
-      const escaped = escapeLike(normalizedSearch);
-
-      nextQuery = nextQuery.or(
-        `fosfor_amount.ilike.%${escaped}%,pseudoephedrin.ilike.%${escaped}%,lithium.ilike.%${escaped}%`
-      );
     }
   }
 
@@ -170,22 +161,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid color" }, { status: 400 });
   }
 
-  if (!["all", "completed", "missing"].includes(status)) {
-    return NextResponse.json({ error: "Invalid status filter" }, { status: 400 });
-  }
-
-  if (
-    ![
-      "default",
-      "renhed-desc",
-      "renhed-asc",
-      "stabiliseringstid-desc",
-      "stabiliseringstid-asc",
-    ].includes(sort)
-  ) {
-    return NextResponse.json({ error: "Invalid sort option" }, { status: 400 });
-  }
-
   const supabase = await createClient();
 
   if (randomMissing) {
@@ -215,13 +190,12 @@ export async function GET(request: Request) {
     status,
     search
   );
+
   itemsQuery = applySort(itemsQuery, sort);
 
   const [
     { data: items, error: itemsError },
     { count: total, error: totalError },
-    { count: completedCount, error: completedError },
-    { count: missingCount, error: missingError },
   ] = await Promise.all([
     itemsQuery.range(offset, offset + limit - 1),
     applySharedFilters(
@@ -230,32 +204,18 @@ export async function GET(request: Request) {
       status,
       search
     ),
-    applySharedFilters(
-      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
-      color,
-      "completed",
-      search
-    ),
-    applySharedFilters(
-      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
-      color,
-      "missing",
-      search
-    ),
   ]);
 
-  const firstError =
-    itemsError || totalError || completedError || missingError;
-
-  if (firstError) {
-    return NextResponse.json({ error: firstError.message }, { status: 500 });
+  if (itemsError || totalError) {
+    return NextResponse.json(
+      { error: itemsError?.message || totalError?.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({
     items: items ?? [],
     total: total ?? 0,
-    completedCount: completedCount ?? 0,
-    missingCount: missingCount ?? 0,
   });
 }
 
