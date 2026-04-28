@@ -24,7 +24,7 @@ export default async function ShopPage() {
     <div className="relative min-h-screen bg-[#07203a] text-white px-6 pt-32 pb-12">
       <div className="max-w-6xl mx-auto">
         {isAdmin && <AddShopItemForm />}
-        <WeaponsShop />
+        <WeaponsShop isAdmin={isAdmin} />
       </div>
     </div>
   );

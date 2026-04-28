@@ -10,10 +10,17 @@ type ShopItem = {
   image: string | null;
 };
 
-export default function WeaponsShop() {
+export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
   const [items, setItems] = useState<ShopItem[]>([]);
   const [buying, setBuying] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+
+  const [editingItem, setEditingItem] = useState<ShopItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCategory, setEditCategory] = useState("weapon");
+  const [editPrice, setEditPrice] = useState("");
+  const [editImage, setEditImage] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   async function loadItems() {
     const res = await fetch("/api/shop");
@@ -31,6 +38,49 @@ export default function WeaponsShop() {
     window.addEventListener("shopItemAdded", reloadItems);
     return () => window.removeEventListener("shopItemAdded", reloadItems);
   }, []);
+
+  function openEdit(item: ShopItem) {
+    setEditingItem(item);
+    setEditName(item.name);
+    setEditCategory(item.category || "weapon");
+    setEditPrice(String(item.price));
+    setEditImage(item.image || "");
+  }
+
+  async function saveEdit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!editingItem) return;
+    if (!editName.trim()) return alert("Enter item name");
+    if (!editPrice) return alert("Enter price");
+
+    setSavingEdit(true);
+
+    const res = await fetch("/api/shop", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: editingItem.id,
+        name: editName.trim(),
+        category: editCategory,
+        price: Number(editPrice),
+        image: editImage.trim() || null,
+      }),
+    });
+
+    setSavingEdit(false);
+
+    if (!res.ok) {
+      const json = await res.json();
+      alert(json?.error || "Failed to update item");
+      return;
+    }
+
+    setEditingItem(null);
+    await loadItems();
+  }
 
   async function buyItem(item: ShopItem) {
     const confirmed = confirm(
@@ -112,15 +162,93 @@ export default function WeaponsShop() {
                 Price: ${item.price.toLocaleString()}
               </p>
 
-              <button
-                onClick={() => buyItem(item)}
-                disabled={buying === item.id}
-                className="mt-6 w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
-              >
-                {buying === item.id ? "Sending..." : "Buy"}
-              </button>
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => buyItem(item)}
+                  disabled={buying === item.id}
+                  className="w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
+                >
+                  {buying === item.id ? "Sending..." : "Buy"}
+                </button>
+
+                {isAdmin && (
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="rounded-xl border border-white/10 px-4 py-3 font-semibold hover:bg-white/10"
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {editingItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#07203a] p-6 text-white shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Edit Shop Item</h2>
+
+              <button
+                onClick={() => setEditingItem(null)}
+                className="rounded-lg px-3 py-1 text-white/70 hover:bg-white/10 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={saveEdit} className="space-y-4">
+              <input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Item name"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              />
+
+              <select
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              >
+                <option value="weapon">Weapon</option>
+                <option value="item">Item</option>
+              </select>
+
+              <input
+                value={editPrice}
+                onChange={(e) => setEditPrice(e.target.value)}
+                placeholder="Price"
+                type="number"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              />
+
+              <input
+                value={editImage}
+                onChange={(e) => setEditImage(e.target.value)}
+                placeholder="Image URL optional"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              />
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="w-full rounded-xl border border-white/10 px-4 py-3 font-semibold hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  disabled={savingEdit}
+                  className="w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
+                >
+                  {savingEdit ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </>

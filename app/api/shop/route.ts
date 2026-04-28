@@ -71,3 +71,41 @@ export async function POST(req: Request) {
 
   return NextResponse.json(data, { status: 201 });
 }
+
+export async function PUT(req: Request) {
+  const auth = await requireAdmin();
+  if (auth.error || !auth.supabase) return auth.error!;
+
+  const body = await req.json();
+
+  const id = String(body.id || "").trim();
+  const name = String(body.name || "").trim();
+  const category = String(body.category || "").trim();
+  const price = Number(body.price);
+  const image = String(body.image || "").trim();
+
+  if (!id || !name || !price) {
+    return NextResponse.json(
+      { error: "Missing item id, name, or price" },
+      { status: 400 }
+    );
+  }
+
+  const { data, error } = await auth.supabase
+    .from("shop_items")
+    .update({
+      name,
+      category: category || null,
+      price,
+      image: image || null,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
+}
