@@ -19,6 +19,7 @@ export default function Navbar() {
     { name: "Crafting", path: "/crafting" },
     { name: "Meth", path: "/meth" },
     { name: "Cars", path: "/cars" },
+    { name: "Shop", path: "/shop" },
   ];
 
   const adminItems = [{ name: "Admin", path: "/admin" }];
@@ -70,6 +71,7 @@ export default function Navbar() {
     prefetchRoute("/crafting");
     prefetchRoute("/meth");
     prefetchRoute("/cars");
+    prefetchRoute("/shop");
 
     return () => {
       active = false;
