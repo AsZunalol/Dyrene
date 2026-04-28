@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         embeds: [
           {
-            title: "🔫 Weapon Purchase",
+            title: "🛒 Shop Purchase",
             color: 3447003,
             fields: [
               {
@@ -57,13 +57,13 @@ export async function POST(req: Request) {
                 inline: true,
               },
               {
-                name: "Weapon",
+                name: "Item",
                 value: weaponName,
                 inline: true,
               },
               {
                 name: "Price",
-                value: `$${price.toLocaleString()}`,
+                value: `${price.toLocaleString("da-DK")} DKK`,
                 inline: true,
               },
             ],

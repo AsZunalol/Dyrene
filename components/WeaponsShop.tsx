@@ -84,7 +84,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
   async function buyItem(item: ShopItem) {
     const confirmed = confirm(
-      `Confirm purchase?\n\nItem: ${item.name}\nPrice: $${item.price.toLocaleString()}`
+      `Confirm purchase?\n\nItem: ${item.name}\nPrice: ${item.price.toLocaleString("da-DK")} DKK`
     );
 
     if (!confirmed) return;
@@ -159,7 +159,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
               )}
 
               <p className="text-gray-300 mt-2">
-                Price: ${item.price.toLocaleString()}
+                Price: {item.price.toLocaleString("da-DK")} DKK
               </p>
 
               <div className="mt-6 flex gap-3">
