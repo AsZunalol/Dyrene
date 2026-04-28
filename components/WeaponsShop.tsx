@@ -10,9 +10,14 @@ type ShopItem = {
   image: string | null;
 };
 
+type CartItem = ShopItem & {
+  quantity: number;
+};
+
 export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
   const [items, setItems] = useState<ShopItem[]>([]);
-  const [buying, setBuying] = useState<string | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [buying, setBuying] = useState(false);
   const [message, setMessage] = useState("");
 
   const [editingItem, setEditingItem] = useState<ShopItem | null>(null);
@@ -21,6 +26,11 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
   const [editPrice, setEditPrice] = useState("");
   const [editImage, setEditImage] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+
+  const totalPrice = cart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
   async function loadItems() {
     const res = await fetch("/api/shop");
@@ -38,6 +48,38 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
     window.addEventListener("shopItemAdded", reloadItems);
     return () => window.removeEventListener("shopItemAdded", reloadItems);
   }, []);
+
+  function addToCart(item: ShopItem) {
+    setMessage("");
+
+    setCart((currentCart) => {
+      const existingItem = currentCart.find((cartItem) => cartItem.id === item.id);
+
+      if (existingItem) {
+        return currentCart.map((cartItem) =>
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        );
+      }
+
+      return [...currentCart, { ...item, quantity: 1 }];
+    });
+  }
+
+  function removeFromCart(itemId: string) {
+    setCart((currentCart) =>
+      currentCart
+        .map((item) =>
+          item.id === itemId ? { ...item, quantity: item.quantity - 1 } : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  }
+
+  function clearCart() {
+    setCart([]);
+  }
 
   function openEdit(item: ShopItem) {
     setEditingItem(item);
@@ -82,14 +124,23 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
     await loadItems();
   }
 
-  async function buyItem(item: ShopItem) {
+  async function confirmPurchase() {
+    if (cart.length === 0) return;
+
+    const cartText = cart
+      .map(
+        (item) =>
+          `${item.quantity}x ${item.name} - ${(item.price * item.quantity).toLocaleString("da-DK")} DKK`
+      )
+      .join("\n");
+
     const confirmed = confirm(
-      `Confirm purchase?\n\nItem: ${item.name}\nPrice: ${item.price.toLocaleString("da-DK")} DKK`
+      `Confirm purchase?\n\n${cartText}\n\nTotal: ${totalPrice.toLocaleString("da-DK")} DKK`
     );
 
     if (!confirmed) return;
 
-    setBuying(item.id);
+    setBuying(true);
     setMessage("");
 
     const res = await fetch("/api/weapon-purchase", {
@@ -98,18 +149,23 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        weaponName: item.name,
-        price: item.price,
+        items: cart.map((item) => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        totalPrice,
       }),
     });
 
-    setBuying(null);
+    setBuying(false);
 
     if (!res.ok) {
       setMessage("Something went wrong.");
       return;
     }
 
+    setCart([]);
     setMessage("Purchase sent to Discord.");
   }
 
@@ -121,13 +177,67 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
         </p>
         <h1 className="text-4xl font-bold mt-2">Shop</h1>
         <p className="text-gray-300 mt-2">
-          Buy items with in-game money. Purchases are sent to Discord.
+          Add items to your shopping list, then confirm once.
         </p>
       </div>
 
       {message && (
         <div className="mb-6 rounded-xl border border-white/10 bg-white/10 p-4">
           {message}
+        </div>
+      )}
+
+      {cart.length > 0 && (
+        <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-2xl font-bold mb-4">Shopping List</h2>
+
+          <div className="space-y-3">
+            {cart.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-4 rounded-xl bg-white/5 p-4"
+              >
+                <div>
+                  <p className="font-semibold">
+                    {item.quantity}x {item.name}
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    {(item.price * item.quantity).toLocaleString("da-DK")} DKK
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  className="rounded-lg border border-white/10 px-3 py-2 text-sm hover:bg-white/10"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 border-t border-white/10 pt-5 md:flex-row md:items-center md:justify-between">
+            <p className="text-xl font-bold">
+              Total: {totalPrice.toLocaleString("da-DK")} DKK
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={clearCart}
+                className="rounded-xl border border-white/10 px-4 py-3 font-semibold hover:bg-white/10"
+              >
+                Clear
+              </button>
+
+              <button
+                onClick={confirmPurchase}
+                disabled={buying}
+                className="rounded-xl bg-blue-500 px-5 py-3 font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
+              >
+                {buying ? "Sending..." : "Confirm Purchase"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -164,11 +274,10 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
               <div className="mt-6 flex gap-3">
                 <button
-                  onClick={() => buyItem(item)}
-                  disabled={buying === item.id}
-                  className="w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
+                  onClick={() => addToCart(item)}
+                  className="w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white hover:bg-blue-400"
                 >
-                  {buying === item.id ? "Sending..." : "Buy"}
+                  Add to List
                 </button>
 
                 {isAdmin && (

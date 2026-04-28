@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+type PurchaseItem = {
+  name: string;
+  price: number;
+  quantity: number;
+};
+
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
@@ -15,15 +21,29 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const weaponName = String(body.weaponName || "").trim();
-    const price = Number(body.price || 0);
+    const items: PurchaseItem[] = Array.isArray(body.items)
+      ? body.items.map((item: PurchaseItem) => ({
+          name: String(item.name || "").trim(),
+          price: Number(item.price || 0),
+          quantity: Number(item.quantity || 1),
+        }))
+      : [];
 
-    if (!weaponName || !price) {
+    const validItems = items.filter(
+      (item) => item.name && item.price > 0 && item.quantity > 0
+    );
+
+    if (validItems.length === 0) {
       return NextResponse.json(
-        { error: "Missing weapon or price" },
+        { error: "Missing purchase items" },
         { status: 400 }
       );
     }
+
+    const totalPrice = validItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
 
     const webhookUrl = process.env.DISCORD_WEAPON_WEBHOOK_URL;
 
@@ -40,6 +60,13 @@ export async function POST(req: Request) {
       user.email ||
       user.id;
 
+    const itemList = validItems
+      .map(
+        (item) =>
+          `${item.quantity}x ${item.name} - ${(item.price * item.quantity).toLocaleString("da-DK")} DKK`
+      )
+      .join("\n");
+
     await fetch(webhookUrl, {
       method: "POST",
       headers: {
@@ -54,17 +81,17 @@ export async function POST(req: Request) {
               {
                 name: "Member",
                 value: String(displayName),
-                inline: true,
+                inline: false,
               },
               {
-                name: "Item",
-                value: weaponName,
-                inline: true,
+                name: "Items",
+                value: itemList,
+                inline: false,
               },
               {
-                name: "Price",
-                value: `${price.toLocaleString("da-DK")} DKK`,
-                inline: true,
+                name: "Total",
+                value: `${totalPrice.toLocaleString("da-DK")} DKK`,
+                inline: false,
               },
             ],
             timestamp: new Date().toISOString(),
