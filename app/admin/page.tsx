@@ -27,8 +27,14 @@ type ProfileWithOnlineAndRoles = Profile & {
 
 function isRecentlyOnline(lastSeen: string | null) {
   if (!lastSeen) return false;
+
   const diff = Date.now() - new Date(lastSeen).getTime();
+
   return diff < 5 * 60 * 1000;
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const assignableRoles: RoleOption[] = [
@@ -50,7 +56,7 @@ export default async function AdminPage() {
 
   const adminSupabase = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
   const { data: profiles, error } = await adminSupabase
@@ -62,8 +68,58 @@ export default async function AdminPage() {
     console.error("Failed to load profiles:", JSON.stringify(error, null, 2));
   }
 
-  const guildId = process.env.DISCORD_GUILD_ID!;
+  const guildId = process.env.DISCORD_GUILD_ID;
   const baseUsers = (profiles || []) as Profile[];
+
+  if (!guildId) {
+    console.error("Missing DISCORD_GUILD_ID");
+
+    const usersWithoutDiscordRoles: ProfileWithOnlineAndRoles[] = baseUsers.map(
+      (profile) => ({
+        ...profile,
+        online: isRecentlyOnline(profile.last_seen),
+        currentRoles: [],
+      }),
+    );
+
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-[#07203a]">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/bg.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        />
+        <div className="absolute inset-0 backdrop-blur-md bg-black/50" />
+
+        <div className="relative z-10 px-6 pt-32 pb-12">
+          <div className="max-w-7xl mx-auto">
+            <div
+              className="rounded-2xl p-8 border border-white/10 shadow-lg mb-8"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
+                backdropFilter: "blur(10px)",
+              }}
+            >
+              <h1 className="text-4xl font-bold text-white">Admin Panel</h1>
+              <p className="text-gray-300 mt-2">
+                Manage users and Discord roles
+              </p>
+            </div>
+
+            <AdminUsersTable
+              users={usersWithoutDiscordRoles}
+              assignableRoles={assignableRoles}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   let guildRoles: RoleOption[] = [];
 
@@ -80,33 +136,35 @@ export default async function AdminPage() {
     console.error("Failed to fetch guild roles:", err);
   }
 
-  const users: ProfileWithOnlineAndRoles[] = await Promise.all(
-    baseUsers.map(async (profile) => {
-      let currentRoles: RoleOption[] = [];
+  const users: ProfileWithOnlineAndRoles[] = [];
 
-      if (profile.discord_id) {
-        try {
-          const member = await getGuildMemberWithBot(guildId, profile.discord_id);
+  for (const profile of baseUsers) {
+    let currentRoles: RoleOption[] = [];
 
-          currentRoles = guildRoles.filter(
-            (role) =>
-              Array.isArray(member.roles) && member.roles.includes(role.id)
-          );
-        } catch (err) {
-          console.error(
-            `Failed to fetch Discord roles for user ${profile.discord_id}:`,
-            err
-          );
-        }
+    if (profile.discord_id) {
+      try {
+        const member = await getGuildMemberWithBot(guildId, profile.discord_id);
+
+        currentRoles = guildRoles.filter(
+          (role) =>
+            Array.isArray(member.roles) && member.roles.includes(role.id),
+        );
+
+        await sleep(150);
+      } catch (err) {
+        console.error(
+          `Failed to fetch Discord roles for user ${profile.discord_id}:`,
+          err,
+        );
       }
+    }
 
-      return {
-        ...profile,
-        online: isRecentlyOnline(profile.last_seen),
-        currentRoles,
-      };
-    })
-  );
+    users.push({
+      ...profile,
+      online: isRecentlyOnline(profile.last_seen),
+      currentRoles,
+    });
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#07203a]">
@@ -132,15 +190,10 @@ export default async function AdminPage() {
             }}
           >
             <h1 className="text-4xl font-bold text-white">Admin Panel</h1>
-            <p className="text-gray-300 mt-2">
-              Manage users and Discord roles
-            </p>
+            <p className="text-gray-300 mt-2">Manage users and Discord roles</p>
           </div>
 
-          <AdminUsersTable
-            users={users}
-            assignableRoles={assignableRoles}
-          />
+          <AdminUsersTable users={users} assignableRoles={assignableRoles} />
         </div>
       </div>
     </div>

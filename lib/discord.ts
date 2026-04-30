@@ -16,13 +16,68 @@ export type DiscordGuildRole = {
   name: string;
 };
 
-export async function getDiscordUser(accessToken: string): Promise<DiscordUser> {
-  const res = await fetch(`${DISCORD_API}/users/@me`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function discordFetch(
+  url: string,
+  init: RequestInit,
+  errorLabel: string,
+  retries = 3,
+): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(url, init);
+
+    if (res.status !== 429) {
+      return res;
+    }
+
+    const text = await res.text();
+
+    let retryAfterMs = 1000;
+
+    try {
+      const json = JSON.parse(text) as { retry_after?: number };
+
+      if (typeof json.retry_after === "number") {
+        retryAfterMs = Math.ceil(json.retry_after * 1000);
+      }
+    } catch {
+      const retryAfterHeader = res.headers.get("retry-after");
+
+      if (retryAfterHeader) {
+        const parsed = Number(retryAfterHeader);
+
+        if (!Number.isNaN(parsed)) {
+          retryAfterMs = Math.ceil(parsed * 1000);
+        }
+      }
+    }
+
+    if (attempt === retries) {
+      throw new Error(`${errorLabel}: ${res.status} ${text}`);
+    }
+
+    await sleep(retryAfterMs + 100);
+  }
+
+  throw new Error(`${errorLabel}: too many rate limit retries`);
+}
+
+export async function getDiscordUser(
+  accessToken: string,
+): Promise<DiscordUser> {
+  const res = await discordFetch(
+    `${DISCORD_API}/users/@me`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+    "Failed to fetch Discord user",
+  );
 
   if (!res.ok) {
     const text = await res.text();
@@ -34,7 +89,7 @@ export async function getDiscordUser(accessToken: string): Promise<DiscordUser> 
 
 export async function getGuildMemberWithBot(
   guildId: string,
-  userId: string
+  userId: string,
 ): Promise<DiscordGuildMember> {
   const botToken = process.env.DISCORD_BOT_TOKEN;
 
@@ -42,12 +97,16 @@ export async function getGuildMemberWithBot(
     throw new Error("Missing DISCORD_BOT_TOKEN");
   }
 
-  const res = await fetch(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, {
-    headers: {
-      Authorization: `Bot ${botToken}`,
+  const res = await discordFetch(
+    `${DISCORD_API}/guilds/${guildId}/members/${userId}`,
+    {
+      headers: {
+        Authorization: `Bot ${botToken}`,
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+    "Failed to fetch guild member",
+  );
 
   if (!res.ok) {
     const text = await res.text();
@@ -58,7 +117,7 @@ export async function getGuildMemberWithBot(
 }
 
 export async function getGuildRolesWithBot(
-  guildId: string
+  guildId: string,
 ): Promise<DiscordGuildRole[]> {
   const botToken = process.env.DISCORD_BOT_TOKEN;
 
@@ -66,12 +125,16 @@ export async function getGuildRolesWithBot(
     throw new Error("Missing DISCORD_BOT_TOKEN");
   }
 
-  const res = await fetch(`${DISCORD_API}/guilds/${guildId}/roles`, {
-    headers: {
-      Authorization: `Bot ${botToken}`,
+  const res = await discordFetch(
+    `${DISCORD_API}/guilds/${guildId}/roles`,
+    {
+      headers: {
+        Authorization: `Bot ${botToken}`,
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+    "Failed to fetch guild roles",
+  );
 
   if (!res.ok) {
     const text = await res.text();
@@ -85,7 +148,7 @@ export async function addGuildMemberRole(
   guildId: string,
   userId: string,
   roleId: string,
-  reason?: string
+  reason?: string,
 ): Promise<void> {
   const botToken = process.env.DISCORD_BOT_TOKEN;
 
@@ -93,7 +156,7 @@ export async function addGuildMemberRole(
     throw new Error("Missing DISCORD_BOT_TOKEN");
   }
 
-  const res = await fetch(
+  const res = await discordFetch(
     `${DISCORD_API}/guilds/${guildId}/members/${userId}/roles/${roleId}`,
     {
       method: "PUT",
@@ -101,7 +164,8 @@ export async function addGuildMemberRole(
         Authorization: `Bot ${botToken}`,
         ...(reason ? { "X-Audit-Log-Reason": encodeURIComponent(reason) } : {}),
       },
-    }
+    },
+    "Failed to add role",
   );
 
   if (!res.ok) {
@@ -114,7 +178,7 @@ export async function removeGuildMemberRole(
   guildId: string,
   userId: string,
   roleId: string,
-  reason?: string
+  reason?: string,
 ): Promise<void> {
   const botToken = process.env.DISCORD_BOT_TOKEN;
 
@@ -122,7 +186,7 @@ export async function removeGuildMemberRole(
     throw new Error("Missing DISCORD_BOT_TOKEN");
   }
 
-  const res = await fetch(
+  const res = await discordFetch(
     `${DISCORD_API}/guilds/${guildId}/members/${userId}/roles/${roleId}`,
     {
       method: "DELETE",
@@ -130,7 +194,8 @@ export async function removeGuildMemberRole(
         Authorization: `Bot ${botToken}`,
         ...(reason ? { "X-Audit-Log-Reason": encodeURIComponent(reason) } : {}),
       },
-    }
+    },
+    "Failed to remove role",
   );
 
   if (!res.ok) {
@@ -141,21 +206,21 @@ export async function removeGuildMemberRole(
 
 export function memberHasRole(
   member: DiscordGuildMember,
-  roleId: string
+  roleId: string,
 ): boolean {
   return Array.isArray(member.roles) && member.roles.includes(roleId);
 }
 
 export function memberHasRequiredRole(
   member: DiscordGuildMember,
-  requiredRoleId: string
+  requiredRoleId: string,
 ): boolean {
   return memberHasRole(member, requiredRoleId);
 }
 
 export function memberHasAdminRole(
   member: DiscordGuildMember,
-  adminRoleId: string
+  adminRoleId: string,
 ): boolean {
   return memberHasRole(member, adminRoleId);
 }

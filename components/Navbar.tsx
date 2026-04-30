@@ -20,6 +20,7 @@ export default function Navbar() {
     { name: "Meth", path: "/meth" },
     { name: "Cars", path: "/cars" },
     { name: "Shop", path: "/shop" },
+    { name: "Gangs", path: "/gangs" },
   ];
 
   const adminItems = [{ name: "Admin", path: "/admin" }];
@@ -28,7 +29,7 @@ export default function Navbar() {
     (path: string) => {
       router.prefetch(path);
     },
-    [router]
+    [router],
   );
 
   useEffect(() => {
@@ -47,6 +48,11 @@ export default function Navbar() {
         setIsAdmin(false);
         return;
       }
+
+      // ✅ Discord sync (ONLY ONCE)
+      await fetch("/api/profile/sync-discord", {
+        method: "POST",
+      });
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -166,7 +172,7 @@ export default function Navbar() {
             })}
         </nav>
 
-        {/* Right side (credit + logout) */}
+        {/* Right side */}
         <div className="flex items-center gap-4">
           <span className="hidden sm:block text-xs text-gray-300/80">
             made with love by{" "}
