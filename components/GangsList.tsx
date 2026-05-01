@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { createClient } from "@/lib/supabase/client";
 
 type Gang = {
@@ -111,6 +113,119 @@ function eventCategoryColor(category?: string | null) {
   }
 
   return "border-indigo-400/30 bg-indigo-500/15 text-indigo-300";
+}
+
+function RichTextEditor({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: value || "",
+    immediatelyRender: false,
+    editorProps: {
+      attributes: {
+        class:
+          "min-h-32 rounded-b-xl border border-t-0 border-white/10 bg-white/10 px-4 py-3 text-white outline-none [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5",
+      },
+    },
+    onUpdate({ editor }) {
+      onChange(editor.getHTML());
+    },
+  });
+
+  useEffect(() => {
+    if (!editor) return;
+
+    if (value && editor.getHTML() !== value) {
+      editor.commands.setContent(value);
+    }
+
+    if (!value && editor.getHTML() !== "<p></p>") {
+      editor.commands.clearContent();
+    }
+  }, [value, editor]);
+
+  if (!editor) return null;
+
+  const buttonClass =
+    "rounded-lg bg-white/10 px-3 py-1 text-sm font-semibold text-white hover:bg-white/20";
+
+  const activeButtonClass =
+    "rounded-lg bg-indigo-600 px-3 py-1 text-sm font-semibold text-white hover:bg-indigo-500";
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2 rounded-t-xl border border-white/10 bg-[#061625] p-2">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive("bold") ? activeButtonClass : buttonClass}
+        >
+          Bold
+        </button>
+
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={
+            editor.isActive("italic") ? activeButtonClass : buttonClass
+          }
+        >
+          Italic
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
+          className={
+            editor.isActive("heading", { level: 3 })
+              ? activeButtonClass
+              : buttonClass
+          }
+        >
+          Heading
+        </button>
+
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={
+            editor.isActive("bulletList") ? activeButtonClass : buttonClass
+          }
+        >
+          Bullet List
+        </button>
+
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={
+            editor.isActive("orderedList") ? activeButtonClass : buttonClass
+          }
+        >
+          Number List
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            editor.chain().focus().unsetAllMarks().clearNodes().run()
+          }
+          className={buttonClass}
+        >
+          Clear
+        </button>
+      </div>
+
+      <EditorContent editor={editor} />
+    </div>
+  );
 }
 
 function Avatar({
@@ -634,12 +749,7 @@ export default function GangsList({ gangs }: { gangs: Gang[] }) {
         className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
       />
 
-      <textarea
-        value={eventDescription}
-        onChange={(e) => setEventDescription(e.target.value)}
-        placeholder="Event description"
-        className="min-h-24 w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
-      />
+      <RichTextEditor value={eventDescription} onChange={setEventDescription} />
 
       <select
         value={eventCategory}
@@ -1319,9 +1429,18 @@ export default function GangsList({ gangs }: { gangs: Gang[] }) {
 
                         <h3 className="text-xl font-bold">{event.title}</h3>
 
-                        <p className="mt-2 text-sm leading-6 text-gray-300">
-                          {event.description || "No description"}
-                        </p>
+                        {event.description ? (
+                          <div
+                            className="mt-2 text-sm leading-6 text-gray-300 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-bold [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5"
+                            dangerouslySetInnerHTML={{
+                              __html: event.description,
+                            }}
+                          />
+                        ) : (
+                          <p className="mt-2 text-sm leading-6 text-gray-300">
+                            No description
+                          </p>
+                        )}
 
                         {getEventImages(event).length > 0 && (
                           <button

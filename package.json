@@ -13,6 +13,9 @@
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.1",
+    "@tiptap/pm": "^3.22.5",
+    "@tiptap/react": "^3.22.5",
+    "@tiptap/starter-kit": "^3.22.5",
     "discord.js": "^14.26.3",
     "dotenv": "^17.4.2",
     "next": "16.2.3",
