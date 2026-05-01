@@ -18,7 +18,7 @@ export default async function GangsPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_admin) return redirect("/denied");
+  const isAdmin = Boolean(profile?.is_admin);
 
   const { data: gangs } = await supabase
     .from("gangs")
@@ -49,7 +49,7 @@ export default async function GangsPage() {
                 <p className="text-gray-300 mt-2 text-lg">Gang relations.</p>
               </div>
 
-              <AddGangModal />
+              {isAdmin ? <AddGangModal /> : null}
             </div>
           </div>
 
@@ -61,7 +61,7 @@ export default async function GangsPage() {
               backdropFilter: "blur(10px)",
             }}
           >
-            <GangsList gangs={gangs ?? []} />
+            <GangsList gangs={gangs ?? []} isAdmin={isAdmin} />
           </div>
         </div>
       </div>

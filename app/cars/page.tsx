@@ -12,13 +12,13 @@ export default async function CarsPage() {
 
   if (!user) return redirect("/login");
 
-  const { data: profile, error: profErr } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("is_admin")
     .eq("id", user.id)
     .single();
 
-  if (profErr || !profile || !profile.is_admin) return redirect("/denied");
+  const isAdmin = Boolean(profile?.is_admin);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#07203a] text-white">
@@ -48,7 +48,7 @@ export default async function CarsPage() {
               </div>
 
               <div className="flex justify-start lg:justify-end">
-                <AddCarModal />
+                {isAdmin ? <AddCarModal /> : null}
               </div>
             </div>
           </div>
@@ -66,7 +66,7 @@ export default async function CarsPage() {
               <p className="text-gray-300 mt-2">Search and filter.</p>
             </div>
 
-            <CarsList />
+            <CarsList isAdmin={isAdmin} />
           </div>
         </div>
       </div>
