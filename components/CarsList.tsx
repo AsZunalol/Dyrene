@@ -50,7 +50,8 @@ function buildCacheKey(filter: Filter, search: string) {
 }
 
 function readPagesCache() {
-  if (typeof window === "undefined") return {} as Record<string, CarsCacheEntry>;
+  if (typeof window === "undefined")
+    return {} as Record<string, CarsCacheEntry>;
 
   try {
     const raw = window.sessionStorage.getItem(CARS_CACHE_KEY);
@@ -69,7 +70,7 @@ function readPagesCache() {
           typeof value.savedAt === "number" &&
           now - value.savedAt < CACHE_TTL_MS
         );
-      })
+      }),
     );
   } catch {
     return {} as Record<string, CarsCacheEntry>;
@@ -194,7 +195,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
   const [name, setName] = useState(car.name || "");
   const [brand, setBrand] = useState(car.brand || "");
   const [price, setPrice] = useState(
-    typeof car.price === "number" ? String(car.price) : ""
+    typeof car.price === "number" ? String(car.price) : "",
   );
   const [image, setImage] = useState(car.image || "");
   const [status, setStatus] = useState(car.status || "store");
@@ -232,7 +233,9 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
         return;
       }
 
-      window.dispatchEvent(new CustomEvent("carUpdated", { detail: { car: json } }));
+      window.dispatchEvent(
+        new CustomEvent("carUpdated", { detail: { car: json } }),
+      );
       onSaved();
       onClose();
     } catch (err) {
@@ -262,7 +265,9 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
         return;
       }
 
-      window.dispatchEvent(new CustomEvent("carDeleted", { detail: { id: car.id } }));
+      window.dispatchEvent(
+        new CustomEvent("carDeleted", { detail: { id: car.id } }),
+      );
       onSaved();
       onClose();
     } catch (err) {
@@ -290,7 +295,9 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <div>
             <h2 className="text-xl font-bold text-white">Edit Car</h2>
-            <p className="text-sm text-gray-400">Update or delete this listing</p>
+            <p className="text-sm text-gray-400">
+              Update or delete this listing
+            </p>
           </div>
 
           <button
@@ -387,7 +394,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
   return mounted ? createPortal(modal, document.body) : null;
 }
 
-export default function CarsList() {
+export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -417,7 +424,11 @@ export default function CarsList() {
         setDebouncedSearch(ui.search.trim());
       }
 
-      if (ui?.filter === "all" || ui?.filter === "store" || ui?.filter === "vin-scratch") {
+      if (
+        ui?.filter === "all" ||
+        ui?.filter === "store" ||
+        ui?.filter === "vin-scratch"
+      ) {
         setFilter(ui.filter);
       }
 
@@ -468,55 +479,56 @@ export default function CarsList() {
 
       return `/api/cars?${params.toString()}`;
     },
-    [debouncedSearch, filter]
+    [debouncedSearch, filter],
   );
 
-const fetchCarsPage = useCallback(
-  async (pageNumber: number, replace = false) => {
-    const isInitialLoad = replace && pageNumber === 0 && carsLengthRef.current === 0;
+  const fetchCarsPage = useCallback(
+    async (pageNumber: number, replace = false) => {
+      const isInitialLoad =
+        replace && pageNumber === 0 && carsLengthRef.current === 0;
 
-    if (replace) {
-      if (isInitialLoad) {
-        setLoading(true);
-      } else {
-        setIsRefreshing(true);
-      }
-    } else {
-      setLoadingMore(true);
-    }
-
-    setError(null);
-
-    try {
-      const res = await fetch(buildCarsUrl(pageNumber));
-      const json = await res.json();
-
-      if (!res.ok) {
-        throw new Error(json?.error || "Failed to fetch cars");
-      }
-
-      const nextCars = Array.isArray(json) ? json : [];
-
-      setCars((current) => (replace ? nextCars : [...current, ...nextCars]));
-      setPage(pageNumber);
-      setHasMore(nextCars.length === PAGE_SIZE);
-    } catch (err: any) {
-      console.error("Failed to fetch cars", err);
       if (replace) {
-        setCars([]);
-      }
-      setError(String(err?.message ?? err));
-    } finally {
-      if (replace) {
-        setLoading(false);
-        setIsRefreshing(false);
+        if (isInitialLoad) {
+          setLoading(true);
+        } else {
+          setIsRefreshing(true);
+        }
       } else {
-        setLoadingMore(false);
+        setLoadingMore(true);
       }
-    }
-  },
-  [buildCarsUrl]
-);
+
+      setError(null);
+
+      try {
+        const res = await fetch(buildCarsUrl(pageNumber));
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json?.error || "Failed to fetch cars");
+        }
+
+        const nextCars = Array.isArray(json) ? json : [];
+
+        setCars((current) => (replace ? nextCars : [...current, ...nextCars]));
+        setPage(pageNumber);
+        setHasMore(nextCars.length === PAGE_SIZE);
+      } catch (err: any) {
+        console.error("Failed to fetch cars", err);
+        if (replace) {
+          setCars([]);
+        }
+        setError(String(err?.message ?? err));
+      } finally {
+        if (replace) {
+          setLoading(false);
+          setIsRefreshing(false);
+        } else {
+          setLoadingMore(false);
+        }
+      }
+    },
+    [buildCarsUrl],
+  );
 
   const resetAndFetch = useCallback(() => {
     clearCarsCache();
@@ -527,26 +539,26 @@ const fetchCarsPage = useCallback(
     fetchCarsPage(0, true);
   }, [fetchCarsPage]);
 
-useEffect(() => {
-  if (!hydratedFromCache) return;
+  useEffect(() => {
+    if (!hydratedFromCache) return;
 
-  const cacheKey = buildCacheKey(filter, debouncedSearch);
-  const pagesCache = readPagesCache();
-  const cachedEntry = pagesCache[cacheKey];
+    const cacheKey = buildCacheKey(filter, debouncedSearch);
+    const pagesCache = readPagesCache();
+    const cachedEntry = pagesCache[cacheKey];
 
-  if (cachedEntry) {
-    setCars(cachedEntry.cars);
-    setPage(cachedEntry.page);
-    setHasMore(cachedEntry.hasMore);
-    setLoading(false);
-    return;
-  }
+    if (cachedEntry) {
+      setCars(cachedEntry.cars);
+      setPage(cachedEntry.page);
+      setHasMore(cachedEntry.hasMore);
+      setLoading(false);
+      return;
+    }
 
-  setPage(0);
-  setHasMore(true);
-  setShouldRestoreScroll(false);
-  fetchCarsPage(0, true);
-}, [debouncedSearch, fetchCarsPage, filter, hydratedFromCache]);
+    setPage(0);
+    setHasMore(true);
+    setShouldRestoreScroll(false);
+    fetchCarsPage(0, true);
+  }, [debouncedSearch, fetchCarsPage, filter, hydratedFromCache]);
 
   useEffect(() => {
     if (!hydratedFromCache || typeof window === "undefined") return;
@@ -558,7 +570,7 @@ useEffect(() => {
           search,
           filter,
           scrollY: window.scrollY,
-        } satisfies CarsUiCache)
+        } satisfies CarsUiCache),
       );
     } catch {}
   }, [filter, hydratedFromCache, search]);
@@ -590,7 +602,7 @@ useEffect(() => {
             search,
             filter,
             scrollY: window.scrollY,
-          } satisfies CarsUiCache)
+          } satisfies CarsUiCache),
         );
       } catch {}
     };
@@ -674,7 +686,7 @@ useEffect(() => {
       },
       {
         rootMargin: "300px 0px",
-      }
+      },
     );
 
     observer.observe(target);
@@ -699,7 +711,8 @@ useEffect(() => {
     );
   }
 
-  if (error && !cars.length) return <div className="p-4 text-red-400">Error: {error}</div>;
+  if (error && !cars.length)
+    return <div className="p-4 text-red-400">Error: {error}</div>;
 
   return (
     <div className="space-y-6">
@@ -829,19 +842,25 @@ useEffect(() => {
 
                 <div className="p-5 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="truncate text-xl font-bold text-white">{car.name}</h3>
-                    <p className="mt-1 text-sm text-gray-400">{prettyStatus(car.status)}</p>
+                    <h3 className="truncate text-xl font-bold text-white">
+                      {car.name}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-400">
+                      {prettyStatus(car.status)}
+                    </p>
                   </div>
 
-                  <button
-                    onClick={() => setEditingCar(car)}
-                    className="shrink-0 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-transform duration-200 hover:scale-105"
-                    style={{
-                      background: "linear-gradient(90deg,#5865F2,#6772E5)",
-                    }}
-                  >
-                    Edit
-                  </button>
+                  {isAdmin ? (
+                    <button
+                      onClick={() => setEditingCar(car)}
+                      className="shrink-0 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-transform duration-200 hover:scale-105"
+                      style={{
+                        background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                      }}
+                    >
+                      Edit
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -851,7 +870,9 @@ useEffect(() => {
         </>
       )}
 
-      {error ? <div className="text-sm text-red-400">Error: {error}</div> : null}
+      {error ? (
+        <div className="text-sm text-red-400">Error: {error}</div>
+      ) : null}
 
       <div ref={loadMoreRef} className="h-1" />
 
@@ -861,7 +882,7 @@ useEffect(() => {
         </div>
       ) : null}
 
-      {editingCar ? (
+      {isAdmin && editingCar ? (
         <EditCarModal
           car={editingCar}
           onClose={() => setEditingCar(null)}

@@ -264,7 +264,13 @@ function Avatar({
   );
 }
 
-export default function GangsList({ gangs }: { gangs: Gang[] }) {
+export default function GangsList({
+  gangs,
+  isAdmin = false,
+}: {
+  gangs: Gang[];
+  isAdmin?: boolean;
+}) {
   const supabase = createClient();
 
   const [gangList, setGangList] = useState<Gang[]>(gangs);
@@ -1355,14 +1361,16 @@ export default function GangsList({ gangs }: { gangs: Gang[] }) {
 
           {activeTab === "timeline" && (
             <>
-              <div className="mb-8 flex justify-center">
-                <button
-                  onClick={openAddEvent}
-                  className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold hover:bg-indigo-500"
-                >
-                  + Add Event
-                </button>
-              </div>
+              {isAdmin ? (
+                <div className="mb-8 flex justify-center">
+                  <button
+                    onClick={openAddEvent}
+                    className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold hover:bg-indigo-500"
+                  >
+                    + Add Event
+                  </button>
+                </div>
+              ) : null}
 
               <div className="relative mx-auto max-w-5xl pb-10">
                 <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-white/20 md:block" />
@@ -1538,31 +1546,33 @@ export default function GangsList({ gangs }: { gangs: Gang[] }) {
                             </div>
                           )}
 
-                        <div
-                          className={`mt-4 flex gap-4 ${
-                            index % 2 === 0 ? "md:justify-end" : ""
-                          }`}
-                        >
-                          <button
-                            onClick={() => openEditEvent(event)}
-                            className="text-sm text-indigo-300 hover:text-indigo-200"
+                        {isAdmin ? (
+                          <div
+                            className={`mt-4 flex gap-4 ${
+                              index % 2 === 0 ? "md:justify-end" : ""
+                            }`}
                           >
-                            Edit
-                          </button>
+                            <button
+                              onClick={() => openEditEvent(event)}
+                              className="text-sm text-indigo-300 hover:text-indigo-200"
+                            >
+                              Edit
+                            </button>
 
-                          <button
-                            onClick={() =>
-                              setConfirmAction({
-                                type: "event",
-                                id: event.id,
-                                name: event.title,
-                              })
-                            }
-                            className="text-sm text-red-400 hover:text-red-300"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                            <button
+                              onClick={() =>
+                                setConfirmAction({
+                                  type: "event",
+                                  id: event.id,
+                                  name: event.title,
+                                })
+                              }
+                              className="text-sm text-red-400 hover:text-red-300"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   ))}
@@ -1579,14 +1589,16 @@ export default function GangsList({ gangs }: { gangs: Gang[] }) {
 
           {activeTab === "members" && (
             <div className="mx-auto max-w-4xl">
-              <div className="mb-8 flex justify-center">
-                <button
-                  onClick={() => setShowAddMember(true)}
-                  className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold hover:bg-indigo-500"
-                >
-                  + Add Member
-                </button>
-              </div>
+              {isAdmin ? (
+                <div className="mb-8 flex justify-center">
+                  <button
+                    onClick={() => setShowAddMember(true)}
+                    className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold hover:bg-indigo-500"
+                  >
+                    + Add Member
+                  </button>
+                </div>
+              ) : null}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {members.map((member) => (
@@ -1624,27 +1636,29 @@ export default function GangsList({ gangs }: { gangs: Gang[] }) {
                       </div>
                     </button>
 
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => openEditMember(member)}
-                        className="text-sm text-indigo-300 hover:text-indigo-200"
-                      >
-                        Edit
-                      </button>
+                    {isAdmin ? (
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => openEditMember(member)}
+                          className="text-sm text-indigo-300 hover:text-indigo-200"
+                        >
+                          Edit
+                        </button>
 
-                      <button
-                        onClick={() =>
-                          setConfirmAction({
-                            type: "member",
-                            id: member.id,
-                            name: member.name,
-                          })
-                        }
-                        className="text-sm text-red-400 hover:text-red-300"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                        <button
+                          onClick={() =>
+                            setConfirmAction({
+                              type: "member",
+                              id: member.id,
+                              name: member.name,
+                            })
+                          }
+                          className="text-sm text-red-400 hover:text-red-300"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 ))}
 
@@ -1758,45 +1772,47 @@ export default function GangsList({ gangs }: { gangs: Gang[] }) {
                 {gang.description || "No description"}
               </p>
 
-              <div className="mt-4 flex gap-3">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openEdit(gang);
-                  }}
-                  className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20"
-                >
-                  Edit
-                </button>
+              {isAdmin ? (
+                <div className="mt-4 flex gap-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(gang);
+                    }}
+                    className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                  >
+                    Edit
+                  </button>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setConfirmAction({
-                      type: "gang",
-                      id: gang.id,
-                      name: gang.name,
-                    });
-                  }}
-                  className="rounded-lg bg-red-500/15 px-3 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/25"
-                >
-                  Delete
-                </button>
-              </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirmAction({
+                        type: "gang",
+                        id: gang.id,
+                        name: gang.name,
+                      });
+                    }}
+                    className="rounded-lg bg-red-500/15 px-3 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/25"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         ))}
       </div>
 
-      {editModal}
+      {isAdmin ? editModal : null}
       {detailsModal}
-      {addEventModal}
-      {editEventModal}
-      {addMemberModal}
-      {editMemberModal}
+      {isAdmin ? addEventModal : null}
+      {isAdmin ? editEventModal : null}
+      {isAdmin ? addMemberModal : null}
+      {isAdmin ? editMemberModal : null}
       {memberProfileModal}
       {imageLightboxModal}
-      {confirmModal}
+      {isAdmin ? confirmModal : null}
     </>
   );
 }
