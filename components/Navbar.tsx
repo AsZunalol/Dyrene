@@ -21,6 +21,7 @@ export default function Navbar() {
     { name: "Cars", path: "/cars" },
     { name: "Shop", path: "/shop" },
     { name: "Gangs", path: "/gangs" },
+    { name: "Map", path: "/map" },
   ];
 
   const adminItems = [{ name: "Admin", path: "/admin" }];
@@ -78,6 +79,8 @@ export default function Navbar() {
     prefetchRoute("/meth");
     prefetchRoute("/cars");
     prefetchRoute("/shop");
+    prefetchRoute("/gangs");
+    prefetchRoute("/map");
 
     return () => {
       active = false;
@@ -117,7 +120,7 @@ export default function Navbar() {
         </LoadingLink>
 
         {/* Navigation */}
-        <nav className="flex flex-1 items-center justify-center gap-2 sm:gap-3">
+        <nav className="flex flex-1 items-center justify-start gap-2 overflow-x-auto sm:gap-3">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
 
@@ -128,7 +131,7 @@ export default function Navbar() {
                 prefetch
                 onMouseEnter={() => prefetchRoute(item.path)}
                 onFocus={() => prefetchRoute(item.path)}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
+                className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
                   isActive
                     ? "text-white"
                     : "text-gray-300 hover:bg-white/10 hover:text-white"
@@ -155,7 +158,7 @@ export default function Navbar() {
                   prefetch
                   onMouseEnter={() => prefetchRoute(item.path)}
                   onFocus={() => prefetchRoute(item.path)}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
+                  className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95 ${
                     isActive
                       ? "text-white"
                       : "text-gray-300 hover:bg-white/10 hover:text-white"
@@ -174,7 +177,7 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-          <span className="hidden sm:block text-xs text-gray-300/80">
+          <span className="hidden xl:block text-xs text-gray-300/80">
             made with love by{" "}
             <span className="font-semibold text-white">AsZuna</span>
           </span>
