@@ -95,6 +95,8 @@ function RichTextEditor({
     "rounded-lg border border-emerald-300/30 bg-emerald-500 px-3 py-1 font-mono text-sm font-bold text-black hover:bg-emerald-400";
 
   function makeCurrentLineCodeBlock() {
+    if (!editor) return;
+
     editor.commands.command(({ state, dispatch }) => {
       const { schema, selection } = state;
       const codeBlockType = schema.nodes.codeBlock;
@@ -139,7 +141,9 @@ function RichTextEditor({
       const emptyParagraph = paragraphType.create();
 
       tr.replaceWith(from, to, [codeNode, emptyParagraph]);
-      tr.setSelection(TextSelection.near(tr.doc.resolve(from + codeNode.nodeSize + 1)));
+      tr.setSelection(
+        TextSelection.near(tr.doc.resolve(from + codeNode.nodeSize + 1)),
+      );
       dispatch(tr.scrollIntoView());
       return true;
     });
@@ -180,14 +184,18 @@ function RichTextEditor({
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive("italic") ? activeButtonClass : buttonClass}
+          className={
+            editor.isActive("italic") ? activeButtonClass : buttonClass
+          }
         >
           Italic
         </button>
 
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           className={
             editor.isActive("heading", { level: 3 })
               ? activeButtonClass
@@ -200,7 +208,9 @@ function RichTextEditor({
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive("bulletList") ? activeButtonClass : buttonClass}
+          className={
+            editor.isActive("bulletList") ? activeButtonClass : buttonClass
+          }
         >
           Bullet List
         </button>
@@ -208,7 +218,9 @@ function RichTextEditor({
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive("orderedList") ? activeButtonClass : buttonClass}
+          className={
+            editor.isActive("orderedList") ? activeButtonClass : buttonClass
+          }
         >
           Number List
         </button>
@@ -224,7 +236,9 @@ function RichTextEditor({
         <button
           type="button"
           onClick={makeCurrentLineCodeBlock}
-          className={editor.isActive("codeBlock") ? activeButtonClass : buttonClass}
+          className={
+            editor.isActive("codeBlock") ? activeButtonClass : buttonClass
+          }
         >
           Code Block
         </button>
@@ -249,7 +263,9 @@ function RichTextEditor({
 
         <button
           type="button"
-          onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+          onClick={() =>
+            editor.chain().focus().unsetAllMarks().clearNodes().run()
+          }
           className={buttonClass}
         >
           Clear
@@ -259,7 +275,8 @@ function RichTextEditor({
       <EditorContent editor={editor} />
 
       <p className="mt-2 text-xs text-emerald-300/60">
-        Tip: Code Block now only converts the current line and puts your cursor back in normal text underneath it.
+        Tip: Code Block now only converts the current line and puts your cursor
+        back in normal text underneath it.
       </p>
     </div>
   );
@@ -271,7 +288,6 @@ function splitImageUrls(value: string) {
     .map((line) => line.trim())
     .filter(Boolean);
 }
-
 
 function getAuthorName(guide: TrojanGuide) {
   return guide.author_name || "Unknown operator";
@@ -292,9 +308,12 @@ function formatLastUpdated(value?: string | null) {
 function difficultyClass(difficulty?: string | null) {
   const clean = (difficulty || "Normal").toLowerCase();
 
-  if (clean.includes("easy")) return "border-emerald-400/30 bg-emerald-500/15 text-emerald-200";
-  if (clean.includes("hard")) return "border-red-400/30 bg-red-500/15 text-red-200";
-  if (clean.includes("expert")) return "border-orange-400/30 bg-orange-500/15 text-orange-200";
+  if (clean.includes("easy"))
+    return "border-emerald-400/30 bg-emerald-500/15 text-emerald-200";
+  if (clean.includes("hard"))
+    return "border-red-400/30 bg-red-500/15 text-red-200";
+  if (clean.includes("expert"))
+    return "border-orange-400/30 bg-orange-500/15 text-orange-200";
 
   return "border-cyan-400/30 bg-cyan-500/15 text-cyan-200";
 }
@@ -441,7 +460,9 @@ export default function TrojanGuides({
       uploadedUrls.push(data.publicUrl);
     }
 
-    setImageUrls((prev) => [...splitImageUrls(prev), ...uploadedUrls].join("\n"));
+    setImageUrls((prev) =>
+      [...splitImageUrls(prev), ...uploadedUrls].join("\n"),
+    );
     setUploadingImages(false);
   }
 
@@ -522,17 +543,27 @@ export default function TrojanGuides({
       return;
     }
 
-    setGuides((currentGuides) => currentGuides.filter((item) => item.id !== guide.id));
+    setGuides((currentGuides) =>
+      currentGuides.filter((item) => item.id !== guide.id),
+    );
   }
 
   return (
     <>
-      <div
-        className="mb-8 overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/55 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur"
-      >
-        <div className="flex items-center gap-2 border-b border-emerald-400/20 bg-emerald-950/25 px-5 py-3"><span className="h-3 w-3 rounded-full bg-red-400" /><span className="h-3 w-3 rounded-full bg-yellow-300" /><span className="h-3 w-3 rounded-full bg-emerald-400" /><span className="ml-3 font-mono text-xs text-emerald-300/80">library@trojan:~/guides</span></div><div className="flex flex-col gap-4 p-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mb-8 overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/55 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur">
+        <div className="flex items-center gap-2 border-b border-emerald-400/20 bg-emerald-950/25 px-5 py-3">
+          <span className="h-3 w-3 rounded-full bg-red-400" />
+          <span className="h-3 w-3 rounded-full bg-yellow-300" />
+          <span className="h-3 w-3 rounded-full bg-emerald-400" />
+          <span className="ml-3 font-mono text-xs text-emerald-300/80">
+            library@trojan:~/guides
+          </span>
+        </div>
+        <div className="flex flex-col gap-4 p-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="font-mono text-2xl font-black text-white">./guide-library</h2>
+            <h2 className="font-mono text-2xl font-black text-white">
+              ./guide-library
+            </h2>
             <p className="mt-1 text-gray-300">
               Select a guide card to open the full terminal-style tutorial.
             </p>
@@ -613,7 +644,11 @@ export default function TrojanGuides({
                     <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-400/20 bg-black/45 px-3 py-2 font-mono text-xs text-emerald-300/75">
                       <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
                       <span className="text-emerald-500/80">LAST UPDATED</span>
-                      <span>{formatLastUpdated(guide.updated_at || guide.created_at)}</span>
+                      <span>
+                        {formatLastUpdated(
+                          guide.updated_at || guide.created_at,
+                        )}
+                      </span>
                     </div>
 
                     <div className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-black/45 px-3 py-2 font-mono text-xs text-cyan-200/85">
@@ -667,7 +702,8 @@ export default function TrojanGuides({
                   {editingGuide ? "Edit Trojan Guide" : "Add Trojan Guide"}
                 </h2>
                 <p className="mt-1 text-sm text-emerald-300/60">
-                  Fullscreen editor mode. The toolbar stays sticky while you write long guides with screenshots and command blocks.
+                  Fullscreen editor mode. The toolbar stays sticky while you
+                  write long guides with screenshots and command blocks.
                 </p>
               </div>
 
@@ -682,7 +718,10 @@ export default function TrojanGuides({
               </button>
             </div>
 
-            <form onSubmit={saveGuide} className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 pt-6 lg:px-7">
+            <form
+              onSubmit={saveGuide}
+              className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 pt-6 lg:px-7"
+            >
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_220px_180px]">
                 <input
                   value={title}
@@ -740,9 +779,17 @@ export default function TrojanGuides({
                   className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-emerald-400"
                 />
 
-                {uploadingCover ? <p className="text-sm text-emerald-300/60">Uploading cover...</p> : null}
+                {uploadingCover ? (
+                  <p className="text-sm text-emerald-300/60">
+                    Uploading cover...
+                  </p>
+                ) : null}
                 {coverImage ? (
-                  <img src={coverImage} alt="Cover preview" className="h-36 w-full rounded-xl object-cover" />
+                  <img
+                    src={coverImage}
+                    alt="Cover preview"
+                    className="h-36 w-full rounded-xl object-cover"
+                  />
                 ) : null}
               </div>
 
@@ -778,7 +825,11 @@ export default function TrojanGuides({
                   className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-emerald-400"
                 />
 
-                {uploadingImages ? <p className="text-sm text-emerald-300/60">Uploading images...</p> : null}
+                {uploadingImages ? (
+                  <p className="text-sm text-emerald-300/60">
+                    Uploading images...
+                  </p>
+                ) : null}
               </div>
 
               <div className="sticky bottom-0 z-30 -mx-5 -mb-5 flex flex-col gap-3 border-t border-emerald-400/20 bg-[#020617] px-5 py-4 sm:flex-row lg:-mx-7 lg:-mb-5 lg:px-7">
@@ -797,7 +848,11 @@ export default function TrojanGuides({
                   disabled={saving || uploadingCover || uploadingImages}
                   className="w-full rounded-xl bg-emerald-500 px-4 py-3 font-mono font-bold text-black hover:bg-emerald-400 disabled:opacity-50"
                 >
-                  {saving ? "Saving..." : editingGuide ? "Save Changes" : "Create Guide"}
+                  {saving
+                    ? "Saving..."
+                    : editingGuide
+                      ? "Save Changes"
+                      : "Create Guide"}
                 </button>
               </div>
             </form>
