@@ -95,9 +95,10 @@ function RichTextEditor({
     "rounded-lg border border-emerald-300/30 bg-emerald-500 px-3 py-1 font-mono text-sm font-bold text-black hover:bg-emerald-400";
 
   function makeCurrentLineCodeBlock() {
-    if (!editor) return;
+    const currentEditor = editor;
+    if (!currentEditor) return;
 
-    editor.commands.command(({ state, dispatch }) => {
+    currentEditor.commands.command(({ state, dispatch }) => {
       const { schema, selection } = state;
       const codeBlockType = schema.nodes.codeBlock;
       const paragraphType = schema.nodes.paragraph;
@@ -148,7 +149,7 @@ function RichTextEditor({
       return true;
     });
 
-    editor.commands.focus();
+    currentEditor.commands.focus();
   }
 
   function insertImageUrl() {
