@@ -89,16 +89,15 @@ function RichTextEditor({
 
   if (!editor) return null;
 
+  const activeEditor = editor;
+
   const buttonClass =
     "rounded-lg border border-emerald-400/15 bg-emerald-500/10 px-3 py-1 font-mono text-sm font-semibold text-emerald-100 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50";
   const activeButtonClass =
     "rounded-lg border border-emerald-300/30 bg-emerald-500 px-3 py-1 font-mono text-sm font-bold text-black hover:bg-emerald-400";
 
   function makeCurrentLineCodeBlock() {
-    const currentEditor = editor;
-    if (!currentEditor) return;
-
-    currentEditor.commands.command(({ state, dispatch }) => {
+    activeEditor.commands.command(({ state, dispatch }) => {
       const { schema, selection } = state;
       const codeBlockType = schema.nodes.codeBlock;
       const paragraphType = schema.nodes.paragraph;
@@ -149,14 +148,14 @@ function RichTextEditor({
       return true;
     });
 
-    currentEditor.commands.focus();
+    activeEditor.commands.focus();
   }
 
   function insertImageUrl() {
     const url = prompt("Paste image URL");
     if (!url?.trim()) return;
 
-    editor.chain().focus().setImage({ src: url.trim() }).run();
+    activeEditor.chain().focus().setImage({ src: url.trim() }).run();
   }
 
   async function insertUploadedImage(file: File | undefined) {
@@ -168,7 +167,7 @@ function RichTextEditor({
 
     if (!url) return;
 
-    editor.chain().focus().setImage({ src: url }).run();
+    activeEditor.chain().focus().setImage({ src: url }).run();
   }
 
   return (
@@ -176,17 +175,17 @@ function RichTextEditor({
       <div className="sticky top-0 z-30 flex flex-wrap gap-2 rounded-t-xl border border-emerald-400/25 bg-[#03140f] p-2">
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive("bold") ? activeButtonClass : buttonClass}
+          onClick={() => activeEditor.chain().focus().toggleBold().run()}
+          className={activeEditor.isActive("bold") ? activeButtonClass : buttonClass}
         >
           Bold
         </button>
 
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          onClick={() => activeEditor.chain().focus().toggleItalic().run()}
           className={
-            editor.isActive("italic") ? activeButtonClass : buttonClass
+            activeEditor.isActive("italic") ? activeButtonClass : buttonClass
           }
         >
           Italic
@@ -195,10 +194,10 @@ function RichTextEditor({
         <button
           type="button"
           onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
+            activeEditor.chain().focus().toggleHeading({ level: 3 }).run()
           }
           className={
-            editor.isActive("heading", { level: 3 })
+            activeEditor.isActive("heading", { level: 3 })
               ? activeButtonClass
               : buttonClass
           }
@@ -208,9 +207,9 @@ function RichTextEditor({
 
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          onClick={() => activeEditor.chain().focus().toggleBulletList().run()}
           className={
-            editor.isActive("bulletList") ? activeButtonClass : buttonClass
+            activeEditor.isActive("bulletList") ? activeButtonClass : buttonClass
           }
         >
           Bullet List
@@ -218,9 +217,9 @@ function RichTextEditor({
 
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          onClick={() => activeEditor.chain().focus().toggleOrderedList().run()}
           className={
-            editor.isActive("orderedList") ? activeButtonClass : buttonClass
+            activeEditor.isActive("orderedList") ? activeButtonClass : buttonClass
           }
         >
           Number List
@@ -228,8 +227,8 @@ function RichTextEditor({
 
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          className={editor.isActive("code") ? activeButtonClass : buttonClass}
+          onClick={() => activeEditor.chain().focus().toggleCode().run()}
+          className={activeEditor.isActive("code") ? activeButtonClass : buttonClass}
         >
           Inline Code
         </button>
@@ -238,7 +237,7 @@ function RichTextEditor({
           type="button"
           onClick={makeCurrentLineCodeBlock}
           className={
-            editor.isActive("codeBlock") ? activeButtonClass : buttonClass
+            activeEditor.isActive("codeBlock") ? activeButtonClass : buttonClass
           }
         >
           Code Block
@@ -265,7 +264,7 @@ function RichTextEditor({
         <button
           type="button"
           onClick={() =>
-            editor.chain().focus().unsetAllMarks().clearNodes().run()
+            activeEditor.chain().focus().unsetAllMarks().clearNodes().run()
           }
           className={buttonClass}
         >
@@ -273,7 +272,7 @@ function RichTextEditor({
         </button>
       </div>
 
-      <EditorContent editor={editor} />
+      <EditorContent editor={activeEditor} />
 
       <p className="mt-2 text-xs text-emerald-300/60">
         Tip: Code Block now only converts the current line and puts your cursor
