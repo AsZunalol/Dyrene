@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { canEditMethRecipes } from "@/lib/meth-access";
 
 async function getCurrentUserAndProfile() {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ async function getCurrentUserAndProfile() {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, is_admin")
+    .select("id, is_admin, discord_id")
     .eq("id", user.id)
     .single();
 
@@ -29,7 +30,10 @@ async function getCurrentUserAndProfile() {
       supabase,
       user,
       profile: null,
-      error: NextResponse.json({ error: profileError.message }, { status: 500 }),
+      error: NextResponse.json(
+        { error: profileError.message },
+        { status: 500 },
+      ),
     };
   }
 
@@ -72,7 +76,7 @@ function applySharedFilters(
   query: any,
   color: string,
   status: StatusFilter,
-  search: string
+  search: string,
 ) {
   let nextQuery = query.eq("fosfor_color", color);
 
@@ -161,7 +165,10 @@ export async function GET(request: Request) {
   }
 
   if (!["all", "completed", "missing"].includes(status)) {
-    return NextResponse.json({ error: "Invalid status filter" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid status filter" },
+      { status: 400 },
+    );
   }
 
   if (
@@ -183,7 +190,7 @@ export async function GET(request: Request) {
       supabase.from("meth_recipes").select("*"),
       color,
       "missing",
-      search
+      search,
     );
 
     const { data, error } = await randomQuery.limit(200);
@@ -203,7 +210,7 @@ export async function GET(request: Request) {
     supabase.from("meth_recipes").select("*"),
     color,
     status,
-    search
+    search,
   );
 
   itemsQuery = applySort(itemsQuery, sort);
@@ -216,27 +223,32 @@ export async function GET(request: Request) {
   ] = await Promise.all([
     itemsQuery.range(offset, offset + limit - 1),
     applySharedFilters(
-      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+      supabase
+        .from("meth_recipes")
+        .select("id", { count: "exact", head: true }),
       color,
       status,
-      search
+      search,
     ),
     applySharedFilters(
-      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+      supabase
+        .from("meth_recipes")
+        .select("id", { count: "exact", head: true }),
       color,
       "completed",
-      search
+      search,
     ),
     applySharedFilters(
-      supabase.from("meth_recipes").select("id", { count: "exact", head: true }),
+      supabase
+        .from("meth_recipes")
+        .select("id", { count: "exact", head: true }),
       color,
       "missing",
-      search
+      search,
     ),
   ]);
 
-  const firstError =
-    itemsError || totalError || completedError || missingError;
+  const firstError = itemsError || totalError || completedError || missingError;
 
   if (firstError) {
     return NextResponse.json({ error: firstError.message }, { status: 500 });
@@ -258,7 +270,9 @@ export async function PATCH(req: Request) {
       return auth.error!;
     }
 
-    if (!auth.profile.is_admin) {
+    const canEditMeth = await canEditMethRecipes(auth.profile);
+
+    if (!canEditMeth) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
@@ -308,7 +322,7 @@ export async function PATCH(req: Request) {
         error:
           error instanceof Error ? error.message : "Unexpected server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import MethRecipesTable from "@/components/MethRecipesTable";
+import { canEditMethRecipes } from "@/lib/meth-access";
 
 export default async function MethPage() {
   const supabase = await createServerClient();
@@ -15,11 +16,11 @@ export default async function MethPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin")
+    .select("is_admin, discord_id")
     .eq("id", user.id)
     .single();
 
-  const isAdmin = Boolean(profile?.is_admin);
+  const canEditMeth = await canEditMethRecipes(profile ?? null);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#07203a] text-white">
@@ -55,7 +56,7 @@ export default async function MethPage() {
               backdropFilter: "blur(10px)",
             }}
           >
-            <MethRecipesTable isAdmin={isAdmin} />
+            <MethRecipesTable isAdmin={canEditMeth} />
           </div>
         </div>
       </div>
