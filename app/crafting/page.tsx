@@ -22,43 +22,14 @@ export default async function CraftingPage() {
   const isAdmin = Boolean(profile?.is_admin);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#07203a] text-white">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a223d] via-[#103b63] to-[#06111f]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_35%),radial-gradient(circle_at_top_right,rgba(6,182,212,0.18),transparent_30%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.65),transparent_45%)]" />
-      <div className="absolute inset-0 bg-black/45" />
+    <main className="relative min-h-screen overflow-hidden bg-[#04111f] text-white">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#07192d] via-[#0b2742] to-[#020617]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(88,101,242,0.26),transparent_34%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_28%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.78),transparent_48%)]" />
+      <div className="absolute inset-0 bg-black/35" />
 
-      <div className="relative z-10 px-6 pt-32 pb-12">
-        <div className="max-w-7xl mx-auto">
-          <div
-            className="rounded-2xl p-8 border border-white/10 shadow-lg mb-8"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            <p className="text-sm uppercase tracking-[0.3em] text-white/70">
-              Dyrene Workshop
-            </p>
-            <h1 className="text-4xl font-bold text-white mt-2">Crafting</h1>
-            <p className="text-gray-300 mt-2 text-lg max-w-3xl">
-              Browse crafting recipes, manage them as admin, and build a shopping list
-              for bulk crafting.
-            </p>
-          </div>
-
-          <div
-            className="rounded-2xl p-6 border border-white/10 shadow-lg"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            <CraftingManager isAdmin={isAdmin} />
-          </div>
-        </div>
+      <div className="relative z-10 w-full px-4 pb-10 pt-28 sm:px-6 lg:px-8 2xl:px-10">
+        <CraftingManager isAdmin={isAdmin} />
       </div>
-    </div>
+    </main>
   );
 }

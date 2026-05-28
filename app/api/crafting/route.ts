@@ -55,7 +55,10 @@ async function getCurrentUserAndProfile() {
       supabase,
       user,
       profile: null,
-      error: NextResponse.json({ error: profileError.message }, { status: 500 }),
+      error: NextResponse.json(
+        { error: profileError.message },
+        { status: 500 },
+      ),
     };
   }
 
@@ -93,7 +96,7 @@ function normalizeIngredients(rawIngredients: unknown): IngredientInput[] {
       (ingredient) =>
         ingredient.ingredient_name &&
         Number.isFinite(ingredient.ingredient_amount) &&
-        ingredient.ingredient_amount > 0
+        ingredient.ingredient_amount > 0,
     );
 }
 
@@ -136,11 +139,19 @@ export async function POST(req: Request) {
     }
 
     if (!Number.isFinite(craftAmount) || craftAmount <= 0) {
-      return NextResponse.json({ error: "Invalid craft amount" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid craft amount" },
+        { status: 400 },
+      );
     }
 
-    if (!ingredients.length) {
-      return NextResponse.json({ error: "Add at least one ingredient" }, { status: 400 });
+    const allowEmptyIngredients = Boolean(body.allow_empty_ingredients);
+
+    if (!allowEmptyIngredients && !ingredients.length) {
+      return NextResponse.json(
+        { error: "Add at least one ingredient" },
+        { status: 400 },
+      );
     }
 
     const { data: item, error: itemError } = await auth.supabase
@@ -159,19 +170,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: itemError.message }, { status: 500 });
     }
 
-    const ingredientRows = ingredients.map((ingredient) => ({
-      crafting_item_id: item.id,
-      ingredient_name: ingredient.ingredient_name,
-      ingredient_amount: ingredient.ingredient_amount,
-      ingredient_item_id: ingredient.ingredient_item_id ?? null,
-    }));
+    if (ingredients.length > 0) {
+      const ingredientRows = ingredients.map((ingredient) => ({
+        crafting_item_id: item.id,
+        ingredient_name: ingredient.ingredient_name,
+        ingredient_amount: ingredient.ingredient_amount,
+        ingredient_item_id: ingredient.ingredient_item_id ?? null,
+      }));
 
-    const { error: ingredientError } = await auth.supabase
-      .from("crafting_recipe_ingredients")
-      .insert(ingredientRows);
+      const { error: ingredientError } = await auth.supabase
+        .from("crafting_recipe_ingredients")
+        .insert(ingredientRows);
 
-    if (ingredientError) {
-      return NextResponse.json({ error: ingredientError.message }, { status: 500 });
+      if (ingredientError) {
+        return NextResponse.json(
+          { error: ingredientError.message },
+          { status: 500 },
+        );
+      }
     }
 
     const { data: fullItem, error: fullItemError } = await auth.supabase
@@ -181,7 +197,10 @@ export async function POST(req: Request) {
       .single();
 
     if (fullItemError) {
-      return NextResponse.json({ error: fullItemError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: fullItemError.message },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(fullItem);
@@ -219,11 +238,19 @@ export async function PATCH(req: Request) {
     }
 
     if (!Number.isFinite(craftAmount) || craftAmount <= 0) {
-      return NextResponse.json({ error: "Invalid craft amount" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid craft amount" },
+        { status: 400 },
+      );
     }
 
-    if (!ingredients.length) {
-      return NextResponse.json({ error: "Add at least one ingredient" }, { status: 400 });
+    const allowEmptyIngredients = Boolean(body.allow_empty_ingredients);
+
+    if (!allowEmptyIngredients && !ingredients.length) {
+      return NextResponse.json(
+        { error: "Add at least one ingredient" },
+        { status: 400 },
+      );
     }
 
     const { error: updateError } = await auth.supabase
@@ -247,22 +274,30 @@ export async function PATCH(req: Request) {
       .eq("crafting_item_id", id);
 
     if (deleteIngredientsError) {
-      return NextResponse.json({ error: deleteIngredientsError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: deleteIngredientsError.message },
+        { status: 500 },
+      );
     }
 
-    const ingredientRows = ingredients.map((ingredient) => ({
-      crafting_item_id: id,
-      ingredient_name: ingredient.ingredient_name,
-      ingredient_amount: ingredient.ingredient_amount,
-      ingredient_item_id: ingredient.ingredient_item_id ?? null,
-    }));
+    if (ingredients.length > 0) {
+      const ingredientRows = ingredients.map((ingredient) => ({
+        crafting_item_id: id,
+        ingredient_name: ingredient.ingredient_name,
+        ingredient_amount: ingredient.ingredient_amount,
+        ingredient_item_id: ingredient.ingredient_item_id ?? null,
+      }));
 
-    const { error: insertIngredientsError } = await auth.supabase
-      .from("crafting_recipe_ingredients")
-      .insert(ingredientRows);
+      const { error: insertIngredientsError } = await auth.supabase
+        .from("crafting_recipe_ingredients")
+        .insert(ingredientRows);
 
-    if (insertIngredientsError) {
-      return NextResponse.json({ error: insertIngredientsError.message }, { status: 500 });
+      if (insertIngredientsError) {
+        return NextResponse.json(
+          { error: insertIngredientsError.message },
+          { status: 500 },
+        );
+      }
     }
 
     const { data: fullItem, error: fullItemError } = await auth.supabase
@@ -272,7 +307,10 @@ export async function PATCH(req: Request) {
       .single();
 
     if (fullItemError) {
-      return NextResponse.json({ error: fullItemError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: fullItemError.message },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(fullItem);
