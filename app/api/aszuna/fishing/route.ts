@@ -10,6 +10,7 @@ type FishingBody = {
   name?: unknown;
   image_url?: unknown;
   sell_price?: unknown;
+  buy_price?: unknown;
   bait_id?: unknown;
   baits_used?: unknown;
   location?: unknown;
@@ -31,6 +32,7 @@ type ImportBait = {
   id?: string;
   name?: string;
   image_url?: string | null;
+  buy_price?: number | string | null;
 };
 
 type ImportFish = {
@@ -121,7 +123,7 @@ function requireAdmin(isAdmin: boolean) {
 }
 
 const sessionSelect =
-  "id,bait_id,baits_used,location,session_date,notes,created_at,aszuna_fishing_baits(id,name,image_url),aszuna_fishing_session_catches(id,fish_id,amount,aszuna_fishing_fish(id,name,image_url,sell_price))";
+  "id,bait_id,baits_used,location,session_date,notes,created_at,aszuna_fishing_baits(id,name,image_url,buy_price),aszuna_fishing_session_catches(id,fish_id,amount,aszuna_fishing_fish(id,name,image_url,sell_price))";
 
 export async function GET() {
   const accessError = await requireAsZunaAccess();
@@ -130,7 +132,7 @@ export async function GET() {
   const { supabase, isAdmin } = await getUserAndAdmin();
 
   const [baitsResult, fishResult, sessionsResult] = await Promise.all([
-    supabase.from("aszuna_fishing_baits").select("id,name,image_url,created_at").order("name"),
+    supabase.from("aszuna_fishing_baits").select("id,name,image_url,buy_price,created_at").order("name"),
     supabase.from("aszuna_fishing_fish").select("id,name,image_url,sell_price,created_at").order("name"),
     supabase.from("aszuna_fishing_sessions").select(sessionSelect).order("session_date", { ascending: false }).order("created_at", { ascending: false }),
   ]);
@@ -163,12 +165,13 @@ export async function POST(req: Request) {
   if (action === "add_bait") {
     const name = cleanText(body.name);
     const imageUrl = cleanText(body.image_url);
+    const buyPrice = cleanMoney(body.buy_price);
     if (!name) return NextResponse.json({ error: "Bait name is required." }, { status: 400 });
 
     const { data, error } = await supabase
       .from("aszuna_fishing_baits")
-      .insert([{ name, image_url: imageUrl || null, created_by: userId }])
-      .select("id,name,image_url,created_at")
+      .insert([{ name, image_url: imageUrl || null, buy_price: buyPrice, created_by: userId }])
+      .select("id,name,image_url,buy_price,created_at")
       .single();
 
     if (error) {
@@ -256,7 +259,7 @@ export async function POST(req: Request) {
       if (existingBait) {
         const { error } = await supabase
           .from("aszuna_fishing_baits")
-          .update({ image_url: cleanText(bait.image_url) || null })
+          .update({ image_url: cleanText(bait.image_url) || null, buy_price: cleanMoney(bait.buy_price) })
           .eq("id", existingBait.id);
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
         baitNameToId.set(existingBait.name.toLowerCase(), existingBait.id);
@@ -266,7 +269,7 @@ export async function POST(req: Request) {
 
       const { data, error } = await supabase
         .from("aszuna_fishing_baits")
-        .insert({ name, image_url: cleanText(bait.image_url) || null, created_by: userId })
+        .insert({ name, image_url: cleanText(bait.image_url) || null, buy_price: cleanMoney(bait.buy_price), created_by: userId })
         .select("id,name")
         .single();
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -352,7 +355,10 @@ export async function PUT(req: Request) {
     const imageUrl = cleanText(body.image_url);
     if (!name) return NextResponse.json({ error: "Bait name is required." }, { status: 400 });
 
-    const { error } = await supabase.from("aszuna_fishing_baits").update({ name, image_url: imageUrl || null }).eq("id", id);
+    const { error } = await supabase
+      .from("aszuna_fishing_baits")
+      .update({ name, image_url: imageUrl || null, buy_price: cleanMoney(body.buy_price) })
+      .eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
   }

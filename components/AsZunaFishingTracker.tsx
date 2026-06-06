@@ -14,6 +14,7 @@ type Bait = {
   id: string;
   name: string;
   image_url: string | null;
+  buy_price: number | null;
   created_at: string;
 };
 type Fish = {
@@ -53,6 +54,8 @@ type StatRow = {
   caught: number;
   baitsUsed: number;
   chance: number;
+  revenue: number;
+  baitCost: number;
   profit: number;
   profitPerBait: number;
 };
@@ -60,6 +63,8 @@ type BaitOverview = {
   bait: Bait;
   baitsUsed: number;
   totalCaught: number;
+  revenue: number;
+  baitCost: number;
   profit: number;
   profitPerBait: number;
   bestFish: StatRow | null;
@@ -148,6 +153,7 @@ export default function AsZunaFishingTracker() {
 
   const [baitName, setBaitName] = useState("");
   const [baitImage, setBaitImage] = useState("");
+  const [baitPrice, setBaitPrice] = useState(0);
   const [fishName, setFishName] = useState("");
   const [fishImage, setFishImage] = useState("");
   const [fishPrice, setFishPrice] = useState(0);
@@ -259,6 +265,7 @@ export default function AsZunaFishingTracker() {
         action: "add_bait",
         name,
         image_url: cleanName(baitImage),
+        buy_price: baitPrice,
       });
       setData((current) => ({
         ...current,
@@ -269,6 +276,7 @@ export default function AsZunaFishingTracker() {
       setSelectedBaitId(json.id);
       setBaitName("");
       setBaitImage("");
+      setBaitPrice(0);
       setActiveTab("session");
       showNotice("Bait added.");
     } catch (err) {
@@ -361,6 +369,7 @@ export default function AsZunaFishingTracker() {
         id: editingBait.id,
         name: editingBait.name,
         image_url: editingBait.image_url,
+        buy_price: editingBait.buy_price ?? 0,
       });
       setEditingBait(null);
       await loadData();
@@ -512,13 +521,17 @@ export default function AsZunaFishingTracker() {
       const fish = fishMap.get(fishId);
       const baitsUsedTotal = baitsUsedByBait.get(baitId) || 0;
       if (!bait || !fish) continue;
-      const profit = caught * Number(fish.sell_price || 0);
+      const revenue = caught * Number(fish.sell_price || 0);
+      const baitCost = baitsUsedTotal * Number(bait.buy_price || 0);
+      const profit = revenue - baitCost;
       rows.push({
         bait,
         fish,
         caught,
         baitsUsed: baitsUsedTotal,
         chance: baitsUsedTotal > 0 ? (caught / baitsUsedTotal) * 100 : 0,
+        revenue,
+        baitCost,
         profit,
         profitPerBait: baitsUsedTotal > 0 ? profit / baitsUsedTotal : 0,
       });
@@ -538,28 +551,36 @@ export default function AsZunaFishingTracker() {
         bait,
         baitsUsed: 0,
         totalCaught: 0,
+        revenue: 0,
+        baitCost: 0,
         profit: 0,
         profitPerBait: 0,
         bestFish: null,
       });
+    const fishMap = new Map(data.fish.map((fish) => [fish.id, fish]));
     for (const session of data.sessions) {
       const row = rows.get(session.bait_id);
       if (!row) continue;
-      row.baitsUsed += Number(session.baits_used) || 0;
-      row.totalCaught += (session.aszuna_fishing_session_catches || []).reduce(
-        (sum, catchRow) => sum + (Number(catchRow.amount) || 0),
-        0,
-      );
+      const used = Number(session.baits_used) || 0;
+      row.baitsUsed += used;
+      row.baitCost += used * Number(row.bait.buy_price || 0);
+      for (const catchRow of session.aszuna_fishing_session_catches || []) {
+        const amount = Number(catchRow.amount) || 0;
+        const fish = fishMap.get(catchRow.fish_id);
+        row.totalCaught += amount;
+        row.revenue += amount * Number(fish?.sell_price || 0);
+      }
     }
     for (const stat of stats) {
       const row = rows.get(stat.bait.id);
       if (!row) continue;
-      row.profit += stat.profit;
       if (!row.bestFish || stat.profitPerBait > row.bestFish.profitPerBait)
         row.bestFish = stat;
     }
-    for (const row of rows.values())
+    for (const row of rows.values()) {
+      row.profit = row.revenue - row.baitCost;
       row.profitPerBait = row.baitsUsed > 0 ? row.profit / row.baitsUsed : 0;
+    }
     return Array.from(rows.values()).sort(
       (a, b) => b.profitPerBait - a.profitPerBait,
     );
@@ -600,7 +621,9 @@ export default function AsZunaFishingTracker() {
       ),
     0,
   );
-  const totalProfit = stats.reduce((total, row) => total + row.profit, 0);
+  const totalRevenue = overview.reduce((total, row) => total + row.revenue, 0);
+  const totalBaitCost = overview.reduce((total, row) => total + row.baitCost, 0);
+  const totalProfit = totalRevenue - totalBaitCost;
   const bestMoneyBait = overview[0];
 
   function exportData() {
@@ -640,10 +663,11 @@ export default function AsZunaFishingTracker() {
         "location",
         "bait",
         "baits_used",
+        "bait_price",
         "fish",
         "amount",
         "sell_price",
-        "profit",
+        "revenue",
       ],
     ];
     for (const session of data.sessions) {
@@ -655,6 +679,7 @@ export default function AsZunaFishingTracker() {
           session.location || "",
           session.aszuna_fishing_baits?.name || "Deleted bait",
           String(session.baits_used),
+          String(session.aszuna_fishing_baits?.buy_price || 0),
           fish?.name || "Deleted fish",
           String(catchRow.amount),
           String(price),
@@ -712,12 +737,12 @@ export default function AsZunaFishingTracker() {
               Fishing Data Tracker
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-gray-400">
-              Track bait sessions, fish drops, locations, drop chances, and
-              profit per bait. We calculate by sessions because bait used is the
+              Track bait sessions, fish drops, locations, drop chances, bait costs, and
+              real profit per bait. We calculate by sessions because bait used is the
               real attempt count.
             </p>
           </div>
-          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-3xl">
+          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-5 lg:max-w-4xl">
             <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
               <p className="text-xs text-gray-500">Sessions</p>
               <p className="text-2xl font-black text-white">
@@ -735,7 +760,13 @@ export default function AsZunaFishingTracker() {
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <p className="text-xs text-gray-500">Profit</p>
+              <p className="text-xs text-gray-500">Bait Cost</p>
+              <p className="text-2xl font-black text-white">
+                {money(totalBaitCost)}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <p className="text-xs text-gray-500">Net Profit</p>
               <p className="text-2xl font-black text-[#00ffbf]">
                 {money(totalProfit)}
               </p>
@@ -801,8 +832,13 @@ export default function AsZunaFishingTracker() {
                       className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition ${selectedBaitId === bait.id ? "border-[#00ffbf]/60 bg-[#00ffbf]/10" : "border-white/10 bg-black/25 hover:bg-white/5"}`}
                     >
                       <ImageBox src={bait.image_url} name={bait.name} />
-                      <span className="text-sm font-black text-white">
-                        {bait.name}
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-black text-white">
+                          {bait.name}
+                        </span>
+                        <span className="block text-xs text-gray-500">
+                          {money(Number(bait.buy_price || 0))} each
+                        </span>
                       </span>
                     </button>
                   ))}
@@ -972,7 +1008,7 @@ export default function AsZunaFishingTracker() {
               <div>
                 <p className="text-lg font-black text-white">Add bait</p>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
-                  Add your 3 bait types here with images.
+                  Add your 3 bait types here with images and buy price.
                 </p>
               </div>
               <Field label="Bait name">
@@ -981,6 +1017,17 @@ export default function AsZunaFishingTracker() {
                   value={baitName}
                   onChange={(e) => setBaitName(e.target.value)}
                   placeholder="Bait name"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Buy price per bait">
+                <input
+                  disabled={!data.isAdmin}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={baitPrice}
+                  onChange={(e) => setBaitPrice(Number(e.target.value))}
                   className={inputClass}
                 />
               </Field>
@@ -1141,7 +1188,7 @@ export default function AsZunaFishingTracker() {
               {bestMoneyBait && (
                 <p className="rounded-2xl border border-[#00ffbf]/20 bg-[#00ffbf]/10 px-4 py-2 text-sm font-black text-[#00ffbf]">
                   Best: {bestMoneyBait.bait.name} ·{" "}
-                  {money(bestMoneyBait.profitPerBait)}/bait
+                  {money(bestMoneyBait.profitPerBait)}/bait net
                 </p>
               )}
             </div>
@@ -1152,7 +1199,9 @@ export default function AsZunaFishingTracker() {
                     <th className="py-3">Bait</th>
                     <th>Baits Used</th>
                     <th>Best Fish</th>
-                    <th>Total Profit</th>
+                    <th>Revenue</th>
+                    <th>Bait Cost</th>
+                    <th>Net Profit</th>
                     <th>Profit / Bait</th>
                   </tr>
                 </thead>
@@ -1175,6 +1224,12 @@ export default function AsZunaFishingTracker() {
                         {row.bestFish
                           ? `${row.bestFish.fish.name} (${percent(row.bestFish.chance)})`
                           : "-"}
+                      </td>
+                      <td className="font-bold text-white">
+                        {money(row.revenue)}
+                      </td>
+                      <td className="font-bold text-gray-300">
+                        {money(row.baitCost)}
                       </td>
                       <td className="font-bold text-white">
                         {money(row.profit)}
@@ -1218,7 +1273,7 @@ export default function AsZunaFishingTracker() {
                   </p>
                   <p className="text-lg font-black text-white">
                     {bestBait.bait.name} · {percent(bestBait.chance)} ·{" "}
-                    {money(bestBait.profitPerBait)}/bait
+                    {money(bestBait.profitPerBait)}/bait net
                   </p>
                 </div>
               </div>
@@ -1279,7 +1334,7 @@ export default function AsZunaFishingTracker() {
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
                             {row.caught} caught · {money(row.profitPerBait)}
-                            /bait · {money(row.profit)} total
+                            /bait net · {money(row.revenue)} revenue
                           </p>
                         </div>
                       </div>
@@ -1370,7 +1425,12 @@ export default function AsZunaFishingTracker() {
                 >
                   <div className="flex items-center gap-3">
                     <ImageBox src={bait.image_url} name={bait.name} />
-                    <p className="font-bold text-white">{bait.name}</p>
+                    <div>
+                      <p className="font-bold text-white">{bait.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {money(Number(bait.buy_price || 0))} each
+                      </p>
+                    </div>
                   </div>
                   {data.isAdmin && (
                     <div className="mt-3 flex gap-2">
@@ -1449,6 +1509,21 @@ export default function AsZunaFishingTracker() {
                   value={editingBait.name}
                   onChange={(e) =>
                     setEditingBait({ ...editingBait, name: e.target.value })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Buy price per bait">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editingBait.buy_price || 0}
+                  onChange={(e) =>
+                    setEditingBait({
+                      ...editingBait,
+                      buy_price: Number(e.target.value),
+                    })
                   }
                   className={inputClass}
                 />
