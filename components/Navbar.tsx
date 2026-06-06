@@ -34,6 +34,7 @@ export default function Navbar() {
     { name: "Cars", path: "/cars" },
     { name: "Shop", path: "/shop" },
     { name: "Map", path: "/map" },
+    { name: "AsZuna", path: "/aszuna" },
   ];
 
   const adminItems: NavItem[] = [{ name: "Admin", path: "/admin" }];

@@ -31,6 +31,12 @@ async function requireAdmin() {
   return { error: null, supabase };
 }
 
+function normalizeStock(value: unknown) {
+  const stock = Number(value ?? 0);
+  if (!Number.isFinite(stock)) return 0;
+  return Math.max(0, Math.floor(stock));
+}
+
 export async function GET() {
   const supabase = await createClient();
 
@@ -59,6 +65,7 @@ export async function POST(req: Request) {
         name: body.name,
         category: body.category || null,
         price: Number(body.price),
+        stock: normalizeStock(body.stock),
         image: body.image || null,
       },
     ])
@@ -82,9 +89,10 @@ export async function PUT(req: Request) {
   const name = String(body.name || "").trim();
   const category = String(body.category || "").trim();
   const price = Number(body.price);
+  const stock = normalizeStock(body.stock);
   const image = String(body.image || "").trim();
 
-  if (!id || !name || !price) {
+  if (!id || !name || !Number.isFinite(price)) {
     return NextResponse.json(
       { error: "Missing item id, name, or price" },
       { status: 400 }
@@ -97,6 +105,7 @@ export async function PUT(req: Request) {
       name,
       category: category || null,
       price,
+      stock,
       image: image || null,
     })
     .eq("id", id)

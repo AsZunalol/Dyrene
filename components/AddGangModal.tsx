@@ -63,33 +63,49 @@ export default function AddGangModal() {
     }
   }
 
+  const inputClass =
+    "w-full rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-blue-400/50 focus:bg-white/[0.1]";
+
   const modal =
     open &&
     createPortal(
-      <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
+      <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
         <form
           onSubmit={addGang}
-          className="relative z-[2147483647] w-full max-w-lg rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-white shadow-2xl"
+          className="relative max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-[2rem] border border-white/10 bg-[#071525]/95 p-6 text-white shadow-2xl shadow-black/50"
         >
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="absolute right-4 top-4 text-2xl text-white hover:text-red-400"
+            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-2xl text-white transition hover:bg-red-500/20 hover:text-red-200"
           >
             ×
           </button>
 
-          <h2 className="mb-5 text-2xl font-bold">Add Gang</h2>
+          <div className="mb-6 pr-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-300">
+              New relation
+            </p>
+            <h2 className="mt-2 text-3xl font-black">Add Gang</h2>
+            <p className="mt-2 text-sm text-slate-400">
+              Add a gang profile with image, relation status and short notes.
+            </p>
+          </div>
 
           <div className="space-y-4">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Gang name"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className={inputClass}
+              required
             />
 
-            <div className="space-y-2">
+            <label className="block rounded-2xl border border-dashed border-white/15 bg-white/[0.04] p-4 transition hover:bg-white/[0.07]">
+              <span className="text-sm font-semibold text-white">Gang image</span>
+              <span className="mt-1 block text-xs text-slate-400">
+                Upload a banner or logo for the card.
+              </span>
               <input
                 type="file"
                 accept="image/*"
@@ -97,42 +113,46 @@ export default function AddGangModal() {
                   const file = e.target.files?.[0];
                   if (file) uploadGangImage(file);
                 }}
-                className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+                className="mt-3 w-full text-sm text-slate-300 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-blue-500"
               />
+            </label>
 
-              {uploadingImage && (
-                <p className="text-sm text-gray-400">Uploading image...</p>
-              )}
+            {uploadingImage && (
+              <p className="text-sm text-slate-400">Uploading image...</p>
+            )}
 
-              {image && (
-                <img
-                  src={image}
-                  alt="Gang preview"
-                  className="h-32 w-full rounded-xl object-cover"
-                />
-              )}
-            </div>
+            {image && (
+              <img
+                src={image}
+                alt="Gang preview"
+                className="h-40 w-full rounded-2xl border border-white/10 object-cover"
+              />
+            )}
 
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short description"
-              className="min-h-28 w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className={`${inputClass} min-h-28 resize-none`}
             />
 
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-2xl border border-white/10 bg-[#061625] px-4 py-3 text-white outline-none transition focus:border-blue-400/50"
             >
-              <option value="friendly">Friendly</option>
-              <option value="conflict">In Conflict</option>
+              <option className="bg-[#061625] text-white" value="friendly">
+                Friendly
+              </option>
+              <option className="bg-[#061625] text-white" value="conflict">
+                In Conflict
+              </option>
             </select>
 
             <button
               type="submit"
               disabled={loading || uploadingImage}
-              className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="w-full rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white shadow-lg shadow-blue-950/30 transition hover:-translate-y-0.5 hover:bg-blue-500 disabled:translate-y-0 disabled:opacity-60"
             >
               {loading ? "Adding..." : "Add Gang"}
             </button>
@@ -146,9 +166,9 @@ export default function AddGangModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-500"
+        className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white shadow-lg shadow-blue-950/30 transition hover:-translate-y-0.5 hover:bg-blue-500"
       >
-        Add Gang
+        + Add Gang
       </button>
 
       {modal}

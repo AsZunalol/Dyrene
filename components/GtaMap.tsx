@@ -30,6 +30,13 @@ const MAP_HEIGHT = 4096;
 const MAP_IMAGE = "/gta-map-small.jpg";
 const START_SCALE = 0.25;
 
+function sortPinsByTitle(a: MapPin, b: MapPin) {
+  return a.title.localeCompare(b.title, undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
+
 function PinSvg({
   icon,
   color,
@@ -184,8 +191,21 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
 
         return combined.includes(search);
       })
-      .sort((a, b) => a.title.localeCompare(b.title));
+      .sort(sortPinsByTitle);
   }, [pins, searchTerm, categoryFilter]);
+
+  useEffect(() => {
+    if (!selectedPin) return;
+
+    const selectedPinCategory = selectedPin.category?.trim() || "General";
+    const categoryMatches =
+      categoryFilter === "All" || selectedPinCategory === categoryFilter;
+
+    if (!categoryMatches) {
+      setSelectedPin(null);
+      setHoveredPin(null);
+    }
+  }, [categoryFilter, selectedPin]);
 
   async function loadPins() {
     try {
@@ -580,7 +600,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             className="pointer-events-none absolute left-0 top-0 h-full w-full max-w-none select-none"
           />
 
-          {pins.map((pin) => (
+          {filteredPins.map((pin) => (
             <button
               key={pin.id}
               type="button"
@@ -655,6 +675,32 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             Right click map to add a pin
           </p>
         )}
+      </div>
+
+      <div className="absolute left-4 top-56 z-50 w-[280px] rounded-2xl border border-white/10 bg-black/70 p-3 shadow-xl backdrop-blur">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <h3 className="text-sm font-bold">Categories</h3>
+          <span className="text-xs text-gray-400">
+            {filteredPins.length}/{pins.length}
+          </span>
+        </div>
+
+        <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto pr-1">
+          {categories.map((categoryName) => (
+            <button
+              key={categoryName}
+              type="button"
+              onClick={() => setCategoryFilter(categoryName)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                categoryFilter === categoryName
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              {categoryName}
+            </button>
+          ))}
+        </div>
       </div>
 
       <aside className="absolute right-4 top-24 z-50 max-h-[calc(100vh-7rem)] w-[360px] overflow-y-auto rounded-2xl border border-white/10 bg-black/75 p-5 text-white shadow-2xl backdrop-blur">
