@@ -167,12 +167,21 @@ export default function AsZunaFishingTracker() {
     { fish_id: "", amount: 1 },
   ]);
   const [targetFish, setTargetFish] = useState("");
+  const [sessionFishSearch, setSessionFishSearch] = useState("");
 
   const [editingBait, setEditingBait] = useState<Bait | null>(null);
   const [editingFish, setEditingFish] = useState<Fish | null>(null);
   const [editingSession, setEditingSession] = useState<FishingSession | null>(
     null,
   );
+
+  const filteredSessionFish = useMemo(() => {
+    const search = sessionFishSearch.trim().toLowerCase();
+    if (!search) return data.fish;
+    return data.fish.filter((fish) =>
+      fish.name.toLowerCase().includes(search),
+    );
+  }, [data.fish, sessionFishSearch]);
 
   async function loadData() {
     setLoading(true);
@@ -833,7 +842,7 @@ export default function AsZunaFishingTracker() {
                     >
                       <ImageBox src={bait.image_url} name={bait.name} />
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-black text-white">
+                        <span className="block whitespace-normal break-words text-sm font-black leading-5 text-white">
                           {bait.name}
                         </span>
                         <span className="block text-xs text-gray-500">
@@ -875,21 +884,38 @@ export default function AsZunaFishingTracker() {
                 </Field>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
-                    Fish caught
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Click a fish image, then set how many you got.
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
+                      Fish caught
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Click a fish image, then set how many you got.
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-xs text-gray-500">
+                    {filteredSessionFish.length} shown
                   </p>
                 </div>
+                <input
+                  disabled={!data.isAdmin}
+                  value={sessionFishSearch}
+                  onChange={(e) => setSessionFishSearch(e.target.value)}
+                  placeholder="Search fish by name..."
+                  className={inputClass}
+                />
                 {data.fish.length === 0 ? (
                   <p className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-gray-500">
                     Add fish/results first before you can log a session.
                   </p>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {data.fish.map((fish) => {
+                    {filteredSessionFish.length === 0 && (
+                      <p className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-gray-500 sm:col-span-2">
+                        No fish match your search.
+                      </p>
+                    )}
+                    {filteredSessionFish.map((fish) => {
                       const amount = getCatchAmount(fish.id);
                       const selected = amount > 0;
                       return (
@@ -905,7 +931,7 @@ export default function AsZunaFishingTracker() {
                           >
                             <ImageBox src={fish.image_url} name={fish.name} />
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-black text-white">
+                              <p className="whitespace-normal break-words text-sm font-black leading-5 text-white">
                                 {fish.name}
                               </p>
                               <p className="text-xs text-gray-500">
