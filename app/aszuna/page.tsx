@@ -90,9 +90,9 @@ export default async function AsZunaPage() {
 
   return (
     <main className="min-h-screen bg-[#07070b] px-4 pb-16 pt-32 text-white sm:px-6 lg:px-8">
-      <section className="mx-auto max-w-6xl">
-        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/40 backdrop-blur-xl">
-          <div className="border-b border-white/10 bg-gradient-to-r from-[#00ffbf]/15 via-white/[0.03] to-transparent p-6 sm:p-8">
+      <section className="mx-auto w-full max-w-[1800px]">
+        <div className="space-y-8">
+          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-r from-[#00ffbf]/15 via-white/[0.03] to-transparent p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#00ffbf]">
@@ -118,9 +118,7 @@ export default async function AsZunaPage() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-8">
-            <AsZunaFishingTracker />
-          </div>
+          <AsZunaFishingTracker />
         </div>
       </section>
     </main>
