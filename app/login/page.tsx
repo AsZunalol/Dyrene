@@ -39,19 +39,7 @@ export default function LoginPageGlass() {
     <div
       className="relative min-h-screen flex items-center justify-center"
       onKeyDown={onKeyDown}
-      style={{ backgroundColor: "#07203a" }}
     >
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(2,6,23,0.60), rgba(4,12,34,0.6))",
-          WebkitBackdropFilter: "saturate(120%) blur(8px)",
-          backdropFilter: "saturate(120%) blur(8px)",
-        }}
-      />
-
       <div className="relative z-10 w-full max-w-md mx-4 px-4">
         <div
           className="rounded-2xl p-8 border border-white/10 shadow-lg"

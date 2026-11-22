@@ -30,10 +30,7 @@ export default async function GangsPage() {
   const conflictCount = gangList.filter((gang) => gang.status === "conflict").length;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#030a13] text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.28),transparent_34%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_28%),linear-gradient(135deg,#06111f_0%,#09233d_45%,#020617_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:48px_48px] opacity-30" />
-      <div className="absolute left-1/2 top-20 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl" />
+    <main className="relative min-h-screen overflow-hidden text-white">
 
       <section className="relative z-10 px-4 pb-14 pt-32 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">

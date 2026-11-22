@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { isComingSoon } from "@/lib/site-mode";
 
 const DISCORD_API = "https://discord.com/api/v10";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -38,6 +39,42 @@ function hasRole(member: { roles?: string[] } | null, roleId: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isApi = pathname === "/api" || pathname.startsWith("/api/");
+  const isAsset =
+    pathname.startsWith("/_next/static/") ||
+    pathname === "/_next/image" ||
+    (process.env.NODE_ENV === "development" && pathname === "/_next/webpack-hmr") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/icon.png" ||
+    pathname === "/GTABG.jpg" ||
+    pathname === "/Dyrene_logo.png";
+
+  // Gate requests before any auth, database calls, route handlers, or Server Actions.
+  if (isComingSoon) {
+    const isRead = request.method === "GET" || request.method === "HEAD";
+    if (isRead && (pathname === "/" || isAsset || pathname === "/api/health")) {
+      return NextResponse.next();
+    }
+
+    if (isApi || !isRead) {
+      return NextResponse.json(
+        { error: "The website is coming soon. This feature is currently unavailable." },
+        { status: 503, headers: { "Cache-Control": "no-store", "Retry-After": "3600" } },
+      );
+    }
+
+    const homeUrl = request.nextUrl.clone();
+    homeUrl.pathname = "/";
+    homeUrl.search = "";
+    const redirect = NextResponse.redirect(homeUrl);
+    redirect.headers.set("Cache-Control", "no-store");
+    return redirect;
+  }
+
+  // Preserve the existing API and static-asset behavior when prelaunch mode is off.
+  if (isApi || isAsset) return NextResponse.next();
+
   let response = NextResponse.next({
     request,
   });
@@ -66,8 +103,6 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-
-  const { pathname } = request.nextUrl;
 
   const isPublic =
     pathname === "/" ||
@@ -164,5 +199,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/:path*"],
 };

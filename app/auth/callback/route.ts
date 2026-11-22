@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const origin = requestUrl.origin;
 
   if (!code) {
-    return NextResponse.redirect(new URL("/denied", origin));
+    return NextResponse.redirect(new URL("/denied?reason=login_failed", origin));
   }
 
   let response = NextResponse.redirect(new URL("/", origin));
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
     if (error || !data.session) {
       console.error("Supabase code exchange error:", error);
-      return NextResponse.redirect(new URL("/denied", origin));
+      return NextResponse.redirect(new URL("/denied?reason=login_failed", origin));
     }
 
     const {
@@ -57,14 +57,14 @@ export async function GET(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.redirect(new URL("/denied", origin));
+      return NextResponse.redirect(new URL("/denied?reason=login_failed", origin));
     }
 
     const discordUserId = user.user_metadata?.provider_id;
 
     if (!discordUserId) {
       console.error("Missing Discord provider_id");
-      return NextResponse.redirect(new URL("/denied", origin));
+      return NextResponse.redirect(new URL("/denied?reason=verification_failed", origin));
     }
 
     const guildId = process.env.DISCORD_GUILD_ID!;
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
 
     if (!hasAccess) {
       await supabase.auth.signOut();
-      const deniedResponse = NextResponse.redirect(new URL("/denied", origin));
+      const deniedResponse = NextResponse.redirect(new URL("/denied?reason=missing_role", origin));
       return deniedResponse;
     }
 
@@ -108,6 +108,6 @@ export async function GET(request: Request) {
     return response;
   } catch (err) {
     console.error("Discord callback error:", err);
-    return NextResponse.redirect(new URL("/denied", origin));
+    return NextResponse.redirect(new URL("/denied?reason=verification_failed", origin));
   }
 }

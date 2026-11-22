@@ -63,10 +63,7 @@ export default async function TrojanGuidePage({
   const authorName = getDiscordDisplayName(authorProfile);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#020617] text-emerald-50">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#020617_0%,#03130d_45%,#020617_100%)]" />
-      <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(34,197,94,0.9)_1px,transparent_1px),linear-gradient(90deg,rgba(34,197,94,0.9)_1px,transparent_1px)] [background-size:34px_34px]" />
-      <div className="absolute inset-0 bg-black/35" />
+    <div className="relative min-h-screen overflow-hidden text-emerald-50">
 
       <div className="relative z-10 px-3 pt-24 pb-6 sm:px-5 lg:px-8">
         <div className="mx-auto max-w-[96rem]">

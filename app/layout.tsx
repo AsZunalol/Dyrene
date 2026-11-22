@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import PageTransitionLoader from "@/components/PageTransitionLoader";
+import { isComingSoon } from "@/lib/site-mode";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dyrene Gangsite",
-  description: "Made by AsZuna",
+  title: isComingSoon ? "Dyrene — Coming in December" : "Dyrene Gangsite",
+  description: isComingSoon
+    ? "Something new is on the way. Coming December 1, 2026. Stay tuned."
+    : "Made by AsZuna",
 };
 
 export default function RootLayout({
@@ -30,7 +33,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar />
+        <div className="site-background" aria-hidden="true" />
+        {!isComingSoon && <Navbar />}
         <PageTransitionLoader>{children}</PageTransitionLoader>
       </body>
     </html>

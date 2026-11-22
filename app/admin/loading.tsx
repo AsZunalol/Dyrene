@@ -1,16 +1,6 @@
 export default function Loading() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#07203a]">
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: "url('/bg.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
-      <div className="absolute inset-0 backdrop-blur-md bg-black/50" />
+    <div className="relative min-h-screen overflow-hidden">
 
       <div className="relative z-10 px-6 pt-32 pb-12">
         <div className="max-w-7xl mx-auto">

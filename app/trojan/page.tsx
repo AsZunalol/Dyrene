@@ -77,11 +77,7 @@ export default async function TrojanPage() {
   });
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#020617] text-emerald-50">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.22),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.16),transparent_30%),linear-gradient(135deg,#020617_0%,#03130d_45%,#020617_100%)]" />
-      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(34,197,94,0.9)_1px,transparent_1px),linear-gradient(90deg,rgba(34,197,94,0.9)_1px,transparent_1px)] [background-size:34px_34px]" />
-      <div className="absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-emerald-500/10 to-transparent" />
-      <div className="absolute inset-0 bg-black/35" />
+    <div className="relative min-h-screen overflow-hidden text-emerald-50">
 
       <div className="relative z-10 px-6 pt-32 pb-12">
         <div className="mx-auto max-w-6xl">

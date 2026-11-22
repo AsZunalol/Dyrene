@@ -42,7 +42,7 @@ export default async function AsZunaPage() {
 
   if (!hasAccess) {
     return (
-      <main className="min-h-screen bg-[#07070b] px-4 pb-16 pt-32 text-white sm:px-6 lg:px-8">
+      <main className="min-h-screen px-4 pb-16 pt-32 text-white sm:px-6 lg:px-8">
         <section className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-xl items-center justify-center">
           <div className="w-full rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-8">
             <div className="mb-8 text-center">
@@ -89,7 +89,7 @@ export default async function AsZunaPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#07070b] px-4 pb-16 pt-32 text-white sm:px-6 lg:px-8">
+    <main className="min-h-screen px-4 pb-16 pt-32 text-white sm:px-6 lg:px-8">
       <section className="mx-auto w-full max-w-[1800px]">
         <div className="space-y-8">
           <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-r from-[#00ffbf]/15 via-white/[0.03] to-transparent p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-8">
