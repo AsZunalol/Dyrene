@@ -23,7 +23,7 @@ export default async function MapPage() {
   }
 
   return (
-    <main className="h-screen w-screen overflow-hidden bg-[#0fa8d2]">
+    <main className="h-[calc(100svh-var(--topbar-height))] w-full overflow-hidden bg-background">
       <GtaMap isAdmin={isAdmin} />
     </main>
   );

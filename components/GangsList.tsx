@@ -79,21 +79,21 @@ function roleColor(role: string) {
   }
 
   if (cleanRole.includes("recruit") || cleanRole.includes("trial")) {
-    return "bg-blue-500/15 text-blue-300 border-blue-400/30";
+    return "bg-accent-strong/15 text-accent border-accent/30";
   }
 
   if (cleanRole.includes("member")) {
     return "bg-green-500/15 text-green-300 border-green-400/30";
   }
 
-  return "bg-purple-500/15 text-purple-300 border-purple-400/30";
+  return "bg-accent-strong/15 text-accent border-accent/30";
 }
 
 function eventCategoryColor(category?: string | null) {
   const cleanCategory = (category || "Intel").toLowerCase();
 
   if (cleanCategory === "meeting") {
-    return "border-blue-400/30 bg-blue-500/15 text-blue-300";
+    return "border-accent/30 bg-accent-strong/15 text-accent";
   }
 
   if (cleanCategory === "fight") {
@@ -109,10 +109,10 @@ function eventCategoryColor(category?: string | null) {
   }
 
   if (cleanCategory === "screenshot") {
-    return "border-purple-400/30 bg-purple-500/15 text-purple-300";
+    return "border-accent/30 bg-accent-strong/15 text-accent";
   }
 
-  return "border-indigo-400/30 bg-indigo-500/15 text-indigo-300";
+  return "border-accent/30 bg-accent-strong/15 text-accent";
 }
 
 function RichTextEditor({
@@ -129,7 +129,7 @@ function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "min-h-32 rounded-b-xl border border-t-0 border-white/10 bg-white/10 px-4 py-3 text-white outline-none [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5",
+          "min-h-32 rounded-b-xl border border-t-0 border-line bg-elevated px-4 py-3 text-white outline-none [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5",
       },
     },
     onUpdate({ editor }) {
@@ -152,14 +152,14 @@ function RichTextEditor({
   if (!editor) return null;
 
   const buttonClass =
-    "rounded-lg bg-white/10 px-3 py-1 text-sm font-semibold text-white hover:bg-white/20";
+    "rounded-lg bg-elevated px-3 py-1 text-sm font-semibold text-white hover:bg-white/20";
 
   const activeButtonClass =
-    "rounded-lg bg-indigo-600 px-3 py-1 text-sm font-semibold text-white hover:bg-indigo-500";
+    "rounded-lg bg-accent-strong px-3 py-1 text-sm font-semibold text-white hover:bg-accent-strong";
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2 rounded-t-xl border border-white/10 bg-[#061625] p-2">
+      <div className="flex flex-wrap gap-2 rounded-t-xl border border-line bg-[var(--surface)] p-2">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -257,7 +257,7 @@ function Avatar({
 
   return (
     <div
-      className={`${sizeClasses[size]} flex items-center justify-center rounded-full bg-white/10 font-bold text-white`}
+      className={`${sizeClasses[size]} flex items-center justify-center rounded-full bg-elevated font-bold text-white`}
     >
       {name.charAt(0).toUpperCase()}
     </div>
@@ -773,7 +773,7 @@ export default function GangsList({
         value={eventTitle}
         onChange={(e) => setEventTitle(e.target.value)}
         placeholder="Event title"
-        className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+        className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
       />
 
       <RichTextEditor value={eventDescription} onChange={setEventDescription} />
@@ -781,24 +781,24 @@ export default function GangsList({
       <select
         value={eventCategory}
         onChange={(e) => setEventCategory(e.target.value)}
-        className="w-full rounded-xl border border-white/10 bg-[#061625] px-4 py-3 text-white outline-none"
+        className="w-full rounded-xl border border-line bg-[var(--surface)] px-4 py-3 text-white outline-none"
       >
-        <option className="bg-[#061625] text-white" value="Intel">
+        <option className="bg-[var(--surface)] text-white" value="Intel">
           Intel
         </option>
-        <option className="bg-[#061625] text-white" value="Meeting">
+        <option className="bg-[var(--surface)] text-white" value="Meeting">
           Meeting
         </option>
-        <option className="bg-[#061625] text-white" value="Fight">
+        <option className="bg-[var(--surface)] text-white" value="Fight">
           Fight
         </option>
-        <option className="bg-[#061625] text-white" value="Alliance">
+        <option className="bg-[var(--surface)] text-white" value="Alliance">
           Alliance
         </option>
-        <option className="bg-[#061625] text-white" value="Warning">
+        <option className="bg-[var(--surface)] text-white" value="Warning">
           Warning
         </option>
-        <option className="bg-[#061625] text-white" value="Screenshot">
+        <option className="bg-[var(--surface)] text-white" value="Screenshot">
           Screenshot
         </option>
       </select>
@@ -820,11 +820,11 @@ export default function GangsList({
           accept="image/*"
           multiple
           onChange={(e) => uploadEventImages(e.target.files)}
-          className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+          className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none"
         />
 
         {uploadingEventImage && (
-          <p className="text-sm text-gray-400">Uploading event images...</p>
+          <p className="text-sm text-muted">Uploading event images...</p>
         )}
 
         {eventImages.length > 0 && (
@@ -834,7 +834,7 @@ export default function GangsList({
                 <button
                   type="button"
                   onClick={() => openLightbox(eventImages, index)}
-                  className="block w-full overflow-hidden rounded-xl border border-white/10"
+                  className="block w-full overflow-hidden rounded-xl border border-line"
                 >
                   <img
                     src={imageUrl}
@@ -863,11 +863,11 @@ export default function GangsList({
       <div className="space-y-2">
         <p className="text-sm font-semibold text-white">Linked Members</p>
 
-        <div className="max-h-40 space-y-2 overflow-y-auto rounded-xl border border-white/10 bg-white/5 p-3">
+        <div className="max-h-40 space-y-2 overflow-y-auto rounded-xl border border-line bg-elevated p-3">
           {members.map((member) => (
             <label
               key={member.id}
-              className="flex cursor-pointer items-center gap-3 text-sm text-gray-300"
+              className="flex cursor-pointer items-center gap-3 text-sm text-muted"
             >
               <input
                 type="checkbox"
@@ -890,7 +890,7 @@ export default function GangsList({
           ))}
 
           {members.length === 0 && (
-            <p className="text-sm text-gray-400">No members to link.</p>
+            <p className="text-sm text-muted">No members to link.</p>
           )}
         </div>
       </div>
@@ -903,7 +903,7 @@ export default function GangsList({
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
         <form
           onSubmit={saveEdit}
-          className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-white shadow-2xl"
+          className="relative w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 text-white shadow-lg"
         >
           <button
             type="button"
@@ -920,7 +920,7 @@ export default function GangsList({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Gang name"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <div className="space-y-2">
@@ -931,11 +931,11 @@ export default function GangsList({
                   const file = e.target.files?.[0];
                   if (file) uploadGangImage(file);
                 }}
-                className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+                className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none"
               />
 
               {uploadingImage && (
-                <p className="text-sm text-gray-400">Uploading image...</p>
+                <p className="text-sm text-muted">Uploading image...</p>
               )}
 
               {image && (
@@ -951,7 +951,7 @@ export default function GangsList({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short description"
-              className="min-h-28 w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="min-h-28 w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <select
@@ -959,12 +959,12 @@ export default function GangsList({
               onChange={(e) =>
                 setStatus(e.target.value as "friendly" | "conflict")
               }
-              className="w-full rounded-xl border border-white/10 bg-[#061625] px-4 py-3 text-white outline-none"
+              className="w-full rounded-xl border border-line bg-[var(--surface)] px-4 py-3 text-white outline-none"
             >
-              <option className="bg-[#061625] text-white" value="friendly">
+              <option className="bg-[var(--surface)] text-white" value="friendly">
                 Friendly
               </option>
-              <option className="bg-[#061625] text-white" value="conflict">
+              <option className="bg-[var(--surface)] text-white" value="conflict">
                 In Conflict
               </option>
             </select>
@@ -972,7 +972,7 @@ export default function GangsList({
             <button
               type="submit"
               disabled={saving || uploadingImage}
-              className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
@@ -988,7 +988,7 @@ export default function GangsList({
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
         <form
           onSubmit={addEvent}
-          className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-white shadow-2xl"
+          className="relative w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 text-white shadow-lg"
         >
           <button
             type="button"
@@ -1004,7 +1004,7 @@ export default function GangsList({
 
           <button
             disabled={uploadingEventImage}
-            className="mt-4 w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="mt-4 w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
           >
             Add Event
           </button>
@@ -1019,7 +1019,7 @@ export default function GangsList({
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
         <form
           onSubmit={saveEventEdit}
-          className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-white shadow-2xl"
+          className="relative w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 text-white shadow-lg"
         >
           <button
             type="button"
@@ -1035,7 +1035,7 @@ export default function GangsList({
 
           <button
             disabled={uploadingEventImage}
-            className="mt-4 w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="mt-4 w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
           >
             Save Event
           </button>
@@ -1050,7 +1050,7 @@ export default function GangsList({
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
         <form
           onSubmit={addMember}
-          className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-white shadow-2xl"
+          className="relative w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 text-white shadow-lg"
         >
           <button
             type="button"
@@ -1067,21 +1067,21 @@ export default function GangsList({
               value={memberName}
               onChange={(e) => setMemberName(e.target.value)}
               placeholder="Member name"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberRole}
               onChange={(e) => setMemberRole(e.target.value)}
               placeholder="Member role"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberPhone}
               onChange={(e) => setMemberPhone(e.target.value)}
               placeholder="Phone number"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <div className="space-y-2">
@@ -1092,11 +1092,11 @@ export default function GangsList({
                   const file = e.target.files?.[0];
                   if (file) uploadMemberAvatar(file);
                 }}
-                className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+                className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none"
               />
 
               {uploadingAvatar && (
-                <p className="text-sm text-gray-400">Uploading avatar...</p>
+                <p className="text-sm text-muted">Uploading avatar...</p>
               )}
 
               {memberAvatar && (
@@ -1110,7 +1110,7 @@ export default function GangsList({
 
             <button
               disabled={uploadingAvatar}
-              className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
             >
               Add Member
             </button>
@@ -1126,7 +1126,7 @@ export default function GangsList({
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
         <form
           onSubmit={saveMemberEdit}
-          className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-white shadow-2xl"
+          className="relative w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 text-white shadow-lg"
         >
           <button
             type="button"
@@ -1143,21 +1143,21 @@ export default function GangsList({
               value={memberName}
               onChange={(e) => setMemberName(e.target.value)}
               placeholder="Member name"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberRole}
               onChange={(e) => setMemberRole(e.target.value)}
               placeholder="Member role"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberPhone}
               onChange={(e) => setMemberPhone(e.target.value)}
               placeholder="Phone number"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 outline-none"
+              className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <div className="space-y-2">
@@ -1168,11 +1168,11 @@ export default function GangsList({
                   const file = e.target.files?.[0];
                   if (file) uploadMemberAvatar(file);
                 }}
-                className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+                className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none"
               />
 
               {uploadingAvatar && (
-                <p className="text-sm text-gray-400">Uploading avatar...</p>
+                <p className="text-sm text-muted">Uploading avatar...</p>
               )}
 
               {memberAvatar && (
@@ -1186,7 +1186,7 @@ export default function GangsList({
 
             <button
               disabled={uploadingAvatar}
-              className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
             >
               Save Member
             </button>
@@ -1200,7 +1200,7 @@ export default function GangsList({
     selectedMember &&
     createPortal(
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
-        <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-center text-white shadow-2xl">
+        <div className="relative w-full max-w-md rounded-xl border border-line bg-[var(--surface)] p-6 text-center text-white shadow-lg">
           <button
             type="button"
             onClick={() => setSelectedMember(null)}
@@ -1228,7 +1228,7 @@ export default function GangsList({
           </span>
 
           {selectedMember.phone && (
-            <p className="mt-4 text-sm text-gray-300">
+            <p className="mt-4 text-sm text-muted">
               Phone: {selectedMember.phone}
             </p>
           )}
@@ -1240,7 +1240,7 @@ export default function GangsList({
                   setSelectedMember(null);
                   openEditMember(selectedMember);
                 }}
-                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold hover:bg-blue-500"
+                className="rounded-xl bg-accent-strong px-4 py-2 text-sm font-bold hover:bg-accent-strong"
               >
                 Edit Member
               </button>
@@ -1268,7 +1268,7 @@ export default function GangsList({
     confirmAction &&
     createPortal(
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4">
-        <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#081b2f] p-6 text-white shadow-2xl">
+        <div className="relative w-full max-w-md rounded-xl border border-line bg-[var(--surface)] p-6 text-white shadow-lg">
           <button
             type="button"
             onClick={() => {
@@ -1285,7 +1285,7 @@ export default function GangsList({
 
           <h2 className="text-2xl font-bold">Confirm Delete</h2>
 
-          <p className="mt-3 text-sm leading-6 text-gray-300">
+          <p className="mt-3 text-sm leading-6 text-muted">
             Are you sure you want to delete{" "}
             <span className="font-semibold text-white">
               {confirmAction.name || `this ${confirmAction.type}`}
@@ -1298,7 +1298,7 @@ export default function GangsList({
               type="button"
               disabled={deleting}
               onClick={() => setConfirmAction(null)}
-              className="flex-1 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white hover:bg-white/20 disabled:opacity-60"
+              className="flex-1 rounded-xl bg-elevated px-4 py-3 text-sm font-semibold text-white hover:bg-white/20 disabled:opacity-60"
             >
               Cancel
             </button>
@@ -1321,16 +1321,16 @@ export default function GangsList({
     selectedGang &&
     createPortal(
       <div className="fixed inset-0 z-[2147483647] overflow-y-auto bg-black/85 px-4 py-8 backdrop-blur-sm">
-        <div className="relative mx-auto min-h-[90vh] w-full max-w-7xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#06111f]/95 p-4 text-white shadow-2xl shadow-black/50 sm:p-6">
+        <div className="relative mx-auto min-h-[90vh] w-full max-w-7xl overflow-hidden rounded-xl border border-line bg-[var(--surface)]/95 p-4 text-white shadow-lg shadow-black/50 sm:p-6">
           <button
             type="button"
             onClick={() => setSelectedGang(null)}
-            className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/30 text-2xl text-white transition hover:bg-red-500/20 hover:text-red-200"
+            className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-line bg-inset text-2xl text-white transition hover:bg-red-500/20 hover:text-red-200"
           >
             ×
           </button>
 
-          <div className="relative mb-6 h-72 w-full overflow-hidden rounded-[1.75rem] border border-white/10">
+          <div className="relative mb-6 h-72 w-full overflow-hidden rounded-[1.75rem] border border-line">
             {selectedGang.image ? (
               <img
                 src={selectedGang.image}
@@ -1338,33 +1338,33 @@ export default function GangsList({
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-950" />
+              <div className="absolute inset-0 bg-gradient-to-br from-accent via-accent to-slate-950" />
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06111f] via-black/55 to-black/15" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-black/55 to-black/15" />
 
             <div className="relative z-10 flex h-full flex-col items-center justify-end px-4 pb-8 text-center">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-200">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
                 Gang Profile
               </p>
 
-              <h2 className="mt-2 text-4xl font-black text-white sm:text-5xl">
+              <h2 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">
                 {selectedGang.name}
               </h2>
 
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-muted sm:text-base">
                 {selectedGang.description || "No description"}
               </p>
             </div>
           </div>
 
-          <div className="mb-6 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-2">
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-3 rounded-xl border border-line bg-inset p-2">
             <button
               onClick={() => setActiveTab("timeline")}
               className={`rounded-xl px-5 py-2 text-sm font-bold transition ${
                 activeTab === "timeline"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-950/30"
-                  : "text-slate-400 hover:bg-white/10 hover:text-white"
+                  ? "bg-accent-strong text-white shadow-lg shadow-accent/30"
+                  : "text-muted hover:bg-elevated hover:text-white"
               }`}
             >
               Timeline
@@ -1374,8 +1374,8 @@ export default function GangsList({
               onClick={() => setActiveTab("members")}
               className={`rounded-xl px-5 py-2 text-sm font-bold transition ${
                 activeTab === "members"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-950/30"
-                  : "text-slate-400 hover:bg-white/10 hover:text-white"
+                  ? "bg-accent-strong text-white shadow-lg shadow-accent/30"
+                  : "text-muted hover:bg-elevated hover:text-white"
               }`}
             >
               Members
@@ -1388,7 +1388,7 @@ export default function GangsList({
                 <div className="mb-8 flex justify-center">
                   <button
                     onClick={openAddEvent}
-                    className="rounded-2xl bg-blue-600 px-6 py-3 font-bold shadow-lg shadow-blue-950/30 transition hover:-translate-y-0.5 hover:bg-blue-500"
+                    className="rounded-xl bg-accent-strong px-6 py-3 font-bold shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong"
                   >
                     + Add Event
                   </button>
@@ -1396,7 +1396,7 @@ export default function GangsList({
               ) : null}
 
               <div className="relative mx-auto max-w-5xl pb-10">
-                <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-blue-400/40 via-white/15 to-transparent md:block" />
+                <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-accent/40 via-white/15 to-transparent md:block" />
 
                 <div className="space-y-10">
                   {events.map((event, index) => (
@@ -1406,10 +1406,10 @@ export default function GangsList({
                         index % 2 === 0 ? "md:justify-start" : "md:justify-end"
                       }`}
                     >
-                      <div className="absolute left-1/2 top-6 hidden h-5 w-5 -translate-x-1/2 rounded-full border-4 border-[#06111f] bg-blue-500 shadow-lg shadow-blue-500/30 md:block" />
+                      <div className="absolute left-1/2 top-6 hidden h-5 w-5 -translate-x-1/2 rounded-full border-4 border-[var(--surface)] bg-accent-strong shadow-lg shadow-accent/30 md:block" />
 
                       <div
-                        className={`w-full rounded-[1.5rem] border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.035] p-5 shadow-xl shadow-black/20 md:w-[calc(50%-2rem)] ${
+                        className={`w-full rounded-[1.5rem] border border-line bg-gradient-to-b from-white/[0.08] to-white/[0.035] p-5 shadow-xl shadow-black/20 md:w-[calc(50%-2rem)] ${
                           index % 2 === 0 ? "md:text-right" : "md:text-left"
                         }`}
                       >
@@ -1430,7 +1430,7 @@ export default function GangsList({
                             <p className="text-xs font-semibold text-white">
                               {event.added_by_email || "Unknown author"}
                             </p>
-                            <p className="text-xs uppercase tracking-[0.16em] text-blue-300">
+                            <p className="text-xs uppercase tracking-[0.16em] text-accent">
                               {timeAgo(event.created_at)}
                             </p>
                           </div>
@@ -1462,13 +1462,13 @@ export default function GangsList({
 
                         {event.description ? (
                           <div
-                            className="mt-2 text-sm leading-6 text-gray-300 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-bold [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5"
+                            className="mt-2 text-sm leading-6 text-muted [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-bold [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5"
                             dangerouslySetInnerHTML={{
                               __html: event.description,
                             }}
                           />
                         ) : (
-                          <p className="mt-2 text-sm leading-6 text-gray-300">
+                          <p className="mt-2 text-sm leading-6 text-muted">
                             No description
                           </p>
                         )}
@@ -1479,7 +1479,7 @@ export default function GangsList({
                             onClick={() =>
                               openLightbox(getEventImages(event), 0)
                             }
-                            className="group relative mt-4 block w-full overflow-hidden rounded-xl border border-white/10"
+                            className="group relative mt-4 block w-full overflow-hidden rounded-xl border border-line"
                           >
                             <img
                               src={getEventImages(event)[0]}
@@ -1519,7 +1519,7 @@ export default function GangsList({
                                     <button
                                       type="button"
                                       onClick={() => setSelectedMember(member)}
-                                      className="flex cursor-pointer items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs text-white hover:bg-white/20"
+                                      className="flex cursor-pointer items-center gap-2 rounded-full bg-elevated px-3 py-1 text-xs text-white hover:bg-white/20"
                                     >
                                       <Avatar
                                         src={member.avatar}
@@ -1530,7 +1530,7 @@ export default function GangsList({
                                       {member.name}
                                     </button>
 
-                                    <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-3 hidden w-64 -translate-x-1/2 rounded-xl border border-white/10 bg-[#061625] p-4 text-left shadow-2xl group-hover:block">
+                                    <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-3 hidden w-64 -translate-x-1/2 rounded-xl border border-line bg-[var(--surface)] p-4 text-left shadow-lg group-hover:block">
                                       <div className="flex items-center gap-3">
                                         <Avatar
                                           src={member.avatar}
@@ -1552,14 +1552,14 @@ export default function GangsList({
                                           </span>
 
                                           {member.phone && (
-                                            <p className="mt-1 text-sm text-gray-400">
+                                            <p className="mt-1 text-sm text-muted">
                                               Phone: {member.phone}
                                             </p>
                                           )}
                                         </div>
                                       </div>
 
-                                      <p className="mt-3 text-xs text-indigo-300">
+                                      <p className="mt-3 text-xs text-accent">
                                         Click to open profile
                                       </p>
                                     </div>
@@ -1577,7 +1577,7 @@ export default function GangsList({
                           >
                             <button
                               onClick={() => openEditEvent(event)}
-                              className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold text-blue-200 transition hover:bg-white/20"
+                              className="rounded-xl bg-elevated px-3 py-2 text-sm font-bold text-accent transition hover:bg-white/20"
                             >
                               Edit
                             </button>
@@ -1601,7 +1601,7 @@ export default function GangsList({
                   ))}
 
                   {events.length === 0 && (
-                    <p className="text-center text-sm text-gray-400">
+                    <p className="text-center text-sm text-muted">
                       No timeline events yet.
                     </p>
                   )}
@@ -1616,7 +1616,7 @@ export default function GangsList({
                 <div className="mb-8 flex justify-center">
                   <button
                     onClick={() => setShowAddMember(true)}
-                    className="rounded-2xl bg-blue-600 px-6 py-3 font-bold shadow-lg shadow-blue-950/30 transition hover:-translate-y-0.5 hover:bg-blue-500"
+                    className="rounded-xl bg-accent-strong px-6 py-3 font-bold shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong"
                   >
                     + Add Member
                   </button>
@@ -1627,7 +1627,7 @@ export default function GangsList({
                 {members.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between rounded-[1.5rem] border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.035] p-4 shadow-lg shadow-black/10 transition hover:border-blue-300/30 hover:bg-white/[0.08]"
+                    className="flex items-center justify-between rounded-[1.5rem] border border-line bg-gradient-to-b from-white/[0.08] to-white/[0.035] p-4 shadow-lg shadow-black/10 transition hover:border-accent/30 hover:bg-surface"
                   >
                     <button
                       type="button"
@@ -1652,7 +1652,7 @@ export default function GangsList({
                         </span>
 
                         {member.phone && (
-                          <p className="mt-1 text-sm text-gray-400">
+                          <p className="mt-1 text-sm text-muted">
                             Phone: {member.phone}
                           </p>
                         )}
@@ -1663,7 +1663,7 @@ export default function GangsList({
                       <div className="flex gap-3">
                         <button
                           onClick={() => openEditMember(member)}
-                          className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold text-blue-200 transition hover:bg-white/20"
+                          className="rounded-xl bg-elevated px-3 py-2 text-sm font-bold text-accent transition hover:bg-white/20"
                         >
                           Edit
                         </button>
@@ -1686,7 +1686,7 @@ export default function GangsList({
                 ))}
 
                 {members.length === 0 && (
-                  <p className="text-sm text-gray-400">No members yet.</p>
+                  <p className="text-sm text-muted">No members yet.</p>
                 )}
               </div>
             </div>
@@ -1718,7 +1718,7 @@ export default function GangsList({
               e.stopPropagation();
               previousLightboxImage();
             }}
-            className="absolute left-5 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 px-4 py-3 text-3xl text-white hover:bg-white/20"
+            className="absolute left-5 top-1/2 z-20 -translate-y-1/2 rounded-full bg-elevated px-4 py-3 text-3xl text-white hover:bg-white/20"
           >
             ‹
           </button>
@@ -1728,7 +1728,7 @@ export default function GangsList({
           src={lightboxImages[lightboxIndex]}
           alt="Preview"
           onClick={(e) => e.stopPropagation()}
-          className="max-h-[90vh] max-w-[95vw] rounded-2xl object-contain"
+          className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain"
         />
 
         {lightboxImages.length > 1 && (
@@ -1738,14 +1738,14 @@ export default function GangsList({
               e.stopPropagation();
               nextLightboxImage();
             }}
-            className="absolute right-5 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 px-4 py-3 text-3xl text-white hover:bg-white/20"
+            className="absolute right-5 top-1/2 z-20 -translate-y-1/2 rounded-full bg-elevated px-4 py-3 text-3xl text-white hover:bg-white/20"
           >
             ›
           </button>
         )}
 
         {lightboxImages.length > 1 && (
-          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm text-white">
+          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-elevated px-4 py-2 text-sm text-white">
             {lightboxIndex + 1} / {lightboxImages.length}
           </p>
         )}
@@ -1755,31 +1755,31 @@ export default function GangsList({
 
   return (
     <>
-      <div className="rounded-[2rem] border border-white/10 bg-white/[0.055] p-4 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-6">
+      <div className="rounded-xl border border-line bg-white/[0.055] p-4 shadow-lg shadow-black/20 backdrop-blur-xl sm:p-6">
         <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
               Relations overview
             </p>
-            <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">
               Active gang profiles
             </h2>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative min-w-0 sm:w-72">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">
                 Search
               </span>
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search gangs..."
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 pl-20 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-blue-400/50 focus:bg-black/30"
+                className="w-full rounded-xl border border-line bg-inset px-4 py-3 pl-20 text-sm text-white outline-none transition placeholder:text-muted focus:border-accent/50 focus:bg-inset"
               />
             </div>
 
-            <div className="flex rounded-2xl border border-white/10 bg-black/20 p-1">
+            <div className="flex rounded-xl border border-line bg-inset p-1">
               {[
                 { value: "all", label: "All", count: gangList.length },
                 { value: "friendly", label: "Friendly", count: friendlyCount },
@@ -1793,8 +1793,8 @@ export default function GangsList({
                   }
                   className={`rounded-xl px-3 py-2 text-xs font-bold transition sm:px-4 ${
                     statusFilter === item.value
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-950/30"
-                      : "text-slate-400 hover:bg-white/10 hover:text-white"
+                      ? "bg-accent-strong text-white shadow-lg shadow-accent/30"
+                      : "text-muted hover:bg-elevated hover:text-white"
                   }`}
                 >
                   {item.label} <span className="opacity-70">{item.count}</span>
@@ -1809,9 +1809,9 @@ export default function GangsList({
             <div
               key={gang.id}
               onClick={() => setSelectedGang(gang)}
-              className="group cursor-pointer overflow-hidden rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.035] shadow-xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-blue-300/30 hover:shadow-blue-950/30"
+              className="group cursor-pointer overflow-hidden rounded-[1.75rem] border border-line bg-gradient-to-b from-white/[0.08] to-white/[0.035] shadow-xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-accent/30"
             >
-              <div className="relative h-44 bg-white/5">
+              <div className="relative h-44 bg-elevated">
                 {gang.image ? (
                   <img
                     src={gang.image}
@@ -1819,17 +1819,17 @@ export default function GangsList({
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-900/70 to-slate-950 text-4xl font-black text-white/30">
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent/70 to-slate-950 text-4xl font-semibold text-white/30">
                     {gang.name.charAt(0).toUpperCase()}
                   </div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#030a13] via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-black/20 to-transparent" />
 
                 <span
                   className={`absolute left-4 top-4 rounded-full border px-3 py-1 text-xs font-bold backdrop-blur-md ${
                     gang.status === "friendly"
-                      ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-200"
+                      ? "border-accent/30 bg-accent-strong/20 text-accent"
                       : "border-red-400/30 bg-red-500/20 text-red-200"
                   }`}
                 >
@@ -1840,29 +1840,29 @@ export default function GangsList({
               <div className="p-5">
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
                       Gang profile
                     </p>
-                    <h2 className="mt-1 text-xl font-black text-white">{gang.name}</h2>
+                    <h2 className="mt-1 text-xl font-semibold text-white">{gang.name}</h2>
                   </div>
 
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-300 transition group-hover:bg-blue-500/20 group-hover:text-blue-200">
+                  <span className="rounded-full bg-elevated px-3 py-1 text-xs font-semibold text-muted transition group-hover:bg-accent-strong/20 group-hover:text-accent">
                     Open
                   </span>
                 </div>
 
-                <p className="min-h-[3.75rem] line-clamp-3 text-sm leading-6 text-slate-300">
+                <p className="min-h-[3.75rem] line-clamp-3 text-sm leading-6 text-muted">
                   {gang.description || "No description added yet."}
                 </p>
 
                 {isAdmin ? (
-                  <div className="mt-5 flex gap-3 border-t border-white/10 pt-4">
+                  <div className="mt-5 flex gap-3 border-t border-line pt-4">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         openEdit(gang);
                       }}
-                      className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/20"
+                      className="rounded-xl bg-elevated px-4 py-2 text-sm font-bold text-white transition hover:bg-white/20"
                     >
                       Edit
                     </button>
@@ -1888,9 +1888,9 @@ export default function GangsList({
         </div>
 
         {filteredGangList.length === 0 && (
-          <div className="rounded-3xl border border-dashed border-white/15 bg-black/20 p-10 text-center">
+          <div className="rounded-xl border border-dashed border-line bg-inset p-10 text-center">
             <p className="text-lg font-bold text-white">No gangs found</p>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted">
               Try another search or change the relation filter.
             </p>
           </div>

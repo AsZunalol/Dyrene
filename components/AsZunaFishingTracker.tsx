@@ -106,7 +106,7 @@ function ImageBox({
   if (!src) {
     return (
       <div
-        className={`flex ${size} shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-black/30 text-sm font-black text-[#00ffbf]`}
+        className={`flex ${size} shrink-0 items-center justify-center rounded-xl border border-line bg-inset text-sm font-semibold text-accent`}
       >
         {name.slice(0, 1).toUpperCase() || "?"}
       </div>
@@ -114,7 +114,7 @@ function ImageBox({
   }
   return (
     <div
-      className={`relative ${size} shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/30`}
+      className={`relative ${size} shrink-0 overflow-hidden rounded-xl border border-line bg-inset`}
     >
       <img src={src} alt={name} className="h-full w-full object-cover" />
     </div>
@@ -124,7 +124,7 @@ function ImageBox({
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-gray-500">
+      <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
         {label}
       </span>
       {children}
@@ -133,11 +133,11 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 const inputClass =
-  "w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition placeholder:text-gray-600 focus:border-[#00ffbf]/60 focus:ring-4 focus:ring-[#00ffbf]/10";
+  "w-full rounded-xl border border-line bg-inset px-4 py-3 text-white outline-none transition placeholder:text-gray-600 focus:border-accent/60 focus:ring-4 focus:ring-accent/10";
 const buttonClass =
-  "rounded-2xl bg-[#00ffbf] px-5 py-3 text-sm font-black uppercase tracking-[0.16em] text-black shadow-lg shadow-[#00ffbf]/20 transition hover:-translate-y-0.5 hover:bg-[#23ffd0] disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-xl bg-accent px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-black shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50";
 const subtleButtonClass =
-  "rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-gray-200 transition hover:bg-white/10";
+  "rounded-xl border border-line bg-elevated px-4 py-2 text-sm font-bold text-gray-200 transition hover:bg-elevated";
 
 export default function AsZunaFishingTracker() {
   const supabase = useMemo(() => createClient(), []);
@@ -736,78 +736,78 @@ export default function AsZunaFishingTracker() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/30 backdrop-blur-xl lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="rounded-xl border border-line bg-surface p-6 shadow-lg shadow-black/30 backdrop-blur-xl lg:p-8">
+        <div className="flex flex-col gap-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#00ffbf]">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
               AsZuna Tool
             </p>
-            <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
+            <h2 className="mt-2 text-2xl font-semibold text-foreground">
               Fishing Data Tracker
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-gray-400">
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
               Track bait sessions, fish drops, locations, drop chances, bait costs, and
               real profit per bait. We calculate by sessions because bait used is the
               real attempt count.
             </p>
           </div>
-          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-5 lg:max-w-4xl">
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <p className="text-xs text-gray-500">Sessions</p>
-              <p className="text-2xl font-black text-white">
+          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-5">
+            <div className="rounded-xl border border-line bg-inset p-4">
+              <p className="text-xs text-muted">Sessions</p>
+              <p className="text-2xl font-semibold text-white">
                 {data.sessions.length}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <p className="text-xs text-gray-500">Bait Used</p>
-              <p className="text-2xl font-black text-white">{totalBaitsUsed}</p>
+            <div className="rounded-xl border border-line bg-inset p-4">
+              <p className="text-xs text-muted">Bait Used</p>
+              <p className="text-2xl font-semibold text-white">{totalBaitsUsed}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <p className="text-xs text-gray-500">Caught</p>
-              <p className="text-2xl font-black text-white">
+            <div className="rounded-xl border border-line bg-inset p-4">
+              <p className="text-xs text-muted">Caught</p>
+              <p className="text-2xl font-semibold text-white">
                 {totalFishCaught}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <p className="text-xs text-gray-500">Bait Cost</p>
-              <p className="text-2xl font-black text-white">
+            <div className="rounded-xl border border-line bg-inset p-4">
+              <p className="text-xs text-muted">Bait Cost</p>
+              <p className="text-2xl font-semibold text-white">
                 {money(totalBaitCost)}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <p className="text-xs text-gray-500">Net Profit</p>
-              <p className="text-2xl font-black text-[#00ffbf]">
+            <div className="rounded-xl border border-line bg-inset p-4">
+              <p className="text-xs text-muted">Net Profit</p>
+              <p className="text-2xl font-semibold text-accent">
                 {money(totalProfit)}
               </p>
             </div>
           </div>
         </div>
         {!data.isAdmin && (
-          <p className="mt-5 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-4 text-sm text-yellow-100">
+          <p className="mt-5 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-4 text-sm text-yellow-100">
             View-only mode. Only admins can add, edit, delete, or import data.
           </p>
         )}
         {error && (
-          <p className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+          <p className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
             {error}
           </p>
         )}
         {notice && (
-          <p className="mt-5 rounded-2xl border border-[#00ffbf]/20 bg-[#00ffbf]/10 p-4 text-sm text-[#b8ffef]">
+          <p className="mt-5 rounded-xl border border-accent/20 bg-accent/10 p-4 text-sm text-accent-hover">
             {notice}
           </p>
         )}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[520px_minmax(0,1fr)]">
-        <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.035] p-5 backdrop-blur-xl lg:p-6 xl:sticky xl:top-28 xl:self-start">
+        <div className="rounded-[1.75rem] border border-line bg-white/[0.035] p-5 backdrop-blur-xl lg:p-6 xl:sticky xl:top-28 xl:self-start">
           <div className="mb-5 grid grid-cols-4 gap-2">
             {(["session", "bait", "fish", "tools"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`rounded-2xl px-3 py-2 text-sm font-black capitalize transition ${activeTab === tab ? "bg-[#00ffbf] text-black" : "bg-black/30 text-gray-300 hover:bg-white/10"}`}
+                className={`rounded-xl px-3 py-2 text-sm font-semibold capitalize transition ${activeTab === tab ? "bg-accent text-black" : "bg-inset text-muted hover:bg-elevated"}`}
               >
                 {tab}
               </button>
@@ -820,12 +820,12 @@ export default function AsZunaFishingTracker() {
               className="space-y-5"
             >
               <div>
-                <p className="text-lg font-black text-white">
+                <p className="text-lg font-semibold text-white">
                   {editingSession
                     ? "Edit fishing session"
                     : "Add fishing session"}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-gray-400">
+                <p className="mt-2 text-sm leading-6 text-muted">
                   Pick bait, enter how many baits you used, then add the fish
                   you got.
                 </p>
@@ -838,14 +838,14 @@ export default function AsZunaFishingTracker() {
                       type="button"
                       disabled={!data.isAdmin}
                       onClick={() => setSelectedBaitId(bait.id)}
-                      className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition ${selectedBaitId === bait.id ? "border-[#00ffbf]/60 bg-[#00ffbf]/10" : "border-white/10 bg-black/25 hover:bg-white/5"}`}
+                      className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${selectedBaitId === bait.id ? "border-accent/60 bg-accent/10" : "border-line bg-inset hover:bg-elevated"}`}
                     >
                       <ImageBox src={bait.image_url} name={bait.name} />
                       <span className="min-w-0">
-                        <span className="block whitespace-normal break-words text-sm font-black leading-5 text-white">
+                        <span className="block whitespace-normal break-words text-sm font-semibold leading-5 text-white">
                           {bait.name}
                         </span>
-                        <span className="block text-xs text-gray-500">
+                        <span className="block text-xs text-muted">
                           {money(Number(bait.buy_price || 0))} each
                         </span>
                       </span>
@@ -886,14 +886,14 @@ export default function AsZunaFishingTracker() {
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                       Fish caught
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-muted">
                       Click a fish image, then set how many you got.
                     </p>
                   </div>
-                  <p className="shrink-0 text-xs text-gray-500">
+                  <p className="shrink-0 text-xs text-muted">
                     {filteredSessionFish.length} shown
                   </p>
                 </div>
@@ -905,13 +905,13 @@ export default function AsZunaFishingTracker() {
                   className={inputClass}
                 />
                 {data.fish.length === 0 ? (
-                  <p className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-gray-500">
+                  <p className="rounded-xl border border-line bg-inset p-4 text-sm text-muted">
                     Add fish/results first before you can log a session.
                   </p>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2">
                     {filteredSessionFish.length === 0 && (
-                      <p className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-gray-500 sm:col-span-2">
+                      <p className="rounded-xl border border-line bg-inset p-4 text-sm text-muted sm:col-span-2">
                         No fish match your search.
                       </p>
                     )}
@@ -921,7 +921,7 @@ export default function AsZunaFishingTracker() {
                       return (
                         <div
                           key={fish.id}
-                          className={`rounded-2xl border p-3 transition ${selected ? "border-[#00ffbf]/60 bg-[#00ffbf]/10" : "border-white/10 bg-black/25"}`}
+                          className={`rounded-xl border p-3 transition ${selected ? "border-accent/60 bg-accent/10" : "border-line bg-inset"}`}
                         >
                           <button
                             type="button"
@@ -931,15 +931,15 @@ export default function AsZunaFishingTracker() {
                           >
                             <ImageBox src={fish.image_url} name={fish.name} />
                             <div className="min-w-0 flex-1">
-                              <p className="whitespace-normal break-words text-sm font-black leading-5 text-white">
+                              <p className="whitespace-normal break-words text-sm font-semibold leading-5 text-white">
                                 {fish.name}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-muted">
                                 {money(Number(fish.sell_price || 0))} each
                               </p>
                             </div>
                             <span
-                              className={`rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${selected ? "bg-[#00ffbf] text-black" : "bg-white/10 text-gray-400"}`}
+                              className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${selected ? "bg-accent text-black" : "bg-elevated text-muted"}`}
                             >
                               {selected ? "Picked" : "Pick"}
                             </span>
@@ -951,7 +951,7 @@ export default function AsZunaFishingTracker() {
                               onClick={() =>
                                 setFishCatchAmount(fish.id, amount - 1)
                               }
-                              className="rounded-xl border border-white/10 bg-white/5 text-lg font-black text-white disabled:opacity-30"
+                              className="rounded-xl border border-line bg-elevated text-lg font-semibold text-white disabled:opacity-30"
                             >
                               -
                             </button>
@@ -974,7 +974,7 @@ export default function AsZunaFishingTracker() {
                               onClick={() =>
                                 setFishCatchAmount(fish.id, amount + 1)
                               }
-                              className="rounded-xl border border-white/10 bg-white/5 text-lg font-black text-white disabled:opacity-30"
+                              className="rounded-xl border border-line bg-elevated text-lg font-semibold text-white disabled:opacity-30"
                             >
                               +
                             </button>
@@ -1032,8 +1032,8 @@ export default function AsZunaFishingTracker() {
           {activeTab === "bait" && (
             <form onSubmit={addBait} className="space-y-5">
               <div>
-                <p className="text-lg font-black text-white">Add bait</p>
-                <p className="mt-2 text-sm leading-6 text-gray-400">
+                <p className="text-lg font-semibold text-white">Add bait</p>
+                <p className="mt-2 text-sm leading-6 text-muted">
                   Add your 3 bait types here with images and buy price.
                 </p>
               </div>
@@ -1074,7 +1074,7 @@ export default function AsZunaFishingTracker() {
                     const file = e.target.files?.[0];
                     if (file) uploadImage(file, "bait");
                   }}
-                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-[#00ffbf] file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
+                  className="w-full rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
                 />
               )}
               {baitImage && (
@@ -1099,8 +1099,8 @@ export default function AsZunaFishingTracker() {
           {activeTab === "fish" && (
             <form onSubmit={addFish} className="space-y-5">
               <div>
-                <p className="text-lg font-black text-white">Add fish/result</p>
-                <p className="mt-2 text-sm leading-6 text-gray-400">
+                <p className="text-lg font-semibold text-white">Add fish/result</p>
+                <p className="mt-2 text-sm leading-6 text-muted">
                   Add image and sell price so profit per bait works.
                 </p>
               </div>
@@ -1141,7 +1141,7 @@ export default function AsZunaFishingTracker() {
                     const file = e.target.files?.[0];
                     if (file) uploadImage(file, "fish");
                   }}
-                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-[#00ffbf] file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
+                  className="w-full rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
                 />
               )}
               {fishImage && (
@@ -1166,8 +1166,8 @@ export default function AsZunaFishingTracker() {
           {activeTab === "tools" && (
             <div className="space-y-5">
               <div>
-                <p className="text-lg font-black text-white">Backup tools</p>
-                <p className="mt-2 text-sm leading-6 text-gray-400">
+                <p className="text-lg font-semibold text-white">Backup tools</p>
+                <p className="mt-2 text-sm leading-6 text-muted">
                   Export your data before big changes. Import supports the JSON
                   file exported here.
                 </p>
@@ -1192,7 +1192,7 @@ export default function AsZunaFishingTracker() {
                     type="file"
                     accept="application/json,.json"
                     onChange={importJson}
-                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-[#00ffbf] file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
+                    className="w-full rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
                   />
                 </Field>
               )}
@@ -1201,18 +1201,18 @@ export default function AsZunaFishingTracker() {
         </div>
 
         <div className="space-y-6 min-w-0">
-          <div className="rounded-[1.75rem] border border-white/10 bg-black/20 p-5 lg:p-6">
+          <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-lg font-black text-white">
+                <p className="text-lg font-semibold text-white">
                   Best bait overview
                 </p>
-                <p className="mt-1 text-sm text-gray-400">
+                <p className="mt-1 text-sm text-muted">
                   Sorted by profit per bait.
                 </p>
               </div>
               {bestMoneyBait && (
-                <p className="rounded-2xl border border-[#00ffbf]/20 bg-[#00ffbf]/10 px-4 py-2 text-sm font-black text-[#00ffbf]">
+                <p className="rounded-xl border border-accent/20 bg-accent/10 px-4 py-2 text-sm font-semibold text-accent">
                   Best: {bestMoneyBait.bait.name} ·{" "}
                   {money(bestMoneyBait.profitPerBait)}/bait net
                 </p>
@@ -1220,7 +1220,7 @@ export default function AsZunaFishingTracker() {
             </div>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[650px] text-left text-sm">
-                <thead className="text-xs uppercase tracking-[0.18em] text-gray-500">
+                <thead className="text-xs uppercase tracking-[0.18em] text-muted">
                   <tr>
                     <th className="py-3">Bait</th>
                     <th>Baits Used</th>
@@ -1233,20 +1233,20 @@ export default function AsZunaFishingTracker() {
                 </thead>
                 <tbody>
                   {overview.map((row) => (
-                    <tr key={row.bait.id} className="border-t border-white/10">
+                    <tr key={row.bait.id} className="border-t border-line">
                       <td className="py-3">
                         <div className="flex items-center gap-3">
                           <ImageBox
                             src={row.bait.image_url}
                             name={row.bait.name}
                           />
-                          <span className="font-black text-white">
+                          <span className="font-semibold text-white">
                             {row.bait.name}
                           </span>
                         </div>
                       </td>
-                      <td className="text-gray-300">{row.baitsUsed}</td>
-                      <td className="text-gray-300">
+                      <td className="text-muted">{row.baitsUsed}</td>
+                      <td className="text-muted">
                         {row.bestFish
                           ? `${row.bestFish.fish.name} (${percent(row.bestFish.chance)})`
                           : "-"}
@@ -1254,13 +1254,13 @@ export default function AsZunaFishingTracker() {
                       <td className="font-bold text-white">
                         {money(row.revenue)}
                       </td>
-                      <td className="font-bold text-gray-300">
+                      <td className="font-bold text-muted">
                         {money(row.baitCost)}
                       </td>
                       <td className="font-bold text-white">
                         {money(row.profit)}
                       </td>
-                      <td className="font-black text-[#00ffbf]">
+                      <td className="font-semibold text-accent">
                         {money(row.profitPerBait)}
                       </td>
                     </tr>
@@ -1270,13 +1270,13 @@ export default function AsZunaFishingTracker() {
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-white/10 bg-black/20 p-5 lg:p-6">
+          <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-lg font-black text-white">
+                <p className="text-lg font-semibold text-white">
                   Drop chance by bait
                 </p>
-                <p className="mt-1 text-sm text-gray-400">
+                <p className="mt-1 text-sm text-muted">
                   Chance = fish caught ÷ baits used.
                 </p>
               </div>
@@ -1288,16 +1288,16 @@ export default function AsZunaFishingTracker() {
               />
             </div>
             {bestBait && (
-              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-[#00ffbf]/25 bg-[#00ffbf]/10 p-4">
+              <div className="mt-4 flex items-center gap-3 rounded-xl border border-accent/25 bg-accent/10 p-4">
                 <ImageBox
                   src={bestBait.bait.image_url}
                   name={bestBait.bait.name}
                 />
                 <div>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-muted">
                     Best bait for {bestBait.fish.name}
                   </p>
-                  <p className="text-lg font-black text-white">
+                  <p className="text-lg font-semibold text-white">
                     {bestBait.bait.name} · {percent(bestBait.chance)} ·{" "}
                     {money(bestBait.profitPerBait)}/bait net
                   </p>
@@ -1306,10 +1306,10 @@ export default function AsZunaFishingTracker() {
             )}
             <div className="mt-5 space-y-4">
               {loading && (
-                <p className="text-sm text-gray-500">Loading fishing data...</p>
+                <p className="text-sm text-muted">Loading fishing data...</p>
               )}
               {!loading && statsByBait.length === 0 && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   No session stats yet. Add baits, fish, then save your first
                   session.
                 </p>
@@ -1317,7 +1317,7 @@ export default function AsZunaFishingTracker() {
               {statsByBait.map((rows) => (
                 <div
                   key={rows[0].bait.id}
-                  className="rounded-2xl border border-white/10 bg-black/25 p-4"
+                  className="rounded-xl border border-line bg-inset p-4"
                 >
                   <div className="mb-4 flex items-center gap-3">
                     <ImageBox
@@ -1325,10 +1325,10 @@ export default function AsZunaFishingTracker() {
                       name={rows[0].bait.name}
                     />
                     <div>
-                      <p className="font-black text-white">
+                      <p className="font-semibold text-white">
                         {rows[0].bait.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted">
                         {rows[0].baitsUsed} baits tested
                       </p>
                     </div>
@@ -1348,17 +1348,17 @@ export default function AsZunaFishingTracker() {
                             <span className="font-bold text-white">
                               {row.fish.name}
                             </span>
-                            <span className="font-black text-[#00ffbf]">
+                            <span className="font-semibold text-accent">
                               {percent(row.chance)}
                             </span>
                           </div>
-                          <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+                          <div className="mt-2 h-2 overflow-hidden rounded-full bg-elevated">
                             <div
-                              className="h-full rounded-full bg-[#00ffbf]"
+                              className="h-full rounded-full bg-accent"
                               style={{ width: `${Math.min(100, row.chance)}%` }}
                             />
                           </div>
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-xs text-muted">
                             {row.caught} caught · {money(row.profitPerBait)}
                             /bait net · {money(row.revenue)} revenue
                           </p>
@@ -1374,13 +1374,13 @@ export default function AsZunaFishingTracker() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-[1.75rem] border border-white/10 bg-black/20 p-5 lg:p-6">
-          <p className="text-lg font-black text-white">Latest sessions</p>
+        <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
+          <p className="text-lg font-semibold text-white">Latest sessions</p>
           <div className="mt-4 space-y-3">
             {data.sessions.slice(0, 10).map((session) => (
               <div
                 key={session.id}
-                className="rounded-2xl border border-white/10 bg-black/25 p-4"
+                className="rounded-xl border border-line bg-inset p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -1389,10 +1389,10 @@ export default function AsZunaFishingTracker() {
                       name={session.aszuna_fishing_baits?.name || "Bait"}
                     />
                     <div>
-                      <p className="font-black text-white">
+                      <p className="font-semibold text-white">
                         {session.aszuna_fishing_baits?.name || "Deleted bait"}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted">
                         {session.baits_used} baits ·{" "}
                         {session.session_date ||
                           session.created_at.slice(0, 10)}
@@ -1405,7 +1405,7 @@ export default function AsZunaFishingTracker() {
                       <button
                         type="button"
                         onClick={() => startEditSession(session)}
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-gray-200"
+                        className="rounded-xl border border-line bg-elevated px-3 py-2 text-xs font-bold text-gray-200"
                       >
                         Edit
                       </button>
@@ -1424,7 +1424,7 @@ export default function AsZunaFishingTracker() {
                     (catchRow) => (
                       <span
                         key={catchRow.id}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300"
+                        className="rounded-full border border-line bg-elevated px-3 py-1 text-xs text-muted"
                       >
                         {catchRow.amount}x{" "}
                         {catchRow.aszuna_fishing_fish?.name || "Deleted fish"}
@@ -1433,7 +1433,7 @@ export default function AsZunaFishingTracker() {
                   )}
                 </div>
                 {session.notes && (
-                  <p className="mt-3 text-sm text-gray-500">{session.notes}</p>
+                  <p className="mt-3 text-sm text-muted">{session.notes}</p>
                 )}
               </div>
             ))}
@@ -1441,19 +1441,19 @@ export default function AsZunaFishingTracker() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-[1.75rem] border border-white/10 bg-black/20 p-5 lg:p-6">
-            <p className="text-lg font-black text-white">Baits</p>
+          <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
+            <p className="text-lg font-semibold text-white">Baits</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {data.baits.map((bait) => (
                 <div
                   key={bait.id}
-                  className="rounded-2xl border border-white/10 bg-black/25 p-3"
+                  className="rounded-xl border border-line bg-inset p-3"
                 >
                   <div className="flex items-center gap-3">
                     <ImageBox src={bait.image_url} name={bait.name} />
                     <div>
                       <p className="font-bold text-white">{bait.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted">
                         {money(Number(bait.buy_price || 0))} each
                       </p>
                     </div>
@@ -1470,7 +1470,7 @@ export default function AsZunaFishingTracker() {
                       <button
                         type="button"
                         onClick={() => deleteRow("bait", bait.id)}
-                        className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-200"
+                        className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-200"
                       >
                         Delete
                       </button>
@@ -1480,19 +1480,19 @@ export default function AsZunaFishingTracker() {
               ))}
             </div>
           </div>
-          <div className="rounded-[1.75rem] border border-white/10 bg-black/20 p-5 lg:p-6">
-            <p className="text-lg font-black text-white">Fish / results</p>
+          <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
+            <p className="text-lg font-semibold text-white">Fish / results</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {data.fish.map((fish) => (
                 <div
                   key={fish.id}
-                  className="rounded-2xl border border-white/10 bg-black/25 p-3"
+                  className="rounded-xl border border-line bg-inset p-3"
                 >
                   <div className="flex items-center gap-3">
                     <ImageBox src={fish.image_url} name={fish.name} />
                     <div>
                       <p className="font-bold text-white">{fish.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted">
                         Sell price: {money(Number(fish.sell_price || 0))}
                       </p>
                     </div>
@@ -1509,7 +1509,7 @@ export default function AsZunaFishingTracker() {
                       <button
                         type="button"
                         onClick={() => deleteRow("fish", fish.id)}
-                        className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-200"
+                        className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-200"
                       >
                         Delete
                       </button>
@@ -1523,12 +1523,12 @@ export default function AsZunaFishingTracker() {
       </div>
 
       {editingBait && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <form
             onSubmit={updateBait}
-            className="w-full max-w-lg rounded-[2rem] border border-white/10 bg-[#0b0b10] p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 shadow-lg"
           >
-            <h3 className="text-2xl font-black text-white">Edit bait</h3>
+            <h3 className="text-2xl font-semibold text-white">Edit bait</h3>
             <div className="mt-5 space-y-4">
               <Field label="Name">
                 <input
@@ -1573,7 +1573,7 @@ export default function AsZunaFishingTracker() {
                   const file = e.target.files?.[0];
                   if (file) uploadImage(file, "bait");
                 }}
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-[#00ffbf] file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
+                className="w-full rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
               />
               {editingBait.image_url && (
                 <ImageBox
@@ -1604,12 +1604,12 @@ export default function AsZunaFishingTracker() {
       )}
 
       {editingFish && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <form
             onSubmit={updateFish}
-            className="w-full max-w-lg rounded-[2rem] border border-white/10 bg-[#0b0b10] p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 shadow-lg"
           >
-            <h3 className="text-2xl font-black text-white">Edit fish</h3>
+            <h3 className="text-2xl font-semibold text-white">Edit fish</h3>
             <div className="mt-5 space-y-4">
               <Field label="Name">
                 <input
@@ -1654,7 +1654,7 @@ export default function AsZunaFishingTracker() {
                   const file = e.target.files?.[0];
                   if (file) uploadImage(file, "fish");
                 }}
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-[#00ffbf] file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
+                className="w-full rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent file:px-4 file:py-2 file:text-sm file:font-bold file:text-black"
               />
               {editingFish.image_url && (
                 <ImageBox

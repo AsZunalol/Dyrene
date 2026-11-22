@@ -67,14 +67,14 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Car name"
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20"
+          className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
           required
         />
         <input
           value={brand}
           onChange={(e) => setBrand(e.target.value)}
           placeholder="Brand"
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20"
+          className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
         />
       </div>
 
@@ -84,13 +84,13 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
           onChange={(e) => setPrice(e.target.value)}
           placeholder="Price"
           type="number"
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20"
+          className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
         />
         <input
           value={image}
           onChange={(e) => setImage(e.target.value)}
           placeholder="Image URL"
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20 md:col-span-2"
+          className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20 md:col-span-2"
         />
       </div>
 
@@ -98,7 +98,7 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-white/20"
+          className="px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none focus:border-white/20"
         >
           <option value="store">store</option>
           <option value="vin-scratch">vin-scratch</option>
@@ -119,7 +119,7 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
           disabled={loading}
           className="md:ml-auto px-5 py-3 rounded-xl text-white font-semibold disabled:opacity-60 transition hover:scale-[1.02]"
           style={{
-            background: "linear-gradient(90deg,#5865F2,#6772E5)",
+            background: "var(--accent)", color: "var(--inset)",
           }}
         >
           {loading ? "Adding…" : "Add car"}

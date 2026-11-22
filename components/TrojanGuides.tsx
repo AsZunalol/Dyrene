@@ -44,7 +44,7 @@ function RichTextEditor({
         allowBase64: false,
         HTMLAttributes: {
           class:
-            "my-5 mx-auto max-h-[360px] w-auto max-w-full rounded-2xl border border-white/10 bg-black/20 object-contain shadow-lg",
+            "my-5 mx-auto max-h-[360px] w-auto max-w-full rounded-xl border border-line bg-inset object-contain shadow-lg",
         },
       }),
     ],
@@ -53,7 +53,7 @@ function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "min-h-[520px] rounded-b-xl border border-t-0 border-emerald-400/20 bg-black/70 px-4 py-4 font-mono text-emerald-100 outline-none [&_code]:rounded-md [&_code]:border [&_code]:border-emerald-400/25 [&_code]:bg-black/70 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-emerald-200 [&_h3]:mb-2 [&_h3]:mt-5 [&_h3]:text-xl [&_h3]:font-black [&_h3]:text-white [&_img]:mx-auto [&_img]:my-5 [&_img]:max-h-[360px] [&_img]:w-auto [&_img]:max-w-full [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:border [&_pre]:border-emerald-400/25 [&_pre]:bg-[#020617] [&_pre]:p-4 [&_pre]:text-emerald-200 [&_pre_code]:border-0 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-bold [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5",
+          "min-h-[520px] rounded-b-xl border border-t-0 border-accent/20 bg-black/70 px-4 py-4 font-mono text-accent outline-none [&_code]:rounded-md [&_code]:border [&_code]:border-accent/25 [&_code]:bg-black/70 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:text-accent [&_h3]:mb-2 [&_h3]:mt-5 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-white [&_img]:mx-auto [&_img]:my-5 [&_img]:max-h-[360px] [&_img]:w-auto [&_img]:max-w-full [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:border [&_pre]:border-accent/25 [&_pre]:bg-[var(--surface)] [&_pre]:p-4 [&_pre]:text-accent [&_pre_code]:border-0 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-bold [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5",
       },
     },
     onUpdate({ editor }) {
@@ -92,9 +92,9 @@ function RichTextEditor({
   const activeEditor = editor;
 
   const buttonClass =
-    "rounded-lg border border-emerald-400/15 bg-emerald-500/10 px-3 py-1 font-mono text-sm font-semibold text-emerald-100 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-lg border border-accent/15 bg-accent-strong/10 px-3 py-1 font-mono text-sm font-semibold text-accent hover:bg-accent-strong/20 disabled:cursor-not-allowed disabled:opacity-50";
   const activeButtonClass =
-    "rounded-lg border border-emerald-300/30 bg-emerald-500 px-3 py-1 font-mono text-sm font-bold text-black hover:bg-emerald-400";
+    "rounded-lg border border-accent/30 bg-accent-strong px-3 py-1 font-mono text-sm font-bold text-black hover:bg-accent-strong";
 
   function makeCurrentLineCodeBlock() {
     activeEditor.commands.command(({ state, dispatch }) => {
@@ -172,7 +172,7 @@ function RichTextEditor({
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-30 flex flex-wrap gap-2 rounded-t-xl border border-emerald-400/25 bg-[#03140f] p-2">
+      <div className="sticky top-0 z-30 flex flex-wrap gap-2 rounded-t-xl border border-accent/25 bg-[var(--surface)] p-2">
         <button
           type="button"
           onClick={() => activeEditor.chain().focus().toggleBold().run()}
@@ -274,7 +274,7 @@ function RichTextEditor({
 
       <EditorContent editor={activeEditor} />
 
-      <p className="mt-2 text-xs text-emerald-300/60">
+      <p className="mt-2 text-xs text-accent/60">
         Tip: Code Block now only converts the current line and puts your cursor
         back in normal text underneath it.
       </p>
@@ -309,13 +309,13 @@ function difficultyClass(difficulty?: string | null) {
   const clean = (difficulty || "Normal").toLowerCase();
 
   if (clean.includes("easy"))
-    return "border-emerald-400/30 bg-emerald-500/15 text-emerald-200";
+    return "border-accent/30 bg-accent-strong/15 text-accent";
   if (clean.includes("hard"))
     return "border-red-400/30 bg-red-500/15 text-red-200";
   if (clean.includes("expert"))
     return "border-orange-400/30 bg-orange-500/15 text-orange-200";
 
-  return "border-cyan-400/30 bg-cyan-500/15 text-cyan-200";
+  return "border-accent/30 bg-accent-strong/15 text-accent";
 }
 
 export default function TrojanGuides({
@@ -550,21 +550,21 @@ export default function TrojanGuides({
 
   return (
     <>
-      <div className="mb-8 overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/55 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur">
-        <div className="flex items-center gap-2 border-b border-emerald-400/20 bg-emerald-950/25 px-5 py-3">
+      <div className="mb-8 overflow-hidden rounded-xl border border-accent/20 bg-black/55 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur">
+        <div className="flex items-center gap-2 border-b border-accent/20 bg-accent/25 px-5 py-3">
           <span className="h-3 w-3 rounded-full bg-red-400" />
           <span className="h-3 w-3 rounded-full bg-yellow-300" />
-          <span className="h-3 w-3 rounded-full bg-emerald-400" />
-          <span className="ml-3 font-mono text-xs text-emerald-300/80">
+          <span className="h-3 w-3 rounded-full bg-accent-strong" />
+          <span className="ml-3 font-mono text-xs text-accent/80">
             library@trojan:~/guides
           </span>
         </div>
         <div className="flex flex-col gap-4 p-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="font-mono text-2xl font-black text-white">
+            <h2 className="font-mono text-2xl font-semibold text-white">
               ./guide-library
             </h2>
-            <p className="mt-1 text-gray-300">
+            <p className="mt-1 text-muted">
               Select a guide card to open the full terminal-style tutorial.
             </p>
           </div>
@@ -574,13 +574,13 @@ export default function TrojanGuides({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="search --guides"
-              className="w-full rounded-xl border border-emerald-400/20 bg-black/50 px-4 py-3 font-mono text-emerald-100 outline-none placeholder:text-emerald-700 sm:w-72"
+              className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 font-mono text-accent outline-none placeholder:text-accent sm:w-72"
             />
 
             {isAdmin ? (
               <button
                 onClick={openAddGuide}
-                className="rounded-xl border border-emerald-300/30 bg-emerald-500 px-5 py-3 font-mono font-bold text-black shadow-[0_0_18px_rgba(16,185,129,0.24)] hover:bg-emerald-400"
+                className="rounded-xl border border-accent/30 bg-accent-strong px-5 py-3 font-mono font-bold text-black shadow-[0_0_18px_rgba(16,185,129,0.24)] hover:bg-accent-strong"
               >
                 + Add Guide
               </button>
@@ -590,7 +590,7 @@ export default function TrojanGuides({
       </div>
 
       {filteredGuides.length === 0 ? (
-        <div className="rounded-2xl border border-emerald-400/20 bg-black/45 p-8 text-center font-mono text-emerald-200/70">
+        <div className="rounded-xl border border-accent/20 bg-black/45 p-8 text-center font-mono text-accent/70">
           No Trojan guides found.
         </div>
       ) : (
@@ -598,7 +598,7 @@ export default function TrojanGuides({
           {filteredGuides.map((guide) => (
             <div
               key={guide.id}
-              className="group overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/50 shadow-[0_0_28px_rgba(16,185,129,0.08)] transition hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-emerald-500/5 hover:shadow-[0_0_35px_rgba(16,185,129,0.18)]"
+              className="group overflow-hidden rounded-xl border border-accent/20 bg-black/50 shadow-[0_0_28px_rgba(16,185,129,0.08)] transition hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-strong/5 hover:shadow-[0_0_35px_rgba(16,185,129,0.18)]"
             >
               <Link href={`/trojan/${guide.id}`} className="block">
                 {guide.cover_image ? (
@@ -608,7 +608,7 @@ export default function TrojanGuides({
                     className="h-44 w-full object-cover opacity-90 transition group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-44 w-full items-center justify-center bg-[#020617] font-mono text-5xl text-emerald-400">
+                  <div className="flex h-44 w-full items-center justify-center bg-[var(--surface)] font-mono text-5xl text-accent">
                     &gt;_
                   </div>
                 )}
@@ -616,7 +616,7 @@ export default function TrojanGuides({
                 <div className="p-5">
                   <div className="mb-3 flex flex-wrap gap-2">
                     {guide.category ? (
-                      <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-bold text-emerald-200">
+                      <span className="rounded-full border border-accent/20 bg-accent-strong/10 px-3 py-1 font-mono text-xs font-bold text-accent">
                         {guide.category}
                       </span>
                     ) : null}
@@ -630,20 +630,20 @@ export default function TrojanGuides({
                     </span>
                   </div>
 
-                  <h3 className="line-clamp-2 font-mono text-xl font-black text-white">
+                  <h3 className="line-clamp-2 font-mono text-xl font-semibold text-white">
                     {guide.title}
                   </h3>
 
                   {guide.short_description ? (
-                    <p className="mt-2 line-clamp-3 text-sm text-emerald-100/70">
+                    <p className="mt-2 line-clamp-3 text-sm text-accent/70">
                       {guide.short_description}
                     </p>
                   ) : null}
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-400/20 bg-black/45 px-3 py-2 font-mono text-xs text-emerald-300/75">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
-                      <span className="text-emerald-500/80">LAST UPDATED</span>
+                    <div className="inline-flex items-center gap-2 rounded-lg border border-accent/20 bg-black/45 px-3 py-2 font-mono text-xs text-accent/75">
+                      <span className="h-2 w-2 rounded-full bg-accent-strong shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
+                      <span className="text-accent/80">LAST UPDATED</span>
                       <span>
                         {formatLastUpdated(
                           guide.updated_at || guide.created_at,
@@ -651,19 +651,19 @@ export default function TrojanGuides({
                       </span>
                     </div>
 
-                    <div className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-black/45 px-3 py-2 font-mono text-xs text-cyan-200/85">
+                    <div className="inline-flex items-center gap-2 rounded-lg border border-accent/20 bg-black/45 px-3 py-2 font-mono text-xs text-accent/85">
                       {guide.author_avatar_url ? (
                         <img
                           src={guide.author_avatar_url}
                           alt={getAuthorName(guide)}
-                          className="h-5 w-5 rounded-full border border-cyan-300/30 object-cover"
+                          className="h-5 w-5 rounded-full border border-accent/30 object-cover"
                         />
                       ) : (
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-500/10 text-[10px]">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-accent/30 bg-accent-strong/10 text-[10px]">
                           @
                         </span>
                       )}
-                      <span className="text-cyan-400/80">AUTHOR</span>
+                      <span className="text-accent/80">AUTHOR</span>
                       <span className="truncate">{getAuthorName(guide)}</span>
                     </div>
                   </div>
@@ -671,10 +671,10 @@ export default function TrojanGuides({
               </Link>
 
               {isAdmin ? (
-                <div className="flex gap-2 border-t border-emerald-400/20 bg-black/25 p-4">
+                <div className="flex gap-2 border-t border-accent/20 bg-inset p-4">
                   <button
                     onClick={() => openEditGuide(guide)}
-                    className="w-full rounded-xl border border-emerald-400/20 px-4 py-2 font-mono text-sm font-semibold text-emerald-100 hover:bg-emerald-500/10"
+                    className="w-full rounded-xl border border-accent/20 px-4 py-2 font-mono text-sm font-semibold text-accent hover:bg-accent-strong/10"
                   >
                     Edit
                   </button>
@@ -695,13 +695,13 @@ export default function TrojanGuides({
 
       {open ? (
         <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black/90 p-2 pt-4 sm:p-4 sm:pt-6 lg:p-6 lg:pt-8">
-          <div className="relative flex h-[calc(100vh-2rem)] w-full max-w-[96rem] flex-col overflow-hidden rounded-2xl border border-emerald-400/20 bg-[#020617] text-emerald-50 shadow-2xl sm:h-[calc(100vh-3rem)] lg:h-[calc(100vh-4rem)]">
-            <div className="sticky top-0 z-40 flex shrink-0 items-center justify-between gap-4 border-b border-emerald-400/20 bg-[#020617] px-5 py-4 lg:px-7">
+          <div className="relative flex h-[calc(100vh-2rem)] w-full max-w-[96rem] flex-col overflow-hidden rounded-xl border border-accent/20 bg-[var(--surface)] text-accent shadow-lg sm:h-[calc(100vh-3rem)] lg:h-[calc(100vh-4rem)]">
+            <div className="sticky top-0 z-40 flex shrink-0 items-center justify-between gap-4 border-b border-accent/20 bg-[var(--surface)] px-5 py-4 lg:px-7">
               <div>
-                <h2 className="font-mono text-2xl font-black text-white">
+                <h2 className="font-mono text-2xl font-semibold text-white">
                   {editingGuide ? "Edit Trojan Guide" : "Add Trojan Guide"}
                 </h2>
-                <p className="mt-1 text-sm text-emerald-300/60">
+                <p className="mt-1 text-sm text-accent/60">
                   Fullscreen editor mode. The toolbar stays sticky while you
                   write long guides with screenshots and command blocks.
                 </p>
@@ -712,7 +712,7 @@ export default function TrojanGuides({
                   setOpen(false);
                   resetForm();
                 }}
-                className="rounded-xl border border-white/10 px-4 py-2 text-white/70 hover:bg-white/10 hover:text-white"
+                className="rounded-xl border border-line px-4 py-2 text-white/70 hover:bg-elevated hover:text-white"
               >
                 ✕
               </button>
@@ -727,20 +727,20 @@ export default function TrojanGuides({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Guide title"
-                  className="w-full rounded-xl border border-emerald-400/20 bg-black/50 px-4 py-3 text-emerald-100 outline-none placeholder:text-emerald-700"
+                  className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
 
                 <input
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="Category"
-                  className="w-full rounded-xl border border-emerald-400/20 bg-black/50 px-4 py-3 text-emerald-100 outline-none placeholder:text-emerald-700"
+                  className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
 
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full rounded-xl border border-emerald-400/20 bg-black/70 px-4 py-3 text-emerald-100 outline-none"
+                  className="w-full rounded-xl border border-accent/20 bg-black/70 px-4 py-3 text-accent outline-none"
                 >
                   <option value="Easy">Easy</option>
                   <option value="Normal">Normal</option>
@@ -754,11 +754,11 @@ export default function TrojanGuides({
                 onChange={(e) => setShortDescription(e.target.value)}
                 placeholder="Short description shown on the guide card"
                 rows={3}
-                className="w-full rounded-xl border border-emerald-400/20 bg-black/50 px-4 py-3 text-emerald-100 outline-none placeholder:text-emerald-700"
+                className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
               />
 
-              <div className="space-y-2 rounded-xl border border-emerald-400/20 bg-black/40 p-4">
-                <label className="block text-sm font-semibold text-emerald-100">
+              <div className="space-y-2 rounded-xl border border-accent/20 bg-inset p-4">
+                <label className="block text-sm font-semibold text-accent">
                   Cover image for the guide card
                 </label>
 
@@ -766,7 +766,7 @@ export default function TrojanGuides({
                   value={coverImage}
                   onChange={(e) => setCoverImage(e.target.value)}
                   placeholder="Paste image URL or upload below"
-                  className="w-full rounded-xl border border-emerald-400/20 bg-black/50 px-4 py-3 text-emerald-100 outline-none placeholder:text-emerald-700"
+                  className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
 
                 <input
@@ -776,11 +776,11 @@ export default function TrojanGuides({
                     const file = e.target.files?.[0];
                     if (file) uploadImage(file, "cover");
                   }}
-                  className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-emerald-400"
+                  className="block w-full text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent-strong file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-accent-strong"
                 />
 
                 {uploadingCover ? (
-                  <p className="text-sm text-emerald-300/60">
+                  <p className="text-sm text-accent/60">
                     Uploading cover...
                   </p>
                 ) : null}
@@ -794,7 +794,7 @@ export default function TrojanGuides({
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-emerald-100">
+                <label className="mb-2 block text-sm font-semibold text-accent">
                   Guide content
                 </label>
                 <RichTextEditor
@@ -804,8 +804,8 @@ export default function TrojanGuides({
                 />
               </div>
 
-              <div className="space-y-2 rounded-xl border border-emerald-400/20 bg-black/40 p-4">
-                <label className="block text-sm font-semibold text-emerald-100">
+              <div className="space-y-2 rounded-xl border border-accent/20 bg-inset p-4">
+                <label className="block text-sm font-semibold text-accent">
                   Optional gallery images at bottom
                 </label>
 
@@ -814,7 +814,7 @@ export default function TrojanGuides({
                   onChange={(e) => setImageUrls(e.target.value)}
                   placeholder="Optional: one image URL per line, or upload below. For images inside the guide text, use Insert Image in the editor above."
                   rows={4}
-                  className="w-full rounded-xl border border-emerald-400/20 bg-black/50 px-4 py-3 text-emerald-100 outline-none placeholder:text-emerald-700"
+                  className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
 
                 <input
@@ -822,31 +822,31 @@ export default function TrojanGuides({
                   accept="image/*"
                   multiple
                   onChange={(e) => uploadMultipleImages(e.target.files)}
-                  className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-emerald-400"
+                  className="block w-full text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent-strong file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-accent-strong"
                 />
 
                 {uploadingImages ? (
-                  <p className="text-sm text-emerald-300/60">
+                  <p className="text-sm text-accent/60">
                     Uploading images...
                   </p>
                 ) : null}
               </div>
 
-              <div className="sticky bottom-0 z-30 -mx-5 -mb-5 flex flex-col gap-3 border-t border-emerald-400/20 bg-[#020617] px-5 py-4 sm:flex-row lg:-mx-7 lg:-mb-5 lg:px-7">
+              <div className="sticky bottom-0 z-30 -mx-5 -mb-5 flex flex-col gap-3 border-t border-accent/20 bg-[var(--surface)] px-5 py-4 sm:flex-row lg:-mx-7 lg:-mb-5 lg:px-7">
                 <button
                   type="button"
                   onClick={() => {
                     setOpen(false);
                     resetForm();
                   }}
-                  className="w-full rounded-xl border border-emerald-400/20 px-4 py-3 font-mono font-semibold hover:bg-emerald-500/10"
+                  className="w-full rounded-xl border border-accent/20 px-4 py-3 font-mono font-semibold hover:bg-accent-strong/10"
                 >
                   Cancel
                 </button>
 
                 <button
                   disabled={saving || uploadingCover || uploadingImages}
-                  className="w-full rounded-xl bg-emerald-500 px-4 py-3 font-mono font-bold text-black hover:bg-emerald-400 disabled:opacity-50"
+                  className="w-full rounded-xl bg-accent-strong px-4 py-3 font-mono font-bold text-black hover:bg-accent-strong disabled:opacity-50"
                 >
                   {saving
                     ? "Saving..."

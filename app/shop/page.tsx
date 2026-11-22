@@ -21,12 +21,9 @@ export default async function ShopPage() {
   const isAdmin = Boolean(profile?.is_admin);
 
   return (
-    <main className="relative min-h-screen overflow-hidden px-4 pb-14 pt-28 text-white sm:px-6 lg:px-8">
-
-      <div className="relative mx-auto max-w-7xl">
-        {isAdmin && <AddShopItemForm />}
-        <WeaponsShop isAdmin={isAdmin} />
-      </div>
+    <main className="hub-page">
+      {isAdmin && <AddShopItemForm />}
+      <WeaponsShop isAdmin={isAdmin} />
     </main>
   );
 }

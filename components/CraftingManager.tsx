@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import PageHeader from "@/components/PageHeader";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
@@ -812,66 +813,40 @@ export default function CraftingManager({ isAdmin }: Props) {
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-7rem)] w-full max-w-none flex-col space-y-8">
-      <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/10 via-white/[0.04] to-indigo-500/10 p-5 shadow-2xl shadow-black/20 md:p-7 xl:p-8">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm uppercase tracking-[0.35em] text-indigo-200/70">
-              Dyrene crafting
-            </p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-white md:text-5xl">
-              Crafting Dashboard
-            </h1>
-            <p className="mt-3 text-base text-gray-300">
-              Search recipes, build a shopping list, and manage crafting items
-              from one full-page overview.
-            </p>
-          </div>
+      <div>
+        <PageHeader icon="crafting" eyebrow="Workshop" title="Crafting" description="Browse recipes, calculate materials, and build your crafting list." actions={isAdmin ? <button type="button" className="hub-primary" onClick={() => openAddRecipeModal("recipe")}>Add recipe</button> : undefined} />
 
-          {isAdmin && (
-            <button
-              type="button"
-              onClick={() => openAddRecipeModal("recipe")}
-              className="w-full rounded-2xl px-6 py-4 text-base font-bold text-white shadow-lg shadow-indigo-950/30 transition hover:scale-[1.01] xl:w-auto"
-              style={{
-                background: "linear-gradient(90deg,#5865F2,#7c3aed)",
-              }}
-            >
-              + Add Recipe
-            </button>
-          )}
-        </div>
-
-        <div className="mt-7 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="text-2xl font-black text-white">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="rounded-xl border border-line bg-inset p-4">
+            <div className="text-2xl font-semibold text-white">
               {dashboardStats.totalRecipes}
             </div>
-            <div className="mt-1 text-sm text-gray-400">Recipes</div>
+            <div className="mt-1 text-sm text-muted">Recipes</div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="text-2xl font-black text-white">
+          <div className="rounded-xl border border-line bg-inset p-4">
+            <div className="text-2xl font-semibold text-white">
               {dashboardStats.withImages}
             </div>
-            <div className="mt-1 text-sm text-gray-400">With images</div>
+            <div className="mt-1 text-sm text-muted">With images</div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="text-2xl font-black text-white">
+          <div className="rounded-xl border border-line bg-inset p-4">
+            <div className="text-2xl font-semibold text-white">
               {dashboardStats.craftableInputs}
             </div>
-            <div className="mt-1 text-sm text-gray-400">Linked recipes</div>
+            <div className="mt-1 text-sm text-muted">Linked recipes</div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="text-2xl font-black text-white">
+          <div className="rounded-xl border border-line bg-inset p-4">
+            <div className="text-2xl font-semibold text-white">
               {dashboardStats.rawIngredients}
             </div>
-            <div className="mt-1 text-sm text-gray-400">Raw materials</div>
+            <div className="mt-1 text-sm text-muted">Raw materials</div>
           </div>
         </div>
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_460px]">
         <div className="space-y-6">
-          <div className="sticky top-4 z-20 rounded-3xl border border-white/10 bg-[#081527]/90 p-4 shadow-xl shadow-black/20 backdrop-blur md:p-5">
+          <div className="sticky top-20 z-20 rounded-xl border border-line bg-[var(--surface)]/90 p-4 shadow-xl shadow-black/20 backdrop-blur md:p-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
               <div className="flex-1">
                 <label className="mb-2 block text-sm font-semibold text-gray-200">
@@ -881,7 +856,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search pistol, plastic, spring..."
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none placeholder:text-gray-500 focus:border-indigo-300/50"
+                  className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none placeholder:text-muted focus:border-accent/50"
                 />
               </div>
 
@@ -899,10 +874,10 @@ export default function CraftingManager({ isAdmin }: Props) {
                         filter.key as "all" | "images" | "craftable",
                       )
                     }
-                    className={`rounded-2xl border px-4 py-3 text-sm font-bold transition ${
+                    className={`rounded-xl border px-4 py-3 text-sm font-bold transition ${
                       recipeFilter === filter.key
-                        ? "border-indigo-300/40 bg-indigo-500/25 text-white"
-                        : "border-white/10 bg-white/5 text-gray-300 hover:bg-white/10"
+                        ? "border-accent/40 bg-accent-strong/25 text-white"
+                        : "border-line bg-elevated text-muted hover:bg-elevated"
                     }`}
                   >
                     {filter.label}
@@ -912,22 +887,22 @@ export default function CraftingManager({ isAdmin }: Props) {
             </div>
           </div>
 
-          <div className="min-h-[680px] rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+          <div className="min-h-[680px] rounded-xl border border-line bg-surface p-4 md:p-5">
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-2xl font-black text-white">Recipes</h2>
-                <p className="mt-1 text-sm text-gray-400">
+                <h2 className="text-2xl font-semibold text-white">Recipes</h2>
+                <p className="mt-1 text-sm text-muted">
                   Showing {filteredItems.length} of {recipeItems.length} recipes.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-gray-300">
+              <div className="rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted">
                 Click <span className="font-bold text-white">Add to list</span>{" "}
                 to calculate materials
               </div>
             </div>
 
-            {loading && <div className="text-gray-300">Loading recipes...</div>}
+            {loading && <div className="text-muted">Loading recipes...</div>}
             {error && <div className="text-red-300">{error}</div>}
 
             {!loading && !error && (
@@ -935,9 +910,9 @@ export default function CraftingManager({ isAdmin }: Props) {
                 {filteredItems.map((item) => (
                   <div
                     key={item.id}
-                    className="group overflow-hidden rounded-3xl border border-white/10 bg-black/20 shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-indigo-300/40 hover:bg-white/[0.06]"
+                    className="group overflow-hidden rounded-xl border border-line bg-inset shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-accent/40 hover:bg-surface"
                   >
-                    <div className="relative aspect-[16/10] bg-white/5">
+                    <div className="relative aspect-[16/10] bg-elevated">
                       {item.image ? (
                         <img
                           src={item.image}
@@ -945,12 +920,12 @@ export default function CraftingManager({ isAdmin }: Props) {
                           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-sm text-gray-500">
+                        <div className="flex h-full w-full items-center justify-center text-sm text-muted">
                           No image
                         </div>
                       )}
 
-                      <div className="absolute left-3 top-3 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                      <div className="absolute left-3 top-3 rounded-full border border-line bg-black/60 px-3 py-1 text-xs font-bold text-white backdrop-blur">
                         Output: {item.craft_amount}
                       </div>
                     </div>
@@ -958,10 +933,10 @@ export default function CraftingManager({ isAdmin }: Props) {
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h3 className="truncate text-xl font-black text-white">
+                          <h3 className="truncate text-xl font-semibold text-white">
                             {item.name}
                           </h3>
-                          <p className="mt-1 text-sm text-gray-400">
+                          <p className="mt-1 text-sm text-muted">
                             {item.crafting_recipe_ingredients.length}{" "}
                             ingredients
                           </p>
@@ -977,7 +952,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 ingredient.id ||
                                 `${item.id}-${ingredient.ingredient_name}`
                               }
-                              className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-2 text-sm"
+                              className="flex items-center justify-between gap-3 rounded-xl bg-elevated px-3 py-2 text-sm"
                             >
                               <div className="min-w-0">
                                 <div className="truncate text-gray-200">
@@ -996,7 +971,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                           ))}
 
                         {item.crafting_recipe_ingredients.length > 4 && (
-                          <div className="rounded-xl bg-white/[0.03] px-3 py-2 text-sm text-gray-400">
+                          <div className="rounded-xl bg-surface px-3 py-2 text-sm text-muted">
                             + {item.crafting_recipe_ingredients.length - 4} more
                             ingredients
                           </div>
@@ -1006,10 +981,9 @@ export default function CraftingManager({ isAdmin }: Props) {
                       <div className="mt-5 flex flex-wrap gap-2">
                         <button
                           onClick={() => addToCart(item.id)}
-                          className="flex-1 rounded-2xl px-4 py-3 text-sm font-bold text-white"
+                          className="flex-1 rounded-xl px-4 py-3 text-sm font-bold text-white"
                           style={{
-                            background:
-                              "linear-gradient(90deg,#5865F2,#6772E5)",
+                            background: "var(--accent)", color: "var(--inset)",
                           }}
                         >
                           Add to list
@@ -1019,14 +993,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                           <>
                             <button
                               onClick={() => startEdit(item)}
-                              className="rounded-2xl border border-amber-400/20 bg-amber-500/15 px-4 py-3 text-sm font-bold text-amber-100 hover:bg-amber-500/25"
+                              className="rounded-xl border border-amber-400/20 bg-amber-500/15 px-4 py-3 text-sm font-bold text-amber-100 hover:bg-amber-500/25"
                             >
                               Edit
                             </button>
 
                             <button
                               onClick={() => handleDeleteRecipe(item.id)}
-                              className="rounded-2xl border border-red-400/20 bg-red-500/15 px-4 py-3 text-sm font-bold text-red-100 hover:bg-red-500/25"
+                              className="rounded-xl border border-red-400/20 bg-red-500/15 px-4 py-3 text-sm font-bold text-red-100 hover:bg-red-500/25"
                             >
                               Delete
                             </button>
@@ -1038,7 +1012,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                 ))}
 
                 {filteredItems.length === 0 && (
-                  <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center text-gray-400 md:col-span-2 xl:col-span-3 2xl:col-span-4 [@media(min-width:1900px)]:col-span-5">
+                  <div className="rounded-xl border border-line bg-elevated p-8 text-center text-muted md:col-span-2 xl:col-span-3 2xl:col-span-4 [@media(min-width:1900px)]:col-span-5">
                     No crafting recipes found.
                   </div>
                 )}
@@ -1048,13 +1022,13 @@ export default function CraftingManager({ isAdmin }: Props) {
         </div>
 
         <div className="space-y-6 2xl:sticky 2xl:top-4 2xl:self-start">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-xl shadow-black/10">
+          <div className="rounded-xl border border-line bg-surface p-5 shadow-xl shadow-black/10">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-black text-white">
+                <h2 className="text-2xl font-semibold text-white">
                   Crafting List
                 </h2>
-                <p className="mt-1 text-sm text-gray-400">
+                <p className="mt-1 text-sm text-muted">
                   Choose recipes and the calculator totals everything.
                 </p>
               </div>
@@ -1062,7 +1036,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                 <button
                   type="button"
                   onClick={() => setCart([])}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-gray-300 hover:bg-white/10"
+                  className="rounded-xl border border-line bg-elevated px-3 py-2 text-sm font-semibold text-muted hover:bg-elevated"
                 >
                   Clear
                 </button>
@@ -1073,17 +1047,17 @@ export default function CraftingManager({ isAdmin }: Props) {
               <select
                 value={selectedItemId}
                 onChange={(e) => setSelectedItemId(e.target.value)}
-                className="min-w-0 flex-1 appearance-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+                className="min-w-0 flex-1 appearance-none rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none"
                 style={{ colorScheme: "dark" }}
               >
-                <option value="" className="bg-[#0b0f1a] text-white">
+                <option value="" className="bg-[var(--surface)] text-white">
                   Select item
                 </option>
                 {items.map((item) => (
                   <option
                     key={item.id}
                     value={item.id}
-                    className="bg-[#0b0f1a] text-white"
+                    className="bg-[var(--surface)] text-white"
                   >
                     {item.name}
                   </option>
@@ -1092,9 +1066,9 @@ export default function CraftingManager({ isAdmin }: Props) {
 
               <button
                 onClick={() => addToCart(selectedItemId)}
-                className="rounded-2xl px-4 py-3 font-bold text-white"
+                className="rounded-xl px-4 py-3 font-bold text-white"
                 style={{
-                  background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                  background: "var(--accent)", color: "var(--inset)",
                 }}
               >
                 Add
@@ -1109,14 +1083,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                 return (
                   <div
                     key={entry.itemId}
-                    className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                    className="rounded-xl border border-line bg-inset p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="truncate font-bold text-white">
                           {item.name}
                         </div>
-                        <div className="mt-1 text-sm text-gray-400">
+                        <div className="mt-1 text-sm text-muted">
                           Output per craft: {item.craft_amount}
                         </div>
                       </div>
@@ -1130,7 +1104,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                     </div>
 
                     <div className="mt-3">
-                      <label className="mb-2 block text-sm text-gray-400">
+                      <label className="mb-2 block text-sm text-muted">
                         Amount wanted
                       </label>
                       <input
@@ -1143,7 +1117,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                             Number(e.target.value),
                           )
                         }
-                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+                        className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none"
                       />
                     </div>
                   </div>
@@ -1151,18 +1125,18 @@ export default function CraftingManager({ isAdmin }: Props) {
               })}
 
               {cart.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-6 text-center text-sm text-gray-400">
+                <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted">
                   Your crafting list is empty.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-xl shadow-black/10">
-            <h2 className="text-2xl font-black text-white">
+          <div className="rounded-xl border border-line bg-surface p-5 shadow-xl shadow-black/10">
+            <h2 className="text-2xl font-semibold text-white">
               Materials Needed
             </h2>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-muted">
               Open a clean popup with images and total amounts for everything in
               your crafting list.
             </p>
@@ -1171,34 +1145,28 @@ export default function CraftingManager({ isAdmin }: Props) {
               type="button"
               onClick={() => setIsTotalsModalOpen(true)}
               disabled={cart.length === 0}
-              className="mt-5 w-full rounded-2xl px-5 py-4 text-base font-black text-white shadow-lg shadow-indigo-950/30 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
-              style={{
-                background:
-                  cart.length === 0
-                    ? "linear-gradient(90deg,#374151,#4b5563)"
-                    : "linear-gradient(90deg,#10b981,#5865F2)",
-              }}
+              className="hub-primary mt-5 w-full"
             >
               Show total needed
             </button>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <div className="text-2xl font-black text-white">
+              <div className="rounded-xl border border-line bg-inset p-4">
+                <div className="text-2xl font-semibold text-white">
                   {shoppingSummary.expandedIngredients.length}
                 </div>
-                <div className="mt-1 text-sm text-gray-400">Raw items</div>
+                <div className="mt-1 text-sm text-muted">Raw items</div>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <div className="text-2xl font-black text-white">
+              <div className="rounded-xl border border-line bg-inset p-4">
+                <div className="text-2xl font-semibold text-white">
                   {shoppingSummary.subCraftedIngredients.length}
                 </div>
-                <div className="mt-1 text-sm text-gray-400">Sub-crafts</div>
+                <div className="mt-1 text-sm text-muted">Sub-crafts</div>
               </div>
             </div>
 
             {cart.length === 0 && (
-              <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-gray-400">
+              <div className="mt-4 rounded-xl border border-line bg-inset p-4 text-sm text-muted">
                 Add recipes to the crafting list first.
               </div>
             )}
@@ -1208,7 +1176,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                 {shoppingSummary.errors.map((error, index) => (
                   <div
                     key={`${error}-${index}`}
-                    className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+                    className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200"
                   >
                     {error}
                   </div>
@@ -1236,16 +1204,16 @@ export default function CraftingManager({ isAdmin }: Props) {
               className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             />
 
-            <div className="relative z-[10000] max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-white/10 bg-[#081527] p-5 shadow-2xl shadow-black/50 md:p-7">
+            <div className="relative z-[10000] max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-xl border border-line bg-[var(--surface)] p-5 shadow-lg shadow-black/50 md:p-7">
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-emerald-200/70">
+                  <p className="text-sm uppercase tracking-[0.12em] text-accent/70">
                     Crafting calculator
                   </p>
-                  <h2 className="mt-2 text-3xl font-black text-white">
+                  <h2 className="mt-2 text-3xl font-semibold text-white">
                     Total Needed To Craft
                   </h2>
-                  <p className="mt-2 text-sm text-gray-300">
+                  <p className="mt-2 text-sm text-muted">
                     Full material breakdown for your current crafting list with
                     saved item images.
                   </p>
@@ -1254,14 +1222,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                 <button
                   type="button"
                   onClick={() => setIsTotalsModalOpen(false)}
-                  className="self-start rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                  className="self-start rounded-xl border border-line bg-elevated px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
                 >
                   Close
                 </button>
               </div>
 
               {cart.length > 0 && (
-                <div className="mb-6 rounded-3xl border border-white/10 bg-black/20 p-4">
+                <div className="mb-6 rounded-xl border border-line bg-inset p-4">
                   <h3 className="font-bold text-white">Crafting list</h3>
                   <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {cart.map((entry) => {
@@ -1273,9 +1241,9 @@ export default function CraftingManager({ isAdmin }: Props) {
                       return (
                         <div
                           key={`modal-cart-${entry.itemId}`}
-                          className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3"
+                          className="flex items-center gap-3 rounded-xl border border-line bg-surface p-3"
                         >
-                          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-black/20">
+                          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-inset">
                             {item.image ? (
                               <img
                                 src={item.image}
@@ -1283,7 +1251,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-xs text-gray-500">
+                              <div className="flex h-full w-full items-center justify-center text-xs text-muted">
                                 No image
                               </div>
                             )}
@@ -1292,7 +1260,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                             <div className="truncate font-bold text-white">
                               {item.name}
                             </div>
-                            <div className="text-sm text-gray-400">
+                            <div className="text-sm text-muted">
                               Amount wanted: {entry.quantity}
                             </div>
                           </div>
@@ -1304,17 +1272,17 @@ export default function CraftingManager({ isAdmin }: Props) {
               )}
 
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-                <div className="rounded-3xl border border-emerald-400/10 bg-emerald-500/5 p-4 md:p-5">
+                <div className="rounded-xl border border-accent/10 bg-accent-strong/5 p-4 md:p-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-xl font-black text-white">
+                      <h3 className="text-xl font-semibold text-white">
                         Raw materials
                       </h3>
-                      <p className="mt-1 text-sm text-gray-400">
+                      <p className="mt-1 text-sm text-muted">
                         Final items you need to farm, buy, or collect.
                       </p>
                     </div>
-                    <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-sm font-bold text-white">
+                    <div className="rounded-full border border-line bg-inset px-3 py-1 text-sm font-bold text-white">
                       {shoppingSummary.expandedIngredients.length}
                     </div>
                   </div>
@@ -1326,9 +1294,9 @@ export default function CraftingManager({ isAdmin }: Props) {
                       return (
                         <div
                           key={`modal-expanded-${ingredient.name}`}
-                          className="overflow-hidden rounded-2xl border border-white/10 bg-black/20"
+                          className="overflow-hidden rounded-xl border border-line bg-inset"
                         >
-                          <div className="aspect-square bg-white/5">
+                          <div className="aspect-square bg-elevated">
                             {matchedItem?.image ? (
                               <img
                                 src={matchedItem.image}
@@ -1336,16 +1304,16 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-sm text-gray-500">
+                              <div className="flex h-full w-full items-center justify-center text-sm text-muted">
                                 No image
                               </div>
                             )}
                           </div>
                           <div className="p-4">
-                            <div className="truncate font-black text-white">
+                            <div className="truncate font-semibold text-white">
                               {ingredient.name}
                             </div>
-                            <div className="mt-2 rounded-xl bg-emerald-500/10 px-3 py-2 text-center text-2xl font-black text-white">
+                            <div className="mt-2 rounded-xl bg-accent-strong/10 px-3 py-2 text-center text-2xl font-semibold text-white">
                               {ingredient.amount}
                             </div>
                           </div>
@@ -1354,24 +1322,24 @@ export default function CraftingManager({ isAdmin }: Props) {
                     })}
 
                     {shoppingSummary.expandedIngredients.length === 0 && (
-                      <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-6 text-center text-sm text-gray-400 sm:col-span-2 lg:col-span-3">
+                      <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted sm:col-span-2 lg:col-span-3">
                         Add recipes to see total raw materials.
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-amber-400/10 bg-amber-500/5 p-4 md:p-5">
+                <div className="rounded-xl border border-amber-400/10 bg-amber-500/5 p-4 md:p-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-xl font-black text-white">
+                      <h3 className="text-xl font-semibold text-white">
                         Sub-crafts
                       </h3>
-                      <p className="mt-1 text-sm text-gray-400">
+                      <p className="mt-1 text-sm text-muted">
                         Items that are crafted along the way.
                       </p>
                     </div>
-                    <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-sm font-bold text-white">
+                    <div className="rounded-full border border-line bg-inset px-3 py-1 text-sm font-bold text-white">
                       {shoppingSummary.subCraftedIngredients.length}
                     </div>
                   </div>
@@ -1383,9 +1351,9 @@ export default function CraftingManager({ isAdmin }: Props) {
                       return (
                         <div
                           key={`modal-sub-${ingredient.name}`}
-                          className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3"
+                          className="flex items-center gap-3 rounded-xl border border-line bg-inset p-3"
                         >
-                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/5">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-elevated">
                             {matchedItem?.image ? (
                               <img
                                 src={matchedItem.image}
@@ -1393,7 +1361,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-xs text-gray-500">
+                              <div className="flex h-full w-full items-center justify-center text-xs text-muted">
                                 No image
                               </div>
                             )}
@@ -1403,12 +1371,12 @@ export default function CraftingManager({ isAdmin }: Props) {
                             <div className="truncate font-bold text-white">
                               {ingredient.name}
                             </div>
-                            <div className="text-sm text-gray-400">
+                            <div className="text-sm text-muted">
                               Needed before final craft
                             </div>
                           </div>
 
-                          <div className="rounded-xl bg-amber-500/10 px-3 py-2 text-xl font-black text-white">
+                          <div className="rounded-xl bg-amber-500/10 px-3 py-2 text-xl font-semibold text-white">
                             {ingredient.amount}
                           </div>
                         </div>
@@ -1416,7 +1384,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                     })}
 
                     {shoppingSummary.subCraftedIngredients.length === 0 && (
-                      <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-6 text-center text-sm text-gray-400">
+                      <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted">
                         No sub-crafts needed.
                       </div>
                     )}
@@ -1429,7 +1397,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                   {shoppingSummary.errors.map((error, index) => (
                     <div
                       key={`modal-error-${error}-${index}`}
-                      className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+                      className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200"
                     >
                       {error}
                     </div>
@@ -1459,16 +1427,16 @@ export default function CraftingManager({ isAdmin }: Props) {
               className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             />
 
-            <div className="relative z-[10000] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-[#081527] p-5 md:p-7 shadow-2xl shadow-black/50">
+            <div className="relative z-[10000] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border border-line bg-[var(--surface)] p-5 md:p-7 shadow-lg shadow-black/50">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-indigo-200/70">
+                  <p className="text-sm uppercase tracking-[0.12em] text-accent/70">
                     Crafting admin
                   </p>
                   <h2 className="text-3xl font-bold text-white mt-2">
                     {editingId ? "Edit Item" : "Add Recipe"}
                   </h2>
-                  <p className="text-sm text-gray-300 mt-2">
+                  <p className="text-sm text-muted mt-2">
                     {editingId
                       ? "Update the selected recipe or item and save the changes."
                       : "Create final recipes, raw materials, or non-raw sub-craft items with images and ingredients."}
@@ -1478,14 +1446,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                 <button
                   type="button"
                   onClick={closeRecipeModal}
-                  className="self-start rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                  className="self-start rounded-xl border border-line bg-elevated px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
                 >
                   Close
                 </button>
               </div>
 
               {!editingId && (
-                <div className="mb-6 grid grid-cols-1 gap-2 rounded-2xl border border-white/10 bg-black/20 p-2 md:grid-cols-3">
+                <div className="mb-6 grid grid-cols-1 gap-2 rounded-xl border border-line bg-inset p-2 md:grid-cols-3">
                   {[
                     { key: "recipe", label: "Recipe", desc: "Final craft" },
                     {
@@ -1505,19 +1473,19 @@ export default function CraftingManager({ isAdmin }: Props) {
                       onClick={() => setAdminModalTab(tab.key as AdminModalTab)}
                       className={`rounded-xl px-4 py-3 text-left transition ${
                         adminModalTab === tab.key
-                          ? "bg-indigo-500/30 text-white"
-                          : "text-gray-300 hover:bg-white/10"
+                          ? "bg-accent-strong/30 text-white"
+                          : "text-muted hover:bg-elevated"
                       }`}
                     >
                       <div className="font-bold">{tab.label}</div>
-                      <div className="text-xs text-gray-400">{tab.desc}</div>
+                      <div className="text-xs text-muted">{tab.desc}</div>
                     </button>
                   ))}
                 </div>
               )}
 
               {editingId && (
-                <div className="mb-6 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                <div className="mb-6 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
                   Editing keeps the current item data. Items with ingredients are
                   craftable; raw materials stay ingredient-free.
                 </div>
@@ -1537,7 +1505,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                           ? "Non-raw craft item name"
                           : "Final recipe name"
                     }
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                     required
                   />
 
@@ -1548,17 +1516,17 @@ export default function CraftingManager({ isAdmin }: Props) {
                       type="number"
                       min="1"
                       placeholder="Output per craft"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none"
+                      className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                     />
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3">
+                <div className="rounded-xl border border-line bg-inset p-4 space-y-3">
                   <div>
                     <label className="block text-sm font-semibold text-white mb-2">
                       Item image
                     </label>
-                    <p className="text-sm text-gray-400 mb-3">
+                    <p className="text-sm text-muted mb-3">
                       Upload an image to Supabase Storage so recipes, raw
                       materials, and non-raw items can all have pictures.
                     </p>
@@ -1571,11 +1539,11 @@ export default function CraftingManager({ isAdmin }: Props) {
                       const file = e.target.files?.[0];
                       if (file) uploadRecipeImage(file);
                     }}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-white/15"
+                    className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-elevated file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-white/15"
                   />
 
                   {uploadingImage && (
-                    <p className="text-sm text-indigo-200">
+                    <p className="text-sm text-accent">
                       Uploading image...
                     </p>
                   )}
@@ -1585,7 +1553,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                       <img
                         src={image}
                         alt="Item preview"
-                        className="h-32 w-full rounded-xl border border-white/10 object-cover bg-white/5"
+                        className="h-32 w-full rounded-xl border border-line object-cover bg-elevated"
                       />
 
                       <button
@@ -1602,7 +1570,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                     value={image}
                     onChange={(e) => setImage(e.target.value)}
                     placeholder="Or paste image URL manually"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                   />
                 </div>
 
@@ -1613,7 +1581,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                         <h3 className="text-lg font-semibold text-white">
                           Ingredients
                         </h3>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-muted">
                           Use the fast picker below, then adjust amounts in the selected list. Non-raw items can be built from raw materials or other craftable items.
                         </p>
                       </div>
@@ -1623,16 +1591,16 @@ export default function CraftingManager({ isAdmin }: Props) {
                         onClick={addIngredientRow}
                         className="shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white"
                         style={{
-                          background: "linear-gradient(90deg,#10b981,#059669)",
+                          background: "var(--accent)", color: "var(--inset)",
                         }}
                       >
                         Manual row
                       </button>
                     </div>
 
-                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-4">
+                    <div className="rounded-xl border border-line bg-inset p-4 space-y-4">
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_260px]">
-                        <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-2">
+                        <div className="grid grid-cols-2 gap-2 rounded-xl border border-line bg-surface p-2">
                           {[
                             {
                               key: "raw",
@@ -1655,12 +1623,12 @@ export default function CraftingManager({ isAdmin }: Props) {
                               }
                               className={`rounded-xl px-4 py-3 text-left transition ${
                                 ingredientPickerTab === tab.key
-                                  ? "bg-indigo-500/30 text-white"
-                                  : "text-gray-300 hover:bg-white/10"
+                                  ? "bg-accent-strong/30 text-white"
+                                  : "text-muted hover:bg-elevated"
                               }`}
                             >
                               <div className="font-bold">{tab.label}</div>
-                              <div className="text-xs text-gray-400">
+                              <div className="text-xs text-muted">
                                 {tab.count} saved
                               </div>
                             </button>
@@ -1673,7 +1641,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                             setIngredientPickerSearch(e.target.value)
                           }
                           placeholder="Search items..."
-                          className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none placeholder:text-gray-500"
+                          className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none placeholder:text-muted"
                         />
                       </div>
 
@@ -1684,9 +1652,9 @@ export default function CraftingManager({ isAdmin }: Props) {
                               key={item.id}
                               type="button"
                               onClick={() => addIngredientFromPicker(item)}
-                              className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] text-left transition hover:border-indigo-300/50 hover:bg-white/[0.08]"
+                              className="group overflow-hidden rounded-xl border border-line bg-surface text-left transition hover:border-accent/50 hover:bg-surface"
                             >
-                              <div className="aspect-square bg-black/20">
+                              <div className="aspect-square bg-inset">
                                 {item.image ? (
                                   <img
                                     src={item.image}
@@ -1694,7 +1662,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                     className="h-full w-full object-cover transition group-hover:scale-105"
                                   />
                                 ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-500">
+                                  <div className="flex h-full w-full items-center justify-center text-xs text-muted">
                                     No image
                                   </div>
                                 )}
@@ -1704,7 +1672,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 <div className="truncate text-sm font-bold text-white">
                                   {item.name}
                                 </div>
-                                <div className="mt-1 text-xs text-gray-400">
+                                <div className="mt-1 text-xs text-muted">
                                   Click to add
                                 </div>
                               </div>
@@ -1713,7 +1681,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                         </div>
 
                         {filteredIngredientPickerItems.length === 0 && (
-                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] p-6 text-center text-sm text-gray-400">
+                          <div className="rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-muted">
                             No items found in this tab.
                           </div>
                         )}
@@ -1722,7 +1690,7 @@ export default function CraftingManager({ isAdmin }: Props) {
 
                     <div className="flex items-center justify-between gap-3 pt-2">
                       <h4 className="font-bold text-white">Selected ingredients</h4>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-muted">
                         {ingredients.filter((ingredient) => ingredient.ingredient_name.trim()).length} selected
                       </span>
                     </div>
@@ -1730,11 +1698,11 @@ export default function CraftingManager({ isAdmin }: Props) {
                     {ingredients.map((ingredient, index) => (
                       <div
                         key={index}
-                        className="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3"
+                        className="rounded-xl border border-line bg-inset p-4 space-y-3"
                       >
                         <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
                           <div>
-                            <label className="block text-sm text-gray-300 mb-2">
+                            <label className="block text-sm text-muted mb-2">
                               Browse existing material/item
                             </label>
                             <select
@@ -1742,12 +1710,12 @@ export default function CraftingManager({ isAdmin }: Props) {
                               onChange={(e) =>
                                 handleLinkedItemChange(index, e.target.value)
                               }
-                              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+                              className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none appearance-none"
                               style={{ colorScheme: "dark" }}
                             >
                               <option
                                 value=""
-                                className="bg-[#0b0f1a] text-white"
+                                className="bg-[var(--surface)] text-white"
                               >
                                 Choose existing item / or type manually
                               </option>
@@ -1755,7 +1723,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 <option
                                   key={item.id}
                                   value={item.id}
-                                  className="bg-[#0b0f1a] text-white"
+                                  className="bg-[var(--surface)] text-white"
                                 >
                                   {item.crafting_recipe_ingredients.length === 0
                                     ? "[Material] "
@@ -1773,15 +1741,15 @@ export default function CraftingManager({ isAdmin }: Props) {
                               );
 
                               return (
-                                <div className="rounded-xl border border-white/10 bg-white/5 p-2">
+                                <div className="rounded-xl border border-line bg-elevated p-2">
                                   {linkedItem?.image ? (
                                     <img
                                       src={linkedItem.image}
                                       alt={linkedItem.name}
-                                      className="h-24 w-full rounded-lg object-cover bg-black/20"
+                                      className="h-24 w-full rounded-lg object-cover bg-inset"
                                     />
                                   ) : (
-                                    <div className="flex h-24 items-center justify-center rounded-lg bg-black/20 text-xs text-gray-500">
+                                    <div className="flex h-24 items-center justify-center rounded-lg bg-inset text-xs text-muted">
                                       No image
                                     </div>
                                   )}
@@ -1792,7 +1760,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                               );
                             })()
                           ) : (
-                            <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-3 text-sm text-gray-400">
+                            <div className="rounded-xl border border-dashed border-line bg-surface p-3 text-sm text-muted">
                               Pick an existing material to use its saved image,
                               or type a custom name below.
                             </div>
@@ -1800,7 +1768,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                         </div>
 
                         <div>
-                          <label className="block text-sm text-gray-300 mb-2">
+                          <label className="block text-sm text-muted mb-2">
                             Ingredient name
                           </label>
                           <input
@@ -1813,13 +1781,13 @@ export default function CraftingManager({ isAdmin }: Props) {
                               )
                             }
                             placeholder="Ingredient name"
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none"
+                            className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                           />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-[1fr_140px] gap-3">
                           <div>
-                            <label className="block text-sm text-gray-300 mb-2">
+                            <label className="block text-sm text-muted mb-2">
                               Amount
                             </label>
                             <input
@@ -1835,7 +1803,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                               min="0"
                               step="0.01"
                               placeholder="Amount"
-                              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none"
+                              className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                             />
                           </div>
 
@@ -1865,19 +1833,19 @@ export default function CraftingManager({ isAdmin }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+                  <div className="rounded-xl border border-accent/20 bg-accent-strong/10 p-4 text-sm text-accent">
                     This will save as a true raw material with an image and no
                     recipe ingredients. The calculator will use it as the final
                     base material when breaking down crafting prices.
                   </div>
                 )}
 
-                <div className="sticky bottom-0 -mx-5 md:-mx-7 -mb-5 md:-mb-7 mt-6 border-t border-white/10 bg-[#081527]/95 p-5 md:p-7 backdrop-blur">
+                <div className="sticky bottom-0 -mx-5 md:-mx-7 -mb-5 md:-mb-7 mt-6 border-t border-line bg-[var(--surface)]/95 p-5 md:p-7 backdrop-blur">
                   <div className="flex flex-col-reverse md:flex-row gap-3 md:justify-end">
                     <button
                       type="button"
                       onClick={closeRecipeModal}
-                      className="px-5 py-3 rounded-xl text-white font-semibold bg-white/10 border border-white/10 hover:bg-white/15"
+                      className="px-5 py-3 rounded-xl text-white font-semibold bg-elevated border border-line hover:bg-white/15"
                     >
                       Cancel
                     </button>
@@ -1887,7 +1855,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                       disabled={saving}
                       className="px-5 py-3 rounded-xl text-white font-semibold disabled:opacity-60"
                       style={{
-                        background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                        background: "var(--accent)", color: "var(--inset)",
                       }}
                     >
                       {saving

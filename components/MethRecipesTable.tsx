@@ -137,9 +137,9 @@ function comboLabel(recipe: Recipe) {
 
 function RecipesTableSkeleton({ isAdmin, rows = 12 }: { isAdmin: boolean; rows?: number }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-white/10 animate-pulse">
+    <div className="overflow-x-auto rounded-xl border border-line animate-pulse">
       <table className="w-full text-left text-sm text-white">
-        <thead className="border-b border-white/10 text-gray-300 bg-white/5">
+        <thead className="border-b border-line text-muted bg-elevated">
           <tr>
             <th className="px-4 py-4">Color</th>
             <th className="px-4 py-4">Fosfor</th>
@@ -154,15 +154,15 @@ function RecipesTableSkeleton({ isAdmin, rows = 12 }: { isAdmin: boolean; rows?:
 
         <tbody>
           {Array.from({ length: rows }).map((_, index) => (
-            <tr key={index} className="border-b border-white/5">
-              <td className="px-4 py-4"><div className="h-7 w-16 rounded-full bg-white/10" /></td>
-              <td className="px-4 py-4"><div className="h-5 w-12 rounded bg-white/10" /></td>
-              <td className="px-4 py-4"><div className="h-5 w-16 rounded bg-white/10" /></td>
-              <td className="px-4 py-4"><div className="h-5 w-10 rounded bg-white/10" /></td>
-              <td className="px-4 py-4"><div className="h-5 w-14 rounded bg-white/10" /></td>
-              <td className="px-4 py-4"><div className="h-5 w-20 rounded bg-white/10" /></td>
-              <td className="px-4 py-4"><div className="h-7 w-24 rounded-full bg-white/10" /></td>
-              {isAdmin && <td className="px-4 py-4"><div className="h-9 w-16 rounded-lg bg-white/10" /></td>}
+            <tr key={index} className="border-b border-line">
+              <td className="px-4 py-4"><div className="h-7 w-16 rounded-full bg-elevated" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-12 rounded bg-elevated" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-16 rounded bg-elevated" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-10 rounded bg-elevated" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-14 rounded bg-elevated" /></td>
+              <td className="px-4 py-4"><div className="h-5 w-20 rounded bg-elevated" /></td>
+              <td className="px-4 py-4"><div className="h-7 w-24 rounded-full bg-elevated" /></td>
+              {isAdmin && <td className="px-4 py-4"><div className="h-9 w-16 rounded-lg bg-elevated" /></td>}
             </tr>
           ))}
         </tbody>
@@ -796,7 +796,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
     <div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-white">Recipes</h2>
-        <p className="text-gray-300 mt-2">
+        <p className="text-muted mt-2">
           Browse recipes 50 at a time for the selected fosfor color.
         </p>
       </div>
@@ -818,57 +818,57 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         <div>
-          <label className="block text-sm text-gray-300 mb-2">Sort by</label>
+          <label className="block text-sm text-muted mb-2">Sort by</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+            className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none appearance-none"
             style={{ colorScheme: "dark" }}
           >
-            <option value="default" className="bg-[#0b0f1a] text-white">Default</option>
-            <option value="renhed-desc" className="bg-[#0b0f1a] text-white">Highest renhed</option>
-            <option value="renhed-asc" className="bg-[#0b0f1a] text-white">Lowest renhed</option>
-            <option value="stabiliseringstid-desc" className="bg-[#0b0f1a] text-white">Highest stabiliseringstid</option>
-            <option value="stabiliseringstid-asc" className="bg-[#0b0f1a] text-white">Lowest stabiliseringstid</option>
+            <option value="default" className="bg-[var(--surface)] text-white">Default</option>
+            <option value="renhed-desc" className="bg-[var(--surface)] text-white">Highest renhed</option>
+            <option value="renhed-asc" className="bg-[var(--surface)] text-white">Lowest renhed</option>
+            <option value="stabiliseringstid-desc" className="bg-[var(--surface)] text-white">Highest stabiliseringstid</option>
+            <option value="stabiliseringstid-asc" className="bg-[var(--surface)] text-white">Lowest stabiliseringstid</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-2">Recipe status</label>
+          <label className="block text-sm text-muted mb-2">Recipe status</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none appearance-none"
+            className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none appearance-none"
             style={{ colorScheme: "dark" }}
           >
-            <option value="all" className="bg-[#0b0f1a] text-white">All recipes</option>
-            <option value="completed" className="bg-[#0b0f1a] text-white">Only completed recipes</option>
-            <option value="missing" className="bg-[#0b0f1a] text-white">Only missing renhed/stabiliseringstid</option>
+            <option value="all" className="bg-[var(--surface)] text-white">All recipes</option>
+            <option value="completed" className="bg-[var(--surface)] text-white">Only completed recipes</option>
+            <option value="missing" className="bg-[var(--surface)] text-white">Only missing renhed/stabiliseringstid</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-2">Search combo</label>
+          <label className="block text-sm text-muted mb-2">Search combo</label>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Example: 100-20-50"
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none"
+            className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
           />
         </div>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-3">
-        <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-gray-200">
+        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">
           Loaded: <span className="font-bold text-white">{recipes.length}</span>
-          <span className="text-gray-400"> / {total}</span>
+          <span className="text-muted"> / {total}</span>
         </div>
 
-        <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-gray-200">
+        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">
           Completed: <span className="font-bold text-white">{completedCount}</span>
         </div>
 
-        <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-gray-200">
+        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">
           Missing: <span className="font-bold text-white">{missingCount}</span>
         </div>
 
@@ -885,11 +885,11 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         )}
       </div>
 
-      <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="mb-8 rounded-xl border border-line bg-elevated p-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
           <div>
             <h3 className="text-xl font-bold text-white">Random Missing Picker</h3>
-            <p className="text-sm text-gray-300 mt-1">
+            <p className="text-sm text-muted mt-1">
               Picks a random recipe that still needs renhed or stabiliseringstid.
             </p>
           </div>
@@ -897,10 +897,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           <button
             onClick={pickRandomMissingRecipe}
             disabled={isRolling || missingCount === 0}
-            className="px-5 py-3 rounded-xl text-sm font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: "linear-gradient(90deg,#8b5cf6,#ec4899,#f59e0b)",
-            }}
+            className="hub-primary"
           >
             {isRolling ? "Rolling..." : "Pick random missing recipe"}
           </button>
@@ -908,11 +905,11 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
         <div
           ref={rouletteViewportRef}
-          className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#06111f] h-[118px]"
+          className="relative overflow-hidden rounded-xl border border-line bg-[var(--surface)] h-[118px]"
         >
           <div className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-[4px] bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.8)] z-20" />
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#06111f] to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#06111f] to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[var(--surface)] to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[var(--surface)] to-transparent z-10" />
 
           <div
             key={rouletteKey}
@@ -935,7 +932,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                     className={`w-[208px] min-w-[208px] rounded-xl border p-4 ${
                       isWinner
                         ? "border-yellow-400 bg-yellow-500/20 shadow-[0_0_25px_rgba(250,204,21,0.25)]"
-                        : "border-white/10 bg-white/5"
+                        : "border-line bg-elevated"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-3">
@@ -947,7 +944,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                         {recipe.fosfor_color}
                       </span>
 
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted">
                         {recipe.renhed === null || recipe.stabiliseringstid === null
                           ? "Missing"
                           : "Done"}
@@ -958,7 +955,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                       {comboLabel(recipe)}
                     </div>
 
-                    <div className="mt-2 text-xs text-gray-300">
+                    <div className="mt-2 text-xs text-muted">
                       Renhed: {recipe.renhed ?? "—"} · Stabiliseringstid:{" "}
                       {recipe.stabiliseringstid ?? "—"}
                     </div>
@@ -981,9 +978,9 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
       {!loading && !error && (
         <>
-          <div className="overflow-x-auto rounded-2xl border border-white/10">
+          <div className="overflow-x-auto rounded-xl border border-line">
             <table className="w-full text-left text-sm text-white">
-              <thead className="border-b border-white/10 text-gray-300 bg-white/5">
+              <thead className="border-b border-line text-muted bg-elevated">
                 <tr>
                   <th className="px-4 py-4">Color</th>
                   <th className="px-4 py-4">Fosfor</th>
@@ -1009,7 +1006,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                       ref={(el) => {
                         rowRefs.current[recipe.id] = el;
                       }}
-                      className={`border-b border-white/5 hover:bg-white/5 ${
+                      className={`border-b border-line hover:bg-elevated ${
                         isSelected ? "bg-yellow-500/10 ring-1 ring-yellow-400/30" : ""
                       }`}
                     >
@@ -1036,7 +1033,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                             step="0.1"
                             value={renhedInput}
                             onChange={(e) => setRenhedInput(e.target.value)}
-                            className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white outline-none"
+                            className="w-28 px-3 py-2 rounded-lg bg-elevated border border-line text-white outline-none"
                           />
                         ) : (
                           recipe.renhed ?? "—"
@@ -1051,7 +1048,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                             inputMode="decimal"
                             value={stabiliseringstidInput}
                             onChange={(e) => setStabiliseringstidInput(e.target.value)}
-                            className="w-32 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white outline-none"
+                            className="w-32 px-3 py-2 rounded-lg bg-elevated border border-line text-white outline-none"
                           />
                         ) : (
                           recipe.stabiliseringstid ?? "—"
@@ -1060,7 +1057,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
                       <td className="px-4 py-4">
                         {isCompleted ? (
-                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-emerald-500/20 text-emerald-300 border-emerald-400/20">
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-accent-strong/20 text-accent border-accent/20">
                             Completed
                           </span>
                         ) : (
@@ -1078,14 +1075,14 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                                 onClick={() => saveEdit(recipe.id)}
                                 className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
                                 style={{
-                                  background: "linear-gradient(90deg,#10b981,#059669)",
+                                  background: "var(--accent)", color: "var(--inset)",
                                 }}
                               >
                                 Save
                               </button>
                               <button
                                 onClick={cancelEdit}
-                                className="px-3 py-2 rounded-lg text-sm font-semibold text-white bg-white/10 border border-white/10"
+                                className="px-3 py-2 rounded-lg text-sm font-semibold text-white bg-elevated border border-line"
                               >
                                 Cancel
                               </button>
@@ -1095,7 +1092,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                               onClick={() => startEdit(recipe)}
                               className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
                               style={{
-                                background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                                background: "var(--accent)", color: "var(--inset)",
                               }}
                             >
                               Edit
@@ -1111,7 +1108,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                   <tr>
                     <td
                       colSpan={isAdmin ? 8 : 7}
-                      className="px-4 py-8 text-center text-gray-400"
+                      className="px-4 py-8 text-center text-muted"
                     >
                       No recipes match your filters.
                     </td>
@@ -1130,7 +1127,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           <div ref={loadMoreRef} className="h-1" />
 
           {!hasMore && recipes.length > 0 ? (
-            <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-gray-400">
+            <div className="mt-4 rounded-xl border border-line bg-elevated px-4 py-3 text-center text-muted">
               You’ve reached the end of the recipes for this filter.
             </div>
           ) : null}

@@ -5,7 +5,7 @@ export default function Loading() {
         {[...Array(6)].map((_, i) => (
           <div
             key={i}
-            className="bg-neutral-800 animate-pulse rounded-xl h-32"
+            className="bg-elevated animate-pulse rounded-xl h-32"
           />
         ))}
       </div>

@@ -573,7 +573,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
   const isFormOpen = Boolean(newPinPosition || editingPin);
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#0fa8d2] text-white">
+    <div className="relative h-full w-full overflow-hidden bg-background text-foreground">
       <div
         ref={viewportRef}
         onWheel={handleWheel}
@@ -639,12 +639,12 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
         </div>
       </div>
 
-      <div className="absolute left-4 top-24 z-50 rounded-2xl border border-white/10 bg-black/70 p-3 shadow-xl backdrop-blur">
+      <div className="absolute left-4 top-4 z-30 rounded-xl border border-line bg-surface/95 p-3 shadow-lg backdrop-blur">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={zoomOut}
-            className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold transition hover:bg-white/20"
+            className="rounded-xl bg-elevated px-3 py-2 text-sm font-bold transition hover:bg-white/20"
           >
             -
           </button>
@@ -652,7 +652,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
           <button
             type="button"
             onClick={zoomIn}
-            className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold transition hover:bg-white/20"
+            className="rounded-xl bg-elevated px-3 py-2 text-sm font-bold transition hover:bg-white/20"
           >
             +
           </button>
@@ -660,13 +660,13 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
           <button
             type="button"
             onClick={resetView}
-            className="rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold transition hover:bg-white/20"
+            className="rounded-xl bg-elevated px-3 py-2 text-sm font-semibold transition hover:bg-white/20"
           >
             Reset
           </button>
         </div>
 
-        <p className="mt-2 text-xs text-gray-300">
+        <p className="mt-2 text-xs text-muted">
           Drag to move · Scroll to zoom
         </p>
 
@@ -677,10 +677,10 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
         )}
       </div>
 
-      <div className="absolute left-4 top-56 z-50 w-[280px] rounded-2xl border border-white/10 bg-black/70 p-3 shadow-xl backdrop-blur">
+      <div className="absolute left-4 top-40 z-30 hidden w-[250px] rounded-xl border border-line bg-surface/95 p-3 shadow-lg backdrop-blur md:block">
         <div className="mb-2 flex items-center justify-between gap-3">
           <h3 className="text-sm font-bold">Categories</h3>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-muted">
             {filteredPins.length}/{pins.length}
           </span>
         </div>
@@ -693,8 +693,8 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               onClick={() => setCategoryFilter(categoryName)}
               className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                 categoryFilter === categoryName
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white"
+                  ? "bg-accent-strong text-white"
+                  : "bg-elevated text-muted hover:bg-white/20 hover:text-white"
               }`}
             >
               {categoryName}
@@ -703,7 +703,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
         </div>
       </div>
 
-      <aside className="absolute right-4 top-24 z-50 max-h-[calc(100vh-7rem)] w-[360px] overflow-y-auto rounded-2xl border border-white/10 bg-black/75 p-5 text-white shadow-2xl backdrop-blur">
+      <aside className="hub-map-panel absolute z-30 overflow-y-auto rounded-xl border border-line bg-surface/95 p-5 text-foreground shadow-lg backdrop-blur">
         {isFormOpen && isAdmin ? (
           <form
             onSubmit={editingPin ? updatePin : createPin}
@@ -714,33 +714,33 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             </h2>
 
             <div>
-              <label className="mb-1 block text-sm text-gray-300">Title</label>
+              <label className="mb-1 block text-sm text-muted">Title</label>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-indigo-400"
+                className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
                 placeholder="Example: Black market"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-gray-300">
+              <label className="mb-1 block text-sm text-muted">
                 Category
               </label>
               <input
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-indigo-400"
+                className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
                 placeholder="Example: Dealer, Mechanic, Stash, Hideout"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-gray-300">Icon</label>
+              <label className="mb-1 block text-sm text-muted">Icon</label>
               <select
                 value={icon}
                 onChange={(event) => setIcon(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-indigo-400"
+                className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
               >
                 <option value="pin">Pin</option>
                 <option value="car">Car</option>
@@ -753,7 +753,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-gray-300">Color</label>
+              <label className="mb-1 block text-sm text-muted">Color</label>
               <div className="flex flex-wrap gap-2">
                 {[
                   "#ef4444",
@@ -782,19 +782,19 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               <input
                 value={color}
                 onChange={(event) => setColor(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-indigo-400"
+                className="mt-2 w-full rounded-xl border border-line bg-inset px-3 py-2 text-sm text-white outline-none focus:border-accent"
                 placeholder="#ef4444"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-gray-300">
+              <label className="mb-1 block text-sm text-muted">
                 Image URL
               </label>
               <input
                 value={imageUrl}
                 onChange={(event) => setImageUrl(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-indigo-400"
+                className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
                 placeholder="https://example.com/image.jpg"
               />
 
@@ -808,19 +808,19 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-gray-300">
+              <label className="mb-1 block text-sm text-muted">
                 Description
               </label>
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                className="min-h-24 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-indigo-400"
+                className="min-h-24 w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
                 placeholder="Write notes about this place..."
               />
             </div>
 
             {newPinPosition && (
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-muted">
                 Position: {newPinPosition.x_position}%,{" "}
                 {newPinPosition.y_position}%
               </div>
@@ -830,7 +830,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-60"
+                className="rounded-xl bg-accent-strong px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:opacity-60"
               >
                 {saving
                   ? "Saving..."
@@ -842,7 +842,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               <button
                 type="button"
                 onClick={cancelForm}
-                className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                className="rounded-xl bg-elevated px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
               >
                 Cancel
               </button>
@@ -854,7 +854,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               <PinSvg icon={selectedPin.icon} color={selectedPin.color} />
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-400">
+                <p className="text-xs uppercase tracking-wide text-muted">
                   {selectedPin.category || "General"}
                 </p>
                 <h2 className="text-2xl font-bold">{selectedPin.title}</h2>
@@ -869,11 +869,11 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               />
             )}
 
-            <p className="whitespace-pre-wrap text-sm text-gray-300">
+            <p className="whitespace-pre-wrap text-sm text-muted">
               {selectedPin.description || "No description added."}
             </p>
 
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-muted">
               Position: {selectedPin.x_position}%, {selectedPin.y_position}%
             </div>
 
@@ -881,7 +881,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               <button
                 type="button"
                 onClick={() => goToPin(selectedPin)}
-                className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                className="rounded-xl bg-elevated px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
               >
                 Go To
               </button>
@@ -891,7 +891,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                   <button
                     type="button"
                     onClick={() => startEditPin(selectedPin)}
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
+                    className="rounded-xl bg-accent-strong px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-strong"
                   >
                     Edit
                   </button>
@@ -909,7 +909,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               <button
                 type="button"
                 onClick={() => setSelectedPin(null)}
-                className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                className="rounded-xl bg-elevated px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
               >
                 Close
               </button>
@@ -919,7 +919,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
           <div className="space-y-4">
             <div>
               <h2 className="text-xl font-bold">Locations</h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted">
                 {filteredPins.length} of {pins.length} pins shown
               </p>
             </div>
@@ -927,7 +927,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none placeholder:text-gray-500 focus:border-indigo-400"
+              className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-sm text-white outline-none placeholder:text-muted focus:border-accent"
               placeholder="Search title, category or description..."
             />
 
@@ -939,8 +939,8 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                   onClick={() => setCategoryFilter(categoryName)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                     categoryFilter === categoryName
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white"
+                      ? "bg-accent-strong text-white"
+                      : "bg-elevated text-muted hover:bg-white/20 hover:text-white"
                   }`}
                 >
                   {categoryName}
@@ -949,7 +949,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             </div>
 
             {filteredPins.length === 0 ? (
-              <p className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-gray-400">
+              <p className="rounded-xl border border-line bg-elevated p-4 text-sm text-muted">
                 No pins match your search/filter.
               </p>
             ) : (
@@ -959,17 +959,17 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                     key={pin.id}
                     type="button"
                     onClick={() => goToPin(pin)}
-                    className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition hover:bg-white/10"
+                    className="flex w-full items-center gap-3 rounded-xl border border-line bg-elevated p-3 text-left transition hover:bg-elevated"
                   >
                     <PinSvg icon={pin.icon} color={pin.color} />
 
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold">{pin.title}</p>
-                      <p className="truncate text-xs text-gray-400">
+                      <p className="truncate text-xs text-muted">
                         {pin.category || "General"}
                       </p>
                       {pin.description && (
-                        <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+                        <p className="mt-1 line-clamp-2 text-xs text-muted">
                           {pin.description}
                         </p>
                       )}
@@ -992,7 +992,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
 
       {hoveredPin && (
         <div
-          className="pointer-events-none fixed z-[9999] w-72 rounded-2xl border border-white/10 bg-black/90 p-3 text-white shadow-2xl backdrop-blur"
+          className="pointer-events-none fixed z-[9999] w-72 rounded-xl border border-line bg-black/90 p-3 text-white shadow-lg backdrop-blur"
           style={{
             left: tooltipPosition.x,
             top: tooltipPosition.y,
@@ -1011,13 +1011,13 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
 
             <div>
               <h3 className="font-bold leading-tight">{hoveredPin.title}</h3>
-              <p className="text-xs uppercase tracking-wide text-gray-400">
+              <p className="text-xs uppercase tracking-wide text-muted">
                 {hoveredPin.category || "General"}
               </p>
             </div>
           </div>
 
-          <p className="mt-2 max-h-24 overflow-hidden whitespace-pre-wrap text-sm text-gray-300">
+          <p className="mt-2 max-h-24 overflow-hidden whitespace-pre-wrap text-sm text-muted">
             {hoveredPin.description || "No description added."}
           </p>
         </div>

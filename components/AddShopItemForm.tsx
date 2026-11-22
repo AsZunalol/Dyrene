@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const inputClass =
-  "w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-blue-300/60 focus:bg-white/[0.09]";
+  "w-full rounded-xl border border-line bg-surface px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-accent/60 focus:bg-white/[0.09]";
 
 export default function AddShopItemForm() {
   const [open, setOpen] = useState(false);
@@ -60,22 +60,22 @@ export default function AddShopItemForm() {
       <div className="mb-6 flex justify-end">
         <button
           onClick={() => setOpen(true)}
-          className="group rounded-2xl border border-blue-300/30 bg-blue-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5 hover:bg-blue-400"
+          className="group rounded-xl border border-accent/30 bg-accent-strong px-5 py-3 text-sm font-bold text-white shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:bg-accent-strong"
         >
           + Add shop item
         </button>
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-white/10 bg-[#071b31] text-white shadow-2xl">
-            <div className="border-b border-white/10 bg-white/[0.04] px-6 py-5">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl overflow-hidden rounded-xl border border-line bg-[var(--surface)] text-white shadow-lg">
+            <div className="border-b border-line bg-surface px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-200/70">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent/70">
                     Admin panel
                   </p>
-                  <h2 className="mt-1 text-2xl font-black">Add Shop Item</h2>
+                  <h2 className="mt-1 text-2xl font-semibold">Add Shop Item</h2>
                   <p className="mt-1 text-sm text-white/55">
                     Create a clean shop card with price, category, stock and image.
                   </p>
@@ -83,7 +83,7 @@ export default function AddShopItemForm() {
 
                 <button
                   onClick={() => setOpen(false)}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-xl border border-line px-3 py-2 text-white/70 transition hover:bg-elevated hover:text-white"
                 >
                   ✕
                 </button>
@@ -113,10 +113,10 @@ export default function AddShopItemForm() {
                     onChange={(e) => setCategory(e.target.value)}
                     className={inputClass}
                   >
-                    <option className="bg-[#071b31]" value="weapon">
+                    <option className="bg-[var(--surface)]" value="weapon">
                       Weapon
                     </option>
-                    <option className="bg-[#071b31]" value="item">
+                    <option className="bg-[var(--surface)]" value="item">
                       Item
                     </option>
                   </select>
@@ -167,14 +167,14 @@ export default function AddShopItemForm() {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="w-full rounded-2xl border border-white/10 px-4 py-3 font-bold text-white/80 transition hover:bg-white/10 hover:text-white"
+                  className="w-full rounded-xl border border-line px-4 py-3 font-bold text-white/80 transition hover:bg-elevated hover:text-white"
                 >
                   Cancel
                 </button>
 
                 <button
                   disabled={loading}
-                  className="w-full rounded-2xl bg-blue-500 px-4 py-3 font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl bg-accent-strong px-4 py-3 font-bold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading ? "Adding..." : "Add item"}
                 </button>

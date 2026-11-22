@@ -22,11 +22,8 @@ export default async function CraftingPage() {
   const isAdmin = Boolean(profile?.is_admin);
 
   return (
-    <main className="relative min-h-screen overflow-hidden text-white">
-
-      <div className="relative z-10 w-full px-4 pb-10 pt-28 sm:px-6 lg:px-8 2xl:px-10">
-        <CraftingManager isAdmin={isAdmin} />
-      </div>
+    <main className="hub-page max-w-none">
+      <CraftingManager isAdmin={isAdmin} />
     </main>
   );
 }

@@ -23,8 +23,8 @@ export default function PageTransitionLoader({
 
   return (
     <div
-      className={`transition-all duration-300 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
+      className={`transition-opacity duration-300 ease-out ${
+        visible ? "opacity-100" : "opacity-0"
       }`}
     >
       {children}

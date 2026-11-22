@@ -63,129 +63,39 @@ export default async function TrojanGuidePage({
   const authorName = getDiscordDisplayName(authorProfile);
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-emerald-50">
-
-      <div className="relative z-10 px-3 pt-24 pb-6 sm:px-5 lg:px-8">
-        <div className="mx-auto max-w-[96rem]">
-          <Link
-            href="/trojan"
-            className="mb-6 inline-flex rounded-xl border border-emerald-400/20 bg-black/40 px-4 py-2 font-mono text-sm font-semibold text-emerald-200 hover:bg-emerald-500/10 hover:text-white"
-          >
-            ← cd ../trojan
-          </Link>
-
-          <article className="min-h-[calc(100vh-9rem)] overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/60 shadow-[0_0_50px_rgba(16,185,129,0.12)] backdrop-blur">
-            <div className="flex items-center gap-2 border-b border-emerald-400/20 bg-emerald-950/30 px-5 py-3">
-              <span className="h-3 w-3 rounded-full bg-red-400/90" />
-              <span className="h-3 w-3 rounded-full bg-yellow-300/90" />
-              <span className="h-3 w-3 rounded-full bg-emerald-400/90" />
-              <span className="ml-3 font-mono text-xs text-emerald-300/80">
-                guide@trojan:~/{guide.id.slice(0, 8)}
-              </span>
+    <main className="hub-page">
+      <Link href="/trojan" className="hub-secondary mb-6">All guides</Link>
+      <article className="hub-panel overflow-hidden">
+        {guide.cover_image && <img src={guide.cover_image} alt={guide.title} className="h-56 w-full object-cover sm:h-72" />}
+        <div className="p-5 sm:p-8">
+          <div className="mb-4 flex flex-wrap gap-2 text-xs font-semibold">
+            {guide.category && <span className="rounded-lg border border-accent/20 bg-accent/10 px-3 py-1 text-accent">{guide.category}</span>}
+            {guide.difficulty && <span className="rounded-lg border border-line bg-elevated px-3 py-1 text-muted">{guide.difficulty}</span>}
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{guide.title}</h1>
+          {guide.short_description && <p className="mt-3 max-w-3xl text-base leading-7 text-muted">{guide.short_description}</p>}
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-y border-line py-4 text-sm text-muted">
+            <div className="flex items-center gap-3">
+              {authorProfile?.avatar_url && <img src={authorProfile.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />}
+              <span>By <span className="text-foreground">{authorName}</span></span>
             </div>
-
-            {guide.cover_image ? (
-              <div className="relative border-b border-emerald-400/20">
-                <img
-                  src={guide.cover_image}
-                  alt={guide.title}
-                  className="h-56 w-full object-cover opacity-90 sm:h-64 lg:h-72"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+            <span>Updated {new Intl.DateTimeFormat("da-DK", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(guide.updated_at || guide.created_at))}</span>
+          </div>
+          <TrojanGuideContent html={guide.content || ""} />
+          {images.length > 0 && (
+            <section className="mt-10">
+              <h2 className="hub-section-title mb-4">Screenshots</h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {images.map((image, index) => (
+                  <a key={image + index} href={image} target="_blank" rel="noreferrer" className="overflow-hidden rounded-xl border border-line bg-inset">
+                    <img src={image} alt={guide.title + " image " + (index + 1)} className="h-64 w-full object-cover" />
+                  </a>
+                ))}
               </div>
-            ) : null}
-
-            <div className="p-5 sm:p-7 lg:p-10">
-              <div className="mb-4 flex flex-wrap gap-2">
-                {guide.category ? (
-                  <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-bold uppercase tracking-wide text-emerald-200">
-                    #{guide.category}
-                  </span>
-                ) : null}
-
-                {guide.difficulty ? (
-                  <span className="rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 font-mono text-xs font-bold uppercase tracking-wide text-cyan-200">
-                    clearance: {guide.difficulty}
-                  </span>
-                ) : null}
-              </div>
-
-              <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl">
-                {guide.title}
-              </h1>
-
-              {guide.short_description ? (
-                <p className="mt-3 text-lg text-emerald-100/75">
-                  {guide.short_description}
-                </p>
-              ) : null}
-
-              <div className="mt-5 grid gap-3 rounded-xl border border-emerald-400/15 bg-black/40 p-4 font-mono text-sm text-emerald-300/80 lg:grid-cols-3">
-                <div>
-                  <span className="text-emerald-400">status:</span> online
-                </div>
-
-                <div className="inline-flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
-                  <span className="text-emerald-400">last updated:</span>
-                  <span>
-                    {new Intl.DateTimeFormat("da-DK", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }).format(new Date(guide.updated_at || guide.created_at))}
-                  </span>
-                </div>
-
-                <div className="inline-flex items-center gap-2 lg:justify-end">
-                  {authorProfile?.avatar_url ? (
-                    <img
-                      src={authorProfile.avatar_url}
-                      alt={authorName}
-                      className="h-6 w-6 rounded-full border border-cyan-300/30 object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-500/10 text-xs text-cyan-200">
-                      @
-                    </span>
-                  )}
-                  <span className="text-cyan-400">author:</span>
-                  <span className="text-cyan-100">{authorName}</span>
-                </div>
-              </div>
-
-              <TrojanGuideContent html={guide.content || ""} />
-
-              {images.length > 0 ? (
-                <div className="mt-10">
-                  <h2 className="mb-4 font-mono text-2xl font-black text-white">
-                    ./extra-screenshots
-                  </h2>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {images.map((image, index) => (
-                      <a
-                        key={`${image}-${index}`}
-                        href={image}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/45 hover:bg-emerald-500/10"
-                      >
-                        <img
-                          src={image}
-                          alt={`${guide.title} image ${index + 1}`}
-                          className="h-64 w-full object-cover"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </article>
+            </section>
+          )}
         </div>
-      </div>
-    </div>
+      </article>
+    </main>
   );
 }

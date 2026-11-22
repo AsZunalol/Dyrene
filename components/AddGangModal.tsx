@@ -64,7 +64,7 @@ export default function AddGangModal() {
   }
 
   const inputClass =
-    "w-full rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-blue-400/50 focus:bg-white/[0.1]";
+    "w-full rounded-xl border border-line bg-surface px-4 py-3 text-white outline-none transition placeholder:text-muted focus:border-accent/50 focus:bg-white/[0.1]";
 
   const modal =
     open &&
@@ -72,22 +72,22 @@ export default function AddGangModal() {
       <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
         <form
           onSubmit={addGang}
-          className="relative max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-[2rem] border border-white/10 bg-[#071525]/95 p-6 text-white shadow-2xl shadow-black/50"
+          className="relative max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-xl border border-line bg-[var(--surface)]/95 p-6 text-white shadow-lg shadow-black/50"
         >
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-2xl text-white transition hover:bg-red-500/20 hover:text-red-200"
+            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-line bg-elevated text-2xl text-white transition hover:bg-red-500/20 hover:text-red-200"
           >
             ×
           </button>
 
           <div className="mb-6 pr-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
               New relation
             </p>
-            <h2 className="mt-2 text-3xl font-black">Add Gang</h2>
-            <p className="mt-2 text-sm text-slate-400">
+            <h2 className="mt-2 text-3xl font-semibold">Add Gang</h2>
+            <p className="mt-2 text-sm text-muted">
               Add a gang profile with image, relation status and short notes.
             </p>
           </div>
@@ -101,9 +101,9 @@ export default function AddGangModal() {
               required
             />
 
-            <label className="block rounded-2xl border border-dashed border-white/15 bg-white/[0.04] p-4 transition hover:bg-white/[0.07]">
+            <label className="block rounded-xl border border-dashed border-line bg-surface p-4 transition hover:bg-surface">
               <span className="text-sm font-semibold text-white">Gang image</span>
-              <span className="mt-1 block text-xs text-slate-400">
+              <span className="mt-1 block text-xs text-muted">
                 Upload a banner or logo for the card.
               </span>
               <input
@@ -113,19 +113,19 @@ export default function AddGangModal() {
                   const file = e.target.files?.[0];
                   if (file) uploadGangImage(file);
                 }}
-                className="mt-3 w-full text-sm text-slate-300 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-blue-500"
+                className="mt-3 w-full text-sm text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-accent-strong file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-accent-strong"
               />
             </label>
 
             {uploadingImage && (
-              <p className="text-sm text-slate-400">Uploading image...</p>
+              <p className="text-sm text-muted">Uploading image...</p>
             )}
 
             {image && (
               <img
                 src={image}
                 alt="Gang preview"
-                className="h-40 w-full rounded-2xl border border-white/10 object-cover"
+                className="h-40 w-full rounded-xl border border-line object-cover"
               />
             )}
 
@@ -139,12 +139,12 @@ export default function AddGangModal() {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-[#061625] px-4 py-3 text-white outline-none transition focus:border-blue-400/50"
+              className="w-full rounded-xl border border-line bg-[var(--surface)] px-4 py-3 text-white outline-none transition focus:border-accent/50"
             >
-              <option className="bg-[#061625] text-white" value="friendly">
+              <option className="bg-[var(--surface)] text-white" value="friendly">
                 Friendly
               </option>
-              <option className="bg-[#061625] text-white" value="conflict">
+              <option className="bg-[var(--surface)] text-white" value="conflict">
                 In Conflict
               </option>
             </select>
@@ -152,7 +152,7 @@ export default function AddGangModal() {
             <button
               type="submit"
               disabled={loading || uploadingImage}
-              className="w-full rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white shadow-lg shadow-blue-950/30 transition hover:-translate-y-0.5 hover:bg-blue-500 disabled:translate-y-0 disabled:opacity-60"
+              className="w-full rounded-xl bg-accent-strong px-4 py-3 font-bold text-white shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:translate-y-0 disabled:opacity-60"
             >
               {loading ? "Adding..." : "Add Gang"}
             </button>
@@ -166,7 +166,7 @@ export default function AddGangModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white shadow-lg shadow-blue-950/30 transition hover:-translate-y-0.5 hover:bg-blue-500"
+        className="inline-flex items-center justify-center rounded-xl bg-accent-strong px-5 py-3 font-bold text-white shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong"
       >
         + Add Gang
       </button>

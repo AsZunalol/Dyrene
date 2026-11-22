@@ -103,30 +103,30 @@ type EditModalProps = {
 function CarCardSkeleton() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-white/10 shadow-lg animate-pulse"
+      className="overflow-hidden rounded-xl border border-line shadow-lg animate-pulse"
       style={{
         background:
-          "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
+          "var(--surface)",
         backdropFilter: "blur(10px)",
       }}
     >
-      <div className="relative h-56 overflow-hidden bg-white/[0.08]">
+      <div className="relative h-56 overflow-hidden bg-surface">
         <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-          <div className="h-7 w-20 rounded-full bg-white/10" />
-          <div className="h-7 w-24 rounded-full bg-white/10" />
+          <div className="h-7 w-20 rounded-full bg-elevated" />
+          <div className="h-7 w-24 rounded-full bg-elevated" />
         </div>
 
-        <div className="absolute top-3 right-3 h-7 w-24 rounded-full bg-white/10" />
-        <div className="absolute bottom-3 left-3 h-7 w-24 rounded-full bg-white/10" />
+        <div className="absolute top-3 right-3 h-7 w-24 rounded-full bg-elevated" />
+        <div className="absolute bottom-3 left-3 h-7 w-24 rounded-full bg-elevated" />
       </div>
 
       <div className="p-5 flex items-center justify-between gap-3">
         <div className="space-y-2 flex-1 min-w-0">
-          <div className="h-6 w-40 max-w-full rounded-lg bg-white/10" />
-          <div className="h-4 w-24 rounded-lg bg-white/10" />
+          <div className="h-6 w-40 max-w-full rounded-lg bg-elevated" />
+          <div className="h-4 w-24 rounded-lg bg-elevated" />
         </div>
 
-        <div className="h-10 w-20 rounded-xl bg-white/10 shrink-0" />
+        <div className="h-10 w-20 rounded-xl bg-elevated shrink-0" />
       </div>
     </div>
   );
@@ -160,7 +160,7 @@ function CarImage({ src, alt }: { src?: string | null; alt: string }) {
 
   if (!src || failed) {
     return (
-      <div className="w-full h-full bg-white/5 flex items-center justify-center text-gray-300">
+      <div className="w-full h-full bg-elevated flex items-center justify-center text-muted">
         No image
       </div>
     );
@@ -169,7 +169,7 @@ function CarImage({ src, alt }: { src?: string | null; alt: string }) {
   return (
     <>
       <div
-        className={`absolute inset-0 bg-white/5 transition-opacity duration-500 ${
+        className={`absolute inset-0 bg-elevated transition-opacity duration-500 ${
           loaded ? "opacity-0" : "opacity-100"
         }`}
       />
@@ -285,24 +285,24 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl rounded-2xl border border-white/10 shadow-2xl"
+        className="w-full max-w-2xl rounded-xl border border-line shadow-lg"
         style={{
           background:
-            "linear-gradient(180deg, rgba(20,20,25,0.96), rgba(15,15,20,0.94))",
+            "var(--surface)",
           backdropFilter: "blur(12px)",
         }}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-line">
           <div>
             <h2 className="text-xl font-bold text-white">Edit Car</h2>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-muted">
               Update or delete this listing
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl leading-none"
+            className="text-muted hover:text-white text-2xl leading-none"
           >
             ×
           </button>
@@ -314,14 +314,14 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Car name"
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20"
+              className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
               required
             />
             <input
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
               placeholder="Brand"
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20"
+              className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
             />
           </div>
 
@@ -331,13 +331,13 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Price"
               type="number"
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20"
+              className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
             />
             <input
               value={image}
               onChange={(e) => setImage(e.target.value)}
               placeholder="Image URL"
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20 md:col-span-2"
+              className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20 md:col-span-2"
             />
           </div>
 
@@ -345,7 +345,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-white/20"
+              className="px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none focus:border-white/20"
             >
               <option value="store">store</option>
               <option value="vin-scratch">vin-scratch</option>
@@ -379,7 +379,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
                 disabled={saving || deleting}
                 className="px-5 py-3 rounded-xl text-white font-semibold disabled:opacity-60"
                 style={{
-                  background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                  background: "var(--accent)", color: "var(--inset)",
                 }}
               >
                 {saving ? "Saving…" : "Save changes"}
@@ -702,7 +702,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col gap-2 text-sm text-gray-300 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
           <p>Loading cars…</p>
           <p>Showing highest price first</p>
         </div>
@@ -722,7 +722,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or brand..."
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-400 outline-none focus:border-white/20"
+            className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
           />
         </div>
 
@@ -732,11 +732,11 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
               filter === "all"
                 ? "text-white"
-                : "text-gray-300 bg-white/5 border border-white/10"
+                : "text-muted bg-elevated border border-line"
             }`}
             style={
               filter === "all"
-                ? { background: "linear-gradient(90deg,#5865F2,#6772E5)" }
+                ? { background: "var(--accent)", color: "var(--inset)", }
                 : undefined
             }
           >
@@ -748,11 +748,11 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
               filter === "store"
                 ? "text-white"
-                : "text-gray-300 bg-white/5 border border-white/10"
+                : "text-muted bg-elevated border border-line"
             }`}
             style={
               filter === "store"
-                ? { background: "linear-gradient(90deg,#5865F2,#6772E5)" }
+                ? { background: "var(--accent)", color: "var(--inset)", }
                 : undefined
             }
           >
@@ -764,11 +764,11 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
               filter === "vin-scratch"
                 ? "text-white"
-                : "text-gray-300 bg-white/5 border border-white/10"
+                : "text-muted bg-elevated border border-line"
             }`}
             style={
               filter === "vin-scratch"
-                ? { background: "linear-gradient(90deg,#5865F2,#6772E5)" }
+                ? { background: "var(--accent)", color: "var(--inset)", }
                 : undefined
             }
           >
@@ -777,13 +777,13 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 text-sm text-gray-300 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
         <p>{isRefreshing ? "Updating results…" : resultText}</p>
         <p>Showing highest price first</p>
       </div>
 
       {!cars.length ? (
-        <div className="p-6 rounded-xl border border-white/10 bg-white/5 text-gray-400">
+        <div className="p-6 rounded-xl border border-line bg-elevated text-muted">
           No cars found.
         </div>
       ) : (
@@ -792,14 +792,14 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
             {cars.map((car) => (
               <div
                 key={car.id}
-                className="group overflow-hidden rounded-2xl border border-white/10 shadow-lg transition duration-300 hover:-translate-y-1 hover:border-white/20"
+                className="group overflow-hidden rounded-xl border border-line shadow-lg transition duration-300 hover:-translate-y-1 hover:border-white/20"
                 style={{
                   background:
-                    "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
+                    "var(--surface)",
                   backdropFilter: "blur(10px)",
                 }}
               >
-                <div className="relative h-56 overflow-hidden bg-black/20">
+                <div className="relative h-56 overflow-hidden bg-inset">
                   <CarImage src={car.image} alt={car.name} />
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 transition-opacity duration-300 group-hover:from-black/85" />
@@ -807,7 +807,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
 
                   <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                     {car.brand ? (
-                      <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                      <span className="rounded-full border border-line bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
                         {car.brand}
                       </span>
                     ) : null}
@@ -825,7 +825,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
 
                   {typeof car.price === "number" ? (
                     <div className="absolute top-3 right-3">
-                      <span className="rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md shadow-lg shadow-black/20">
+                      <span className="rounded-full border border-line bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md shadow-lg shadow-black/20">
                         {formatPrice(car.price)}
                       </span>
                     </div>
@@ -845,7 +845,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                     <h3 className="truncate text-xl font-bold text-white">
                       {car.name}
                     </h3>
-                    <p className="mt-1 text-sm text-gray-400">
+                    <p className="mt-1 text-sm text-muted">
                       {prettyStatus(car.status)}
                     </p>
                   </div>
@@ -855,7 +855,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                       onClick={() => setEditingCar(car)}
                       className="shrink-0 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-transform duration-200 hover:scale-105"
                       style={{
-                        background: "linear-gradient(90deg,#5865F2,#6772E5)",
+                        background: "var(--accent)", color: "var(--inset)",
                       }}
                     >
                       Edit
@@ -877,7 +877,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
       <div ref={loadMoreRef} className="h-1" />
 
       {!hasMore && cars.length ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-gray-400">
+        <div className="rounded-xl border border-line bg-elevated px-4 py-3 text-center text-muted">
           You’ve reached the end of the garage.
         </div>
       ) : null}

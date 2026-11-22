@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import TrojanGuides from "@/components/TrojanGuides";
@@ -77,41 +78,9 @@ export default async function TrojanPage() {
   });
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-emerald-50">
-
-      <div className="relative z-10 px-6 pt-32 pb-12">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8 overflow-hidden rounded-2xl border border-emerald-400/20 bg-black/55 shadow-[0_0_50px_rgba(16,185,129,0.12)] backdrop-blur">
-            <div className="flex items-center gap-2 border-b border-emerald-400/20 bg-emerald-950/30 px-5 py-3">
-              <span className="h-3 w-3 rounded-full bg-red-400/90" />
-              <span className="h-3 w-3 rounded-full bg-yellow-300/90" />
-              <span className="h-3 w-3 rounded-full bg-emerald-400/90" />
-              <span className="ml-3 font-mono text-xs text-emerald-300/80">
-                root@dyrene:~/trojan-guides
-              </span>
-            </div>
-
-            <div className="p-8">
-              <p className="font-mono text-sm uppercase tracking-[0.35em] text-emerald-300/80">
-                Dyrene Intel System
-              </p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-white sm:text-5xl">
-                Trojan Terminal
-              </h1>
-              <p className="mt-4 max-w-3xl text-lg text-emerald-100/75">
-                Hacking guides, screenshots, commands, notes, and step-by-step tutorials built like a clean terminal archive.
-              </p>
-
-              <div className="mt-6 rounded-xl border border-emerald-400/20 bg-black/50 p-4 font-mono text-sm text-emerald-200 shadow-inner">
-                <span className="text-emerald-400">$</span> load --guides --mode=roleplay --status=online
-                <span className="ml-2 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-emerald-300" />
-              </div>
-            </div>
-          </div>
-
-          <TrojanGuides initialGuides={guidesWithAuthors} isAdmin={isAdmin} />
-        </div>
-      </div>
-    </div>
+    <main className="hub-page">
+      <PageHeader icon="terminal" eyebrow="Knowledge base" title="Trojan guides" description="Your shared library of roleplay guides, screenshots, commands, and walkthroughs." />
+      <TrojanGuides initialGuides={guidesWithAuthors} isAdmin={isAdmin} />
+    </main>
   );
 }

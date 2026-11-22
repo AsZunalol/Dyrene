@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
@@ -83,32 +84,14 @@ export default async function AdminPage() {
     );
 
     return (
-      <div className="relative min-h-screen overflow-hidden">
-
-        <div className="relative z-10 px-6 pt-32 pb-12">
-          <div className="max-w-7xl mx-auto">
-            <div
-              className="rounded-2xl p-8 border border-white/10 shadow-lg mb-8"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              <h1 className="text-4xl font-bold text-white">Admin Panel</h1>
-              <p className="text-gray-300 mt-2">
-                Manage users and Discord roles
-              </p>
-            </div>
-
-            <AdminUsersTable
+    <main className="hub-page">
+      <PageHeader icon="shield" eyebrow="Management" title="Administration" description="Manage members, review recent activity, and update Discord roles." />
+      <section className="hub-panel p-4 sm:p-6"><AdminUsersTable
               users={usersWithoutDiscordRoles}
               assignableRoles={assignableRoles}
-            />
-          </div>
-        </div>
-      </div>
-    );
+            /></section>
+    </main>
+  );
   }
 
   let guildRoles: RoleOption[] = [];
@@ -157,25 +140,9 @@ export default async function AdminPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-
-      <div className="relative z-10 px-6 pt-32 pb-12">
-        <div className="max-w-7xl mx-auto">
-          <div
-            className="rounded-2xl p-8 border border-white/10 shadow-lg mb-8"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            <h1 className="text-4xl font-bold text-white">Admin Panel</h1>
-            <p className="text-gray-300 mt-2">Manage users and Discord roles</p>
-          </div>
-
-          <AdminUsersTable users={users} assignableRoles={assignableRoles} />
-        </div>
-      </div>
-    </div>
+    <main className="hub-page">
+      <PageHeader icon="shield" eyebrow="Management" title="Administration" description="Manage members, review recent activity, and update Discord roles." />
+      <section className="hub-panel p-4 sm:p-6"><AdminUsersTable users={users} assignableRoles={assignableRoles} /></section>
+    </main>
   );
 }

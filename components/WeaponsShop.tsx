@@ -1,5 +1,7 @@
 "use client";
 
+import PageHeader from "@/components/PageHeader";
+
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
@@ -17,7 +19,7 @@ type CartItem = ShopItem & {
 };
 
 const inputClass =
-  "w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-blue-300/60 focus:bg-white/[0.09]";
+  "w-full rounded-xl border border-line bg-surface px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-accent/60 focus:bg-white/[0.09]";
 
 function formatPrice(price: number) {
   return `${price.toLocaleString("da-DK")} DKK`;
@@ -228,39 +230,29 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <>
-      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/20 backdrop-blur">
-        <div className="border-b border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.35em] text-blue-200/75">
-                Dyrene marketplace
-              </p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">
-                Shop
-              </h1>
-              <p className="mt-3 max-w-2xl text-base text-white/60">
-                Browse items, check stock and send the full purchase to Discord in one clean request.
-              </p>
-            </div>
+      <section className="overflow-hidden rounded-xl border border-line bg-surface shadow-lg shadow-black/20 backdrop-blur">
+        <div className="border-b border-line bg-surface p-6 sm:p-8">
+          <div className="flex flex-col gap-4">
+            <PageHeader icon="shop" eyebrow="Marketplace" title="Shop" description="Browse supplies, check stock, and send an order to Discord." />
 
             <div className="grid grid-cols-3 gap-3 sm:min-w-[28rem]">
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div className="rounded-xl border border-line bg-inset p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/40">
                   Items
                 </p>
-                <p className="mt-1 text-2xl font-black">{items.length}</p>
+                <p className="mt-1 text-2xl font-semibold">{items.length}</p>
               </div>
-              <div className="rounded-2xl border border-emerald-300/20 bg-emerald-500/10 p-4">
+              <div className="rounded-xl border border-accent/20 bg-accent-strong/10 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/40">
                   Stock
                 </p>
-                <p className="mt-1 text-2xl font-black">{totalStock}</p>
+                <p className="mt-1 text-2xl font-semibold">{totalStock}</p>
               </div>
-              <div className="rounded-2xl border border-blue-300/20 bg-blue-500/10 p-4">
+              <div className="rounded-xl border border-accent/20 bg-accent-strong/10 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/40">
                   Cart
                 </p>
-                <p className="mt-1 text-2xl font-black">{cart.length}</p>
+                <p className="mt-1 text-2xl font-semibold">{cart.length}</p>
               </div>
             </div>
           </div>
@@ -268,13 +260,13 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
         <div className="grid gap-6 p-6 lg:grid-cols-[1fr_360px] lg:p-8">
           <div>
-            <div className="mb-6 rounded-3xl border border-white/10 bg-black/20 p-4">
+            <div className="mb-6 rounded-xl border border-line bg-inset p-4">
               <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search the shop..."
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-blue-300/60"
+                  className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-accent/60"
                 />
 
                 <div className="flex flex-wrap gap-2">
@@ -282,10 +274,10 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                     <button
                       key={category}
                       onClick={() => setActiveCategory(category)}
-                      className={`rounded-2xl px-4 py-3 text-sm font-bold capitalize transition ${
+                      className={`rounded-xl px-4 py-3 text-sm font-bold capitalize transition ${
                         activeCategory === category
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
-                          : "border border-white/10 bg-white/[0.04] text-white/65 hover:bg-white/10 hover:text-white"
+                          ? "bg-accent-strong text-white shadow-lg shadow-accent/20"
+                          : "border border-line bg-surface text-white/65 hover:bg-elevated hover:text-white"
                       }`}
                     >
                       {category}
@@ -296,17 +288,17 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
             </div>
 
             {message && (
-              <div className="mb-6 rounded-2xl border border-blue-300/20 bg-blue-500/10 p-4 text-sm font-semibold text-blue-100">
+              <div className="mb-6 rounded-xl border border-accent/20 bg-accent-strong/10 p-4 text-sm font-semibold text-accent">
                 {message}
               </div>
             )}
 
             {items.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] p-10 text-center text-white/55">
+              <div className="rounded-xl border border-dashed border-line bg-surface p-10 text-center text-white/55">
                 No shop items yet.
               </div>
             ) : filteredItems.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] p-10 text-center text-white/55">
+              <div className="rounded-xl border border-dashed border-line bg-surface p-10 text-center text-white/55">
                 No items match your search.
               </div>
             ) : (
@@ -320,13 +312,13 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                   return (
                     <article
                       key={item.id}
-                      className={`group overflow-hidden rounded-3xl border shadow-xl shadow-black/10 transition ${
+                      className={`group overflow-hidden rounded-xl border shadow-xl shadow-black/10 transition ${
                         outOfStock
-                          ? "border-white/5 bg-white/[0.025] opacity-50 grayscale"
-                          : "border-white/10 bg-white/[0.05] hover:-translate-y-1 hover:border-blue-300/35 hover:bg-white/[0.07]"
+                          ? "border-line bg-surface opacity-50 grayscale"
+                          : "border-line bg-surface hover:-translate-y-1 hover:border-accent/35 hover:bg-surface"
                       }`}
                     >
-                      <div className="relative h-48 overflow-hidden bg-black/25">
+                      <div className="relative h-48 overflow-hidden bg-inset">
                         {item.image ? (
                           <img
                             src={item.image}
@@ -334,20 +326,20 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-500/20 to-cyan-300/10 text-5xl">
+                          <div className="flex h-full items-center justify-center bg-gradient-to-br from-accent/20 to-accent/10 text-5xl">
                             🛒
                           </div>
                         )}
 
-                        <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/45 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur capitalize">
+                        <div className="absolute left-4 top-4 rounded-full border border-line bg-black/45 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur capitalize">
                           {getCategory(item)}
                         </div>
 
                         <div
-                          className={`absolute right-4 top-4 rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.16em] backdrop-blur ${
+                          className={`absolute right-4 top-4 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] backdrop-blur ${
                             outOfStock
                               ? "border-red-300/20 bg-red-500/20 text-red-100"
-                              : "border-emerald-300/20 bg-emerald-500/20 text-emerald-100"
+                              : "border-accent/20 bg-accent-strong/20 text-accent"
                           }`}
                         >
                           {outOfStock ? "Out of stock" : `${stock} in stock`}
@@ -357,7 +349,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                       <div className="p-5">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h2 className="text-xl font-black tracking-tight text-white">
+                            <h2 className="text-xl font-semibold tracking-tight text-white">
                               {item.name}
                             </h2>
                             <p className="mt-1 text-sm text-white/45">
@@ -365,7 +357,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                             </p>
                           </div>
 
-                          <p className="rounded-2xl border border-blue-300/20 bg-blue-500/10 px-3 py-2 text-right text-sm font-black text-blue-100">
+                          <p className="rounded-xl border border-accent/20 bg-accent-strong/10 px-3 py-2 text-right text-sm font-semibold text-accent">
                             {formatPrice(item.price)}
                           </p>
                         </div>
@@ -374,7 +366,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                           <button
                             onClick={() => addToCart(item)}
                             disabled={outOfStock || reachedCartLimit}
-                            className="w-full rounded-2xl bg-blue-500 px-4 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35 disabled:shadow-none"
+                            className="w-full rounded-xl bg-accent-strong px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:bg-elevated disabled:text-white/35 disabled:shadow-none"
                           >
                             {outOfStock
                               ? "Out of stock"
@@ -386,7 +378,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                           {isAdmin && (
                             <button
                               onClick={() => openEdit(item)}
-                              className="rounded-2xl border border-white/10 px-4 py-3 text-sm font-black text-white/75 transition hover:bg-white/10 hover:text-white"
+                              className="rounded-xl border border-line px-4 py-3 text-sm font-semibold text-white/75 transition hover:bg-elevated hover:text-white"
                             >
                               Edit
                             </button>
@@ -400,18 +392,18 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
             )}
           </div>
 
-          <aside className="h-fit rounded-3xl border border-white/10 bg-black/25 p-5 shadow-2xl shadow-black/20 lg:sticky lg:top-28">
-            <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+          <aside className="h-fit rounded-xl border border-line bg-inset p-5 shadow-lg shadow-black/20 lg:sticky lg:top-28">
+            <div className="flex items-center justify-between gap-4 border-b border-line pb-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-200/60">
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent/60">
                   Order list
                 </p>
-                <h2 className="mt-1 text-2xl font-black">Cart</h2>
+                <h2 className="mt-1 text-2xl font-semibold">Cart</h2>
               </div>
               {cart.length > 0 && (
                 <button
                   onClick={clearCart}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-xs font-bold text-white/60 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-xl border border-line px-3 py-2 text-xs font-bold text-white/60 transition hover:bg-elevated hover:text-white"
                 >
                   Clear
                 </button>
@@ -420,7 +412,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
             {cart.length === 0 ? (
               <div className="py-10 text-center text-white/45">
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-2xl">
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-xl border border-line bg-surface text-2xl">
                   🛍️
                 </div>
                 Add items to create a purchase request.
@@ -431,7 +423,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                   {cart.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-3"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-bold text-white">
@@ -444,7 +436,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        className="shrink-0 rounded-xl border border-white/10 px-3 py-2 text-sm font-bold text-white/65 transition hover:bg-white/10 hover:text-white"
+                        className="shrink-0 rounded-xl border border-line px-3 py-2 text-sm font-bold text-white/65 transition hover:bg-elevated hover:text-white"
                       >
                         -
                       </button>
@@ -452,10 +444,10 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                   ))}
                 </div>
 
-                <div className="mt-5 border-t border-white/10 pt-5">
+                <div className="mt-5 border-t border-line pt-5">
                   <div className="mb-4 flex items-center justify-between gap-4">
                     <span className="text-white/55">Total</span>
-                    <span className="text-2xl font-black text-white">
+                    <span className="text-2xl font-semibold text-white">
                       {formatPrice(totalPrice)}
                     </span>
                   </div>
@@ -463,7 +455,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                   <button
                     onClick={confirmPurchase}
                     disabled={buying}
-                    className="w-full rounded-2xl bg-blue-500 px-5 py-4 font-black text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="w-full rounded-xl bg-accent-strong px-5 py-4 font-semibold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {buying ? "Sending..." : "Confirm purchase"}
                   </button>
@@ -475,20 +467,20 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
       </section>
 
       {editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-white/10 bg-[#071b31] text-white shadow-2xl">
-            <div className="border-b border-white/10 bg-white/[0.04] px-6 py-5">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl overflow-hidden rounded-xl border border-line bg-[var(--surface)] text-white shadow-lg">
+            <div className="border-b border-line bg-surface px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-200/70">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent/70">
                     Admin panel
                   </p>
-                  <h2 className="mt-1 text-2xl font-black">Edit Shop Item</h2>
+                  <h2 className="mt-1 text-2xl font-semibold">Edit Shop Item</h2>
                 </div>
 
                 <button
                   onClick={() => setEditingItem(null)}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-xl border border-line px-3 py-2 text-white/70 transition hover:bg-elevated hover:text-white"
                 >
                   ✕
                 </button>
@@ -518,10 +510,10 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                     onChange={(e) => setEditCategory(e.target.value)}
                     className={inputClass}
                   >
-                    <option className="bg-[#071b31]" value="weapon">
+                    <option className="bg-[var(--surface)]" value="weapon">
                       Weapon
                     </option>
-                    <option className="bg-[#071b31]" value="item">
+                    <option className="bg-[var(--surface)]" value="item">
                       Item
                     </option>
                   </select>
@@ -572,14 +564,14 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                 <button
                   type="button"
                   onClick={() => setEditingItem(null)}
-                  className="w-full rounded-2xl border border-white/10 px-4 py-3 font-bold text-white/80 transition hover:bg-white/10 hover:text-white"
+                  className="w-full rounded-xl border border-line px-4 py-3 font-bold text-white/80 transition hover:bg-elevated hover:text-white"
                 >
                   Cancel
                 </button>
 
                 <button
                   disabled={savingEdit}
-                  className="w-full rounded-2xl bg-blue-500 px-4 py-3 font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl bg-accent-strong px-4 py-3 font-bold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {savingEdit ? "Saving..." : "Save changes"}
                 </button>

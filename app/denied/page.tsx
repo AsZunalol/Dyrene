@@ -1,3 +1,4 @@
+import HubIcon from "@/components/HubIcon";
 import Link from "next/link";
 
 export default async function DeniedPage({
@@ -18,11 +19,12 @@ export default async function DeniedPage({
         : "We couldn't verify access for this account. Sign in with the Discord account that has the required server role.";
 
   return (
-    <main className="min-h-screen text-white flex items-center justify-center">
-      <div className="max-w-xl px-6 text-center">
-        <h1 className="text-4xl font-bold text-red-500 mb-4">{title}</h1>
-        <p className="text-gray-300 mb-6">{message}</p>
-        <Link href="/login" className="bg-white text-black px-6 py-3 rounded-xl">Back to Login</Link>
+    <main className="hub-auth">
+      <div className="hub-auth-card">
+        <div className="hub-auth-mark"><HubIcon name="lock" /></div>
+        <h1 className="text-red-300">{title}</h1>
+        <p className="text-muted mb-6">{message}</p>
+        <Link href="/login" className="hub-primary">Back to Login</Link>
       </div>
     </main>
   );
