@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "bot": "node bot.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run bot\""
+    "bot:hub": "node server/bot-hub/service.cjs",
+    "test:bot": "node scripts/test-bot-hub.cjs",
+    "dev:all": "npm run dev",
+    "start:all": "npm run start"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",

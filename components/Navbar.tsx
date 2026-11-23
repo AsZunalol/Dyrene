@@ -24,6 +24,7 @@ const workspaceItems: NavItem[] = [
 const homeItem: NavItem = { name: "Home", path: "/", icon: "home" };
 const personalItem: NavItem = { name: "AsZuna", path: "/aszuna", icon: "user" };
 const adminItem: NavItem = { name: "Administration", path: "/admin", icon: "shield" };
+const botItem: NavItem = { name: "Discord bot", path: "/admin/bot", icon: "terminal" };
 
 export default function Navbar() {
   const { t } = useTranslation();
@@ -31,13 +32,14 @@ export default function Navbar() {
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canManageBot, setCanManageBot] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [openPath, setOpenPath] = useState<string | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileOpen = openPath === pathname;
   const shouldHideNavbar = pathname === "/login" || pathname === "/denied";
-  const isActive = (path: string) => path === "/" ? pathname === path : pathname === path || pathname.startsWith(`${path}/`);
+  const isActive = (path: string) => path === "/" || path === "/admin" ? pathname === path : pathname === path || pathname.startsWith(`${path}/`);
 
   useEffect(() => {
     if (shouldHideNavbar) return;
@@ -46,7 +48,12 @@ export default function Navbar() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!active) return;
       setSignedIn(Boolean(user));
-      if (!user) { setIsAdmin(false); return; }
+      if (!user) { setIsAdmin(false); setCanManageBot(false); return; }
+      try {
+        const response = await fetch("/api/admin/bot/access", { cache: "no-store" });
+        const access = await response.json();
+        if (active) setCanManageBot(response.ok && access.allowed === true);
+      } catch { if (active) setCanManageBot(false); }
       await fetch("/api/profile/sync-discord", { method: "POST" });
       const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
       if (active) setIsAdmin(profile?.is_admin === true);
@@ -115,6 +122,7 @@ export default function Navbar() {
             <p className={styles.groupLabel}>{t("Personal")}</p>
             {navLink(personalItem)}
             {isAdmin && navLink(adminItem)}
+            {canManageBot && navLink(botItem)}
           </div>
         </nav>
         <div className={styles.sidebarFooter}>

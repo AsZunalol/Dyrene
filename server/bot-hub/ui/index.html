@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dyrene Bot Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="web.css">
+</head>
+<body>
+  <svg class="symbol-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5a9.5 9.5 0 0 1 19 0Z"/><path d="M7 9h9M7 13h6"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M2 12h5l3-8 4 16 3-8h5"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 3 3-1 2 2 3-1 1-3 3-1 1-4-3-1-1-3-4-1-1-2Z"/><circle cx="11" cy="11" r="3"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="4"/><path d="M12 3v4M9 16h6M1 11v5M23 11v5M8 11v2M16 11v2"/><circle cx="12" cy="2" r="1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 13 8-13 8Z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 2 8M3 3v7h7"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6h.01M7 17h.01M12 6h5M12 17h5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-windows" viewBox="0 0 24 24"><path d="M3 5 11 4v7H3Zm10-1 8-1v8h-8ZM3 13h8v7l-8-1Zm10 0h8v8l-8-1Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9S4 17 4 12V6Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-square" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 6 6 6-6 6M13 18h7"/></symbol>
+  </defs></svg>
+
+
+
+  <div class="app-body">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><img src="/Dyrene_logo.png" alt="AZ"><div><strong>AZ <span>BOT HUB</span></strong><small>YOUR DISCORD, CONNECTED.</small></div></div>
+      <div class="nav-caption">WORKSPACE</div>
+      <nav aria-label="Main navigation">
+        <button class="nav-item" data-page="messages" title="Messages"><svg><use href="#i-message"/></svg><span>Messages</span></button>
+        <button class="nav-item" data-page="activity" title="Activity log"><svg><use href="#i-activity"/></svg><span>Activity log</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="nav-item" data-page="settings" title="Settings"><svg><use href="#i-settings"/></svg><span>Settings</span></button>
+        <div class="sidebar-connection"><i class="status-dot" data-status-dot></i><div><strong id="sidebar-status">Bot offline</strong><small>SERVER CONNECTION</small></div></div>
+        <button class="collapse" id="collapse" aria-label="Collapse sidebar"><svg><use href="#i-chevron"/></svg><span>Collapse sidebar</span></button>
+      </div>
+    </aside>
+
+    <main id="main">
+      <div class="page-header"><div><div class="eyebrow">YOUR BOT. YOUR CONTROL.</div><h1 id="page-title">Twitch live alerts</h1><p id="page-subtitle">Custom Discord announcements for your favorite Twitch streamers.</p></div><div class="header-right"><span id="date"></span><span class="pill" id="global-status"><i class="status-dot" data-status-dot></i><span>Offline</span></span></div></div>
+      <div class="bot-connection-bar"><div><i class="status-dot" data-status-dot></i><strong id="bot-name">Discord bot</strong><span id="bot-detail">Connecting to your bot?</span></div><div class="connection-controls"><button class="button secondary" data-control="start">Connect bot</button><button class="button secondary" data-control="restart" disabled>Reconnect</button><button class="button danger-quiet" data-control="stop" disabled>Disconnect</button></div></div>
+      <div id="connection-error" class="notice error" role="alert" hidden></div>
+
+      <section class="page" id="page-messages" aria-label="Message composer" hidden>
+        <div class="notice" id="composer-offline"><svg><use href="#i-bot"/></svg><span>Start your bot to load servers, channels, and mentions. You can write your draft now.</span><button class="text-button" data-control="start">Start bot →</button></div>
+        <div class="composer-grid">
+          <div class="panel composer-panel"><div class="panel-heading"><span class="section-icon"><svg><use href="#i-message"/></svg></span><h3>New message</h3><span class="small-label" id="draft-status">DRAFT SAVED LOCALLY</span></div>
+            <div class="destination"><label>SERVER<select id="guild-select" disabled><option value="">Connect your bot first</option></select></label><label>CHANNEL<select id="channel-select" disabled><option value="">Select a server</option></select></label><button class="icon-button" id="refresh-channels" title="Refresh channels" aria-label="Refresh channels" disabled><svg><use href="#i-restart"/></svg></button></div>
+            <div class="editor"><div class="format-toolbar" role="toolbar" aria-label="Message formatting"><button data-format="bold" title="Bold (Ctrl+B)" aria-label="Bold"><b>B</b></button><button data-format="italic" title="Italic (Ctrl+I)" aria-label="Italic"><i>I</i></button><button data-format="underline" title="Underline (Ctrl+U)" aria-label="Underline"><u>U</u></button><button data-format="strike" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button><span class="toolbar-divider"></span><button data-format="code" title="Inline code" aria-label="Inline code">&lt;/&gt;</button><button data-format="codeblock" title="Code block" aria-label="Code block">{ }</button><button data-format="quote" title="Quote" aria-label="Quote">❞</button><button data-format="spoiler" title="Spoiler" aria-label="Spoiler">▧</button><span class="toolbar-divider"></span><button data-format="heading" title="Heading" aria-label="Heading">H</button><button data-format="list" title="Bullet list" aria-label="Bullet list">≡</button></div><textarea id="message-content" placeholder="What would you like your bot to say?" aria-label="Message content" spellcheck="true"></textarea><div class="editor-footer"><button id="open-mentions" class="text-button">@ <span>Mention someone</span></button><button id="emoji-toggle" class="text-button" title="Insert emoji" aria-label="Insert emoji">☺</button><span id="character-count">0 / 2,000</span></div></div>
+            <div id="emoji-picker" class="emoji-picker" hidden></div>
+            <div id="mention-panel" class="mention-panel" hidden><div class="mention-tabs"><button class="active" data-mention-tab="members">Members</button><button data-mention-tab="roles">Roles</button><button class="icon-button" id="close-mentions" aria-label="Close mention picker"><svg><use href="#i-close"/></svg></button></div><div class="search-field"><svg><use href="#i-search"/></svg><input id="mention-search" placeholder="Search a name or paste a user ID…" aria-label="Search mentions"></div><div id="mention-results" class="mention-results"><p class="muted">Type a name to find members.</p></div></div>
+            <label class="checkbox-row"><input type="checkbox" id="allow-everyone"><span>Allow <strong>@everyone</strong> and <strong>@here</strong> notifications</span></label>
+            <div class="send-row"><button class="text-button muted" id="clear-draft">Clear draft</button><span class="shortcut"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span><button class="button primary" id="send-message" disabled><svg><use href="#i-send"/></svg><span>Send message</span></button></div>
+            <div id="send-result" role="status" class="send-result" hidden></div>
+          </div>
+          <div class="preview-column"><div class="panel preview-panel"><div class="panel-heading"><h3>Live preview</h3><span class="preview-badge">DISCORD</span></div><div class="preview-channel"><span>#</span><strong id="preview-channel">your-channel</strong></div><div class="discord-message"><div class="preview-avatar" id="preview-avatar"><svg><use href="#i-bot"/></svg></div><div class="discord-message-body"><div class="discord-author"><strong id="preview-name">Your bot</strong><span class="app-tag">APP</span><small>Today</small></div><div id="message-preview" class="markdown preview-placeholder">Your message will appear here.<br>Make it a good one.</div></div></div><div class="preview-note">An approximate preview. Discord handles final formatting.</div></div><div class="composer-tip"><svg><use href="#i-shield"/></svg><div><strong>A little mention etiquette</strong><p>Members and roles you mention can be notified. Server-wide mentions stay silent unless you enable them.</p></div></div><div class="composer-tip"><svg><use href="#i-check"/></svg><div><strong>Drafts stay with you</strong><p>Your draft is saved in this browser, even when you close the tab.</p></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-activity" aria-label="Activity log" hidden><div class="panel logs-panel"><div class="panel-heading"><span class="section-icon"><svg><use href="#i-terminal"/></svg></span><h3>Bot activity</h3><span class="live-label"><i></i> LIVE</span><label class="log-filter">Show <select id="log-filter"><option value="all">All activity</option><option value="error">Errors only</option></select></label></div><div id="log-list" class="log-list" role="log" aria-live="off"></div><div class="logs-footer"><span>The last 500 entries from this app session.</span><span id="log-count">0 entries</span></div></div></section>
+
+      <section class="page" id="page-settings" aria-label="Settings" hidden><div class="settings-layout"><div><div class="panel settings-panel"><div class="panel-heading"><h3>Bot startup</h3></div><label class="setting-row"><div><strong>Start bot with the server</strong><p>Connect to Discord automatically when the bot backend starts.</p></div><input type="checkbox" class="switch" id="setting-autoStartBot"></label><div class="setting-footnote">Your bot keeps running when you close this tab. Use Disconnect above to stop the bot. Schedules and alerts need the bot server to remain online.</div></div><div class="panel settings-panel"><div class="panel-heading"><h3>Bot connection</h3></div><div class="connection-detail"><div><strong>Discord bot</strong><p>Connection details are managed securely on the server.</p></div><span class="pill" id="token-status">Checking…</span></div></div></div></div></section>
+      <footer class="app-footer"><span><i class="tiny-dot"></i> ADMIN WORKSPACE</span><span>Made to keep your community connected.</span><span>AZ BOT HUB <b>1.3</b></span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script src="bridge.js"></script>
+  <script src="format.js"></script>
+  <script src="app.js"></script>
+  <script src="features.js"></script>
+  <script src="twitch.js"></script>
+</body>
+</html>

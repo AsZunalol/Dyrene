@@ -1,0 +1,11 @@
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const root = path.resolve(__dirname, '..');
+require('dotenv').config({ path: [path.join(root, '.env.local'), path.join(root, '.env')], quiet: true });
+const node = spawnSync(process.execPath, ['--test', 'tests/bot-hub.test.cjs', 'tests/discord-dashboard.test.cjs', 'tests/discord-formatting.test.cjs'], { cwd: root, stdio: 'inherit' });
+if (node.status !== 0) process.exit(node.status || 1);
+const python = process.env.BOT_HUB_PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+const code = "import sys, unittest; from pathlib import Path; sys.path.insert(0, str(Path('server/bot-hub').resolve())); import hub_scope; hub_scope.GUILD_ID = '1'; result = unittest.TextTestRunner(verbosity=1).run(unittest.defaultTestLoader.discover('tests/bot_hub')); sys.exit(not result.wasSuccessful())";
+const result = spawnSync(python, ['-c', code], { cwd: root, stdio: 'inherit', windowsHide: true });
+if (result.error) console.error('Python is unavailable. Set BOT_HUB_PYTHON to a Python installation with requirements-lock.txt installed.');
+process.exit(result.status || (result.error ? 1 : 0));

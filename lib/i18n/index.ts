@@ -1,4 +1,5 @@
 import { da } from "./da";
+import { discordDa } from "./discord-da";
 
 export type Language = "en" | "da";
 export const LANGUAGE_COOKIE = "dyrene-language";
@@ -21,7 +22,7 @@ const englishOverrides: Record<string, string> = {
 
 export function getTranslator(language: Language) {
   return (text: string, values?: Record<string, string | number>): string => {
-    const translated = language === "da" ? (da[text] ?? text) : (englishOverrides[text] ?? text);
+    const translated = language === "da" ? (discordDa[text] ?? da[text] ?? text) : (englishOverrides[text] ?? text);
     return values ? translated.replace(/\{(\w+)\}/g, (match, key) => String(values[key] ?? match)) : translated;
   };
 }

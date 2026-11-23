@@ -1,0 +1,33 @@
+:root{--accent:#a78bfa;--bg:#0b0b12;--panel:#14141f;--text:#f1eff9;--muted:#a6a3b6;--line:#ffffff12}
+body{font-size:16px;background:var(--bg)}
+.app-body{height:100%;min-height:0}.sidebar{width:185px;min-width:185px;padding-top:12px}.brand{display:none}.nav-caption{padding-top:8px}
+main#main{padding:24px;min-width:0}.page-header{margin-bottom:22px}.page-header h1{font-size:28px}.page-header p{font-size:14px}
+.header-right{display:none}.nav-item{font-size:14px}.sidebar-connection small{font-size:12px}.app-footer{font-size:12px}
+h3,.feature-field,.destination label,.feature-help,.setting-row p,.notice,.text-button,.button,input,textarea,select,.nav-caption{font-size:14px}
+.startup-strip{display:none}.hero-visual{transform:scale(.8)}.hero-copy{min-width:0}.hero{min-height:240px}
+.settings-layout{grid-template-columns:1fr}.stats-grid{gap:12px}.stat{padding:16px}.stat span{font-size:12px}
+.setting-footnote{font-size:14px}.feature-list,.feature-panel,.preview-column,.composer-panel,.twitch-layout>div{min-width:0}
+.feature-copy,.log-message{overflow-wrap:anywhere}.log-row{font-size:14px}.feature-card-head{flex-wrap:wrap}
+.hub-dialog{max-width:calc(100% - 24px)}.titlebar,.window-controls{display:none}
+select{appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23a6a3b6' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.feature-actions .button,.twitch-option,.twitch-tokens,.twitch-tokens button,.discord-link-preview,.hero-copy>p,.stat small,.preview-note{font-size:14px}.twitch-preview .markdown{font-size:16px}.hero-copy{max-width:100%}
+.nav-item.active{background:#a78bfa14;border-color:#a78bfa22}.sidebar:after{background:linear-gradient(#a78bfa55,transparent)}
+@media(max-width:1100px){.composer-grid,.overview-grid,.twitch-layout,.feature-two-column{grid-template-columns:1fr}.hero-visual{display:none}.hero-copy{width:100%}.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stat{gap:8px}.stat-icon{display:none}.stat strong{font-size:22px}}
+@media(max-width:700px){.app-body{display:flex;flex-direction:column}.sidebar{width:100%;min-width:0;padding:8px;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;gap:8px;overflow-x:auto;flex-shrink:0}.sidebar nav{display:flex;gap:4px}.nav-item{padding:10px;white-space:nowrap;width:auto;margin:0}.nav-item svg,.nav-caption,.sidebar-connection,.collapse{display:none}.sidebar-bottom{margin:0;padding:0}.sidebar-bottom .nav-item{height:100%}main#main{padding:16px;flex:1;overflow:auto}.page-header h1{font-size:24px}.hero{padding:20px}.stats-grid{grid-template-columns:1fr}.stat{display:flex}.stat span{font-size:14px}.destination,.feature-columns{display:flex;flex-direction:column;align-items:stretch}.control-buttons{flex-wrap:wrap}.feature-heading{flex-wrap:wrap;gap:8px}.page-header{display:block}.format-toolbar{flex-wrap:wrap}.settings-panel{padding:16px}.setting-row{gap:16px}.send-row{flex-wrap:wrap}.shortcut{display:none}.log-row{grid-template-columns:65px 1fr}.log-message{grid-column:1/-1}.app-footer{display:none}}
+@media(max-width:700px){.sidebar nav{overflow:visible;flex:0 0 auto}.sidebar-bottom{flex:0 0 auto}.sidebar .nav-item{flex:0 0 auto}.sidebar.collapsed{width:100%;min-width:0}.collapsed .nav-item span{display:inline}.hero-copy{max-width:100%}.toast{left:12px;right:12px;bottom:12px;transform:none;width:auto}}
+
+/* Use a full-height workspace with one row of tools instead of a second sidebar. */
+.app-body{flex-direction:column}
+.sidebar,.sidebar.collapsed{width:100%;min-width:0;flex-direction:row;align-items:center;gap:8px;padding:12px 180px 12px 24px;border-right:0;border-bottom:1px solid var(--line);flex-shrink:0}
+.sidebar:after,.nav-caption,.sidebar-connection,.collapse,.sidebar .nav-item svg{display:none}
+.sidebar nav{display:flex;gap:4px;min-width:0;flex:1;overflow-x:auto;overflow-y:hidden}
+.sidebar .nav-item{width:auto;flex:0 0 auto;margin:0;padding:0 12px;height:40px;font-size:14px}
+.sidebar .nav-item.active:before{display:none}.sidebar-bottom{margin:0;padding:0;flex:0 0 auto}
+main#main{flex:1;min-height:0;padding:22px 28px;overflow:auto}
+.page-header{margin-bottom:16px}.page-header .eyebrow,.app-footer{display:none}
+.bot-connection-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 16px;margin-bottom:20px;background:#14141f;border:1px solid var(--line);border-radius:10px;font-size:14px}
+.bot-connection-bar>div{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.bot-connection-bar #bot-detail{color:var(--muted)}
+.connection-controls .button{min-height:34px;padding:6px 12px;font-size:14px}.connection-controls [data-control="start"]:disabled{display:none}
+.twitch-layout{grid-template-columns:minmax(340px,.9fr) minmax(420px,1.1fr)}
+@media(max-width:1023px){.sidebar,.sidebar.collapsed{padding:10px 16px}.bot-connection-bar{flex-wrap:wrap}.twitch-layout{grid-template-columns:1fr}}
+@media(max-width:700px){main#main{padding:18px 16px}.sidebar nav{overflow-x:auto;flex:1}.sidebar{overflow:visible}.bot-connection-bar>div{gap:8px}.bot-connection-bar #bot-detail{flex-basis:100%;padding-left:0}.connection-controls{width:100%}.page-header h1{font-size:24px}}
