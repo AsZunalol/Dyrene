@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: isComingSoon ? "Dyrene — Coming in December" : "Dyrene Gangsite",
+  title: isComingSoon ? "The Strays — Soon" : "The Strays",
   description: isComingSoon
-    ? "Something new is on the way. Coming December 1, 2026. Stay tuned."
+    ? "The Strays. Something new is on the way. Coming soon. Stay tuned."
     : "Made by AsZuna",
 };
 
