@@ -1,8 +1,10 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import { useEffect, useRef } from "react";
 
 export default function TrojanGuideContent({ html }: { html: string }) {
+  const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -24,14 +26,18 @@ export default function TrojanGuideContent({ html }: { html: string }) {
       if (!src) return;
 
       const parent = image.parentElement;
-      if (parent?.tagName.toLowerCase() === "a") return;
+      if (parent?.tagName.toLowerCase() === "a") {
+        if (parent.dataset.guideImageLink) parent.title = t("Open image bigger");
+        return;
+      }
 
       const link = document.createElement("a");
       link.href = src;
       link.target = "_blank";
       link.rel = "noreferrer";
       link.className = "block";
-      link.title = "Open image bigger";
+      link.title = t("Open image bigger");
+      link.dataset.guideImageLink = "true";
 
       image.parentNode?.insertBefore(link, image);
       link.appendChild(image);
@@ -47,11 +53,11 @@ export default function TrojanGuideContent({ html }: { html: string }) {
       const header = document.createElement("div");
       header.className =
         "flex items-center gap-2 border-b border-line bg-elevated px-4 py-2";
-      header.textContent = "Code";
+      header.textContent = t("Code");
 
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = "Copy";
+      button.textContent = t("Copy");
       button.className =
         "absolute right-3 top-2 rounded-lg border border-accent/25 bg-accent-strong/10 px-3 py-1 text-xs font-bold text-accent backdrop-blur hover:bg-accent-strong/20";
 
@@ -60,14 +66,14 @@ export default function TrojanGuideContent({ html }: { html: string }) {
 
         try {
           await navigator.clipboard.writeText(text);
-          button.textContent = "Copied!";
+          button.textContent = t("Copied!");
           setTimeout(() => {
-            button.textContent = "Copy";
+            button.textContent = t("Copy");
           }, 1200);
         } catch {
-          button.textContent = "Failed";
+          button.textContent = t("Failed");
           setTimeout(() => {
-            button.textContent = "Copy";
+            button.textContent = t("Copy");
           }, 1200);
         }
       });
@@ -77,7 +83,7 @@ export default function TrojanGuideContent({ html }: { html: string }) {
       wrapper.appendChild(pre);
       wrapper.appendChild(button);
     });
-  }, [html]);
+  }, [html, t]);
 
   return (
     <div

@@ -1,3 +1,4 @@
+import { getTranslations } from "@/lib/i18n/server";
 import HubIcon from "@/components/HubIcon";
 import Link from "next/link";
 
@@ -6,6 +7,7 @@ export default async function DeniedPage({
 }: {
   searchParams: Promise<{ reason?: string | string[] }>;
 }) {
+  const { t } = await getTranslations();
   const { reason } = await searchParams;
   const loginFailed = reason === "login_failed";
   const verificationFailed = reason === "verification_failed";
@@ -22,9 +24,9 @@ export default async function DeniedPage({
     <main className="hub-auth">
       <div className="hub-auth-card">
         <div className="hub-auth-mark"><HubIcon name="lock" /></div>
-        <h1 className="text-red-300">{title}</h1>
-        <p className="text-muted mb-6">{message}</p>
-        <Link href="/login" className="hub-primary">Back to Login</Link>
+        <h1 className="text-red-300">{t(title)}</h1>
+        <p className="text-muted mb-6">{t(message)}</p>
+        <Link href="/login" className="hub-primary">{t("Back to Login")}</Link>
       </div>
     </main>
   );

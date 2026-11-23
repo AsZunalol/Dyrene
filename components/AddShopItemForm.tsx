@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import { useState } from "react";
 
@@ -6,6 +7,7 @@ const inputClass =
   "w-full rounded-xl border border-line bg-surface px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-accent/60 focus:bg-white/[0.09]";
 
 export default function AddShopItemForm() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("weapon");
@@ -17,9 +19,9 @@ export default function AddShopItemForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!name.trim()) return alert("Enter item name");
-    if (!price) return alert("Enter price");
-    if (stock === "") return alert("Enter stock amount");
+    if (!name.trim()) return alert(t("Enter item name"));
+    if (!price) return alert(t("Enter price"));
+    if (stock === "") return alert(t("Enter stock amount"));
 
     setLoading(true);
 
@@ -41,7 +43,7 @@ export default function AddShopItemForm() {
 
     if (!res.ok) {
       const json = await res.json();
-      alert(json?.error || "Failed to add item");
+      alert(t(json?.error || "Failed to add item"));
       return;
     }
 
@@ -61,9 +63,7 @@ export default function AddShopItemForm() {
         <button
           onClick={() => setOpen(true)}
           className="group rounded-xl border border-accent/30 bg-accent-strong px-5 py-3 text-sm font-bold text-white shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:bg-accent-strong"
-        >
-          + Add shop item
-        </button>
+        >{t("+ Add shop item")}</button>
       </div>
 
       {open && (
@@ -72,13 +72,9 @@ export default function AddShopItemForm() {
             <div className="border-b border-line bg-surface px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent/70">
-                    Admin panel
-                  </p>
-                  <h2 className="mt-1 text-2xl font-semibold">Add Shop Item</h2>
-                  <p className="mt-1 text-sm text-white/55">
-                    Create a clean shop card with price, category, stock and image.
-                  </p>
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent/70">{t("Admin panel")}</p>
+                  <h2 className="mt-1 text-2xl font-semibold">{t("Add Shop Item")}</h2>
+                  <p className="mt-1 text-sm text-white/55">{t("Create a clean shop card with price, category, stock and image.")}</p>
                 </div>
 
                 <button
@@ -92,40 +88,30 @@ export default function AddShopItemForm() {
 
             <form onSubmit={handleSubmit} className="space-y-4 p-6">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-white/70">
-                  Item name
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-white/70">{t("Item name")}</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Navy pistol"
+                  placeholder={t("Navy pistol")}
                   className={inputClass}
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-white/70">
-                    Category
-                  </label>
+                  <label className="mb-2 block text-sm font-semibold text-white/70">{t("Category")}</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className={inputClass}
                   >
-                    <option className="bg-[var(--surface)]" value="weapon">
-                      Weapon
-                    </option>
-                    <option className="bg-[var(--surface)]" value="item">
-                      Item
-                    </option>
+                    <option className="bg-[var(--surface)]" value="weapon">{t("Weapon")}</option>
+                    <option className="bg-[var(--surface)]" value="item">{t("Item")}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-white/70">
-                    Price
-                  </label>
+                  <label className="mb-2 block text-sm font-semibold text-white/70">{t("Price")}</label>
                   <input
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
@@ -137,9 +123,7 @@ export default function AddShopItemForm() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-white/70">
-                    Stock
-                  </label>
+                  <label className="mb-2 block text-sm font-semibold text-white/70">{t("Stock")}</label>
                   <input
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
@@ -152,13 +136,11 @@ export default function AddShopItemForm() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-white/70">
-                  Image URL
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-white/70">{t("Image URL")}</label>
                 <input
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
-                  placeholder="Optional image URL"
+                  placeholder={t("Optional image URL")}
                   className={inputClass}
                 />
               </div>
@@ -168,15 +150,13 @@ export default function AddShopItemForm() {
                   type="button"
                   onClick={() => setOpen(false)}
                   className="w-full rounded-xl border border-line px-4 py-3 font-bold text-white/80 transition hover:bg-elevated hover:text-white"
-                >
-                  Cancel
-                </button>
+                >{t("Cancel")}</button>
 
                 <button
                   disabled={loading}
                   className="w-full rounded-xl bg-accent-strong px-4 py-3 font-bold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? "Adding..." : "Add item"}
+                  {loading ? t("Adding...") : t("Add item")}
                 </button>
               </div>
             </form>

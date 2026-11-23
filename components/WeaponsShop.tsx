@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import PageHeader from "@/components/PageHeader";
 
@@ -21,9 +22,7 @@ type CartItem = ShopItem & {
 const inputClass =
   "w-full rounded-xl border border-line bg-surface px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-accent/60 focus:bg-white/[0.09]";
 
-function formatPrice(price: number) {
-  return `${price.toLocaleString("da-DK")} DKK`;
-}
+
 
 function getCategory(item: ShopItem) {
   return item.category?.trim() || "uncategorized";
@@ -34,6 +33,12 @@ function getStock(item: ShopItem) {
 }
 
 export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
+  const { t, locale } = useTranslation();
+
+function formatPrice(price: number) {
+  return `${price.toLocaleString(locale)} DKK`;
+}
+
   const [items, setItems] = useState<ShopItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [buying, setBuying] = useState(false);
@@ -99,7 +104,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
     const stock = getStock(item);
     if (stock <= 0) {
-      setMessage(`${item.name} is out of stock.`);
+      setMessage(t("{name} is out of stock.", { name: item.name }));
       return;
     }
 
@@ -108,7 +113,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
       if (existingItem) {
         if (existingItem.quantity >= stock) {
-          setMessage(`Only ${stock}x ${item.name} in stock.`);
+          setMessage(t("Only {count}x {name} in stock.", { count: stock, name: item.name }));
           return currentCart;
         }
 
@@ -150,9 +155,9 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
     e.preventDefault();
 
     if (!editingItem) return;
-    if (!editName.trim()) return alert("Enter item name");
-    if (!editPrice) return alert("Enter price");
-    if (editStock === "") return alert("Enter stock amount");
+    if (!editName.trim()) return alert(t("Enter item name"));
+    if (!editPrice) return alert(t("Enter price"));
+    if (editStock === "") return alert(t("Enter stock amount"));
 
     setSavingEdit(true);
 
@@ -175,7 +180,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
     if (!res.ok) {
       const json = await res.json();
-      alert(json?.error || "Failed to update item");
+      alert(t(json?.error || "Failed to update item"));
       return;
     }
 
@@ -191,7 +196,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
       .join("\n");
 
     const confirmed = confirm(
-      `Confirm purchase?\n\n${cartText}\n\nTotal: ${formatPrice(totalPrice)}`
+      `${t("Confirm purchase?")}\n\n${cartText}\n\n${t("Total")}: ${formatPrice(totalPrice)}`
     );
 
     if (!confirmed) return;
@@ -233,25 +238,19 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
       <section className="overflow-hidden rounded-xl border border-line bg-surface shadow-lg shadow-black/20 backdrop-blur">
         <div className="border-b border-line bg-surface p-6 sm:p-8">
           <div className="flex flex-col gap-4">
-            <PageHeader icon="shop" eyebrow="Marketplace" title="Shop" description="Browse supplies, check stock, and send an order to Discord." />
+            <PageHeader icon="shop" eyebrow={t("Marketplace")} title={t("Shop")} description="Browse supplies, check stock, and send an order to Discord." />
 
             <div className="grid grid-cols-3 gap-3 sm:min-w-[28rem]">
               <div className="rounded-xl border border-line bg-inset p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                  Items
-                </p>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/40">{t("Items")}</p>
                 <p className="mt-1 text-2xl font-semibold">{items.length}</p>
               </div>
               <div className="rounded-xl border border-accent/20 bg-accent-strong/10 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                  Stock
-                </p>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/40">{t("Stock")}</p>
                 <p className="mt-1 text-2xl font-semibold">{totalStock}</p>
               </div>
               <div className="rounded-xl border border-accent/20 bg-accent-strong/10 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                  Cart
-                </p>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/40">{t("Cart")}</p>
                 <p className="mt-1 text-2xl font-semibold">{cart.length}</p>
               </div>
             </div>
@@ -265,14 +264,14 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search the shop..."
+                  placeholder={t("Search the shop...")}
                   className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-accent/60"
                 />
 
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category) => (
                     <button
-                      key={category}
+                      key={t(category)}
                       onClick={() => setActiveCategory(category)}
                       className={`rounded-xl px-4 py-3 text-sm font-bold capitalize transition ${
                         activeCategory === category
@@ -280,7 +279,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                           : "border border-line bg-surface text-white/65 hover:bg-elevated hover:text-white"
                       }`}
                     >
-                      {category}
+                      {t(category)}
                     </button>
                   ))}
                 </div>
@@ -289,18 +288,14 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
             {message && (
               <div className="mb-6 rounded-xl border border-accent/20 bg-accent-strong/10 p-4 text-sm font-semibold text-accent">
-                {message}
+                {t(message)}
               </div>
             )}
 
             {items.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-line bg-surface p-10 text-center text-white/55">
-                No shop items yet.
-              </div>
+              <div className="rounded-xl border border-dashed border-line bg-surface p-10 text-center text-white/55">{t("No shop items yet.")}</div>
             ) : filteredItems.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-line bg-surface p-10 text-center text-white/55">
-                No items match your search.
-              </div>
+              <div className="rounded-xl border border-dashed border-line bg-surface p-10 text-center text-white/55">{t("No items match your search.")}</div>
             ) : (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {filteredItems.map((item) => {
@@ -332,7 +327,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                         )}
 
                         <div className="absolute left-4 top-4 rounded-full border border-line bg-black/45 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur capitalize">
-                          {getCategory(item)}
+                          {t(getCategory(item))}
                         </div>
 
                         <div
@@ -342,7 +337,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                               : "border-accent/20 bg-accent-strong/20 text-accent"
                           }`}
                         >
-                          {outOfStock ? "Out of stock" : `${stock} in stock`}
+                          {outOfStock ? t("Out of stock") : t("{count} in stock", { count: stock })}
                         </div>
                       </div>
 
@@ -353,7 +348,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                               {item.name}
                             </h2>
                             <p className="mt-1 text-sm text-white/45">
-                              {outOfStock ? "Currently unavailable" : "Ready for order"}
+                              {outOfStock ? t("Currently unavailable") : t("Ready for order")}
                             </p>
                           </div>
 
@@ -369,19 +364,17 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                             className="w-full rounded-xl bg-accent-strong px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:bg-elevated disabled:text-white/35 disabled:shadow-none"
                           >
                             {outOfStock
-                              ? "Out of stock"
+                              ? t("Out of stock")
                               : reachedCartLimit
-                                ? "Max in cart"
-                                : "Add to list"}
+                                ? t("Max in cart")
+                                : t("Add to list")}
                           </button>
 
                           {isAdmin && (
                             <button
                               onClick={() => openEdit(item)}
                               className="rounded-xl border border-line px-4 py-3 text-sm font-semibold text-white/75 transition hover:bg-elevated hover:text-white"
-                            >
-                              Edit
-                            </button>
+                            >{t("Edit")}</button>
                           )}
                         </div>
                       </div>
@@ -395,18 +388,14 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
           <aside className="h-fit rounded-xl border border-line bg-inset p-5 shadow-lg shadow-black/20 lg:sticky lg:top-28">
             <div className="flex items-center justify-between gap-4 border-b border-line pb-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent/60">
-                  Order list
-                </p>
-                <h2 className="mt-1 text-2xl font-semibold">Cart</h2>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent/60">{t("Order list")}</p>
+                <h2 className="mt-1 text-2xl font-semibold">{t("Cart")}</h2>
               </div>
               {cart.length > 0 && (
                 <button
                   onClick={clearCart}
                   className="rounded-xl border border-line px-3 py-2 text-xs font-bold text-white/60 transition hover:bg-elevated hover:text-white"
-                >
-                  Clear
-                </button>
+                >{t("Clear")}</button>
               )}
             </div>
 
@@ -414,9 +403,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
               <div className="py-10 text-center text-white/45">
                 <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-xl border border-line bg-surface text-2xl">
                   🛍️
-                </div>
-                Add items to create a purchase request.
-              </div>
+                </div>{t("Add items to create a purchase request.")}</div>
             ) : (
               <>
                 <div className="mt-4 space-y-3">
@@ -430,8 +417,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                           {item.quantity}x {item.name}
                         </p>
                         <p className="text-sm text-white/45">
-                          {formatPrice(item.price * item.quantity)} · {Math.max(0, getStock(item) - item.quantity)} left after order
-                        </p>
+                          {formatPrice(item.price * item.quantity)} · {Math.max(0, getStock(item) - item.quantity)} {t("left after order")}</p>
                       </div>
 
                       <button
@@ -446,7 +432,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
                 <div className="mt-5 border-t border-line pt-5">
                   <div className="mb-4 flex items-center justify-between gap-4">
-                    <span className="text-white/55">Total</span>
+                    <span className="text-white/55">{t("Total")}</span>
                     <span className="text-2xl font-semibold text-white">
                       {formatPrice(totalPrice)}
                     </span>
@@ -457,7 +443,7 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                     disabled={buying}
                     className="w-full rounded-xl bg-accent-strong px-5 py-4 font-semibold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {buying ? "Sending..." : "Confirm purchase"}
+                    {buying ? t("Sending...") : t("Confirm purchase")}
                   </button>
                 </div>
               </>
@@ -472,10 +458,8 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
             <div className="border-b border-line bg-surface px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent/70">
-                    Admin panel
-                  </p>
-                  <h2 className="mt-1 text-2xl font-semibold">Edit Shop Item</h2>
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent/70">{t("Admin panel")}</p>
+                  <h2 className="mt-1 text-2xl font-semibold">{t("Edit Shop Item")}</h2>
                 </div>
 
                 <button
@@ -489,44 +473,34 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
 
             <form onSubmit={saveEdit} className="space-y-4 p-6">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-white/70">
-                  Item name
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-white/70">{t("Item name")}</label>
                 <input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Item name"
+                  placeholder={t("Item name")}
                   className={inputClass}
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-white/70">
-                    Category
-                  </label>
+                  <label className="mb-2 block text-sm font-semibold text-white/70">{t("Category")}</label>
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
                     className={inputClass}
                   >
-                    <option className="bg-[var(--surface)]" value="weapon">
-                      Weapon
-                    </option>
-                    <option className="bg-[var(--surface)]" value="item">
-                      Item
-                    </option>
+                    <option className="bg-[var(--surface)]" value="weapon">{t("Weapon")}</option>
+                    <option className="bg-[var(--surface)]" value="item">{t("Item")}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-white/70">
-                    Price
-                  </label>
+                  <label className="mb-2 block text-sm font-semibold text-white/70">{t("Price")}</label>
                   <input
                     value={editPrice}
                     onChange={(e) => setEditPrice(e.target.value)}
-                    placeholder="Price"
+                    placeholder={t("Price")}
                     type="number"
                     min="0"
                     className={inputClass}
@@ -534,13 +508,11 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-white/70">
-                    Stock
-                  </label>
+                  <label className="mb-2 block text-sm font-semibold text-white/70">{t("Stock")}</label>
                   <input
                     value={editStock}
                     onChange={(e) => setEditStock(e.target.value)}
-                    placeholder="Stock"
+                    placeholder={t("Stock")}
                     type="number"
                     min="0"
                     className={inputClass}
@@ -549,13 +521,11 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-white/70">
-                  Image URL
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-white/70">{t("Image URL")}</label>
                 <input
                   value={editImage}
                   onChange={(e) => setEditImage(e.target.value)}
-                  placeholder="Image URL optional"
+                  placeholder={t("Image URL optional")}
                   className={inputClass}
                 />
               </div>
@@ -565,15 +535,13 @@ export default function WeaponsShop({ isAdmin }: { isAdmin: boolean }) {
                   type="button"
                   onClick={() => setEditingItem(null)}
                   className="w-full rounded-xl border border-line px-4 py-3 font-bold text-white/80 transition hover:bg-elevated hover:text-white"
-                >
-                  Cancel
-                </button>
+                >{t("Cancel")}</button>
 
                 <button
                   disabled={savingEdit}
                   className="w-full rounded-xl bg-accent-strong px-4 py-3 font-bold text-white shadow-lg shadow-accent/20 transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {savingEdit ? "Saving..." : "Save changes"}
+                  {savingEdit ? t("Saving...") : t("Save changes")}
                 </button>
               </div>
             </form>

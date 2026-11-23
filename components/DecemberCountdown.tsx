@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -10,6 +11,7 @@ type Countdown = ReturnType<typeof getDecemberCountdown>;
 const units = ["days", "hours", "minutes", "seconds"] as const;
 
 export default function DecemberCountdown() {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState<Countdown | null>(null);
 
   useEffect(() => {
@@ -48,34 +50,34 @@ export default function DecemberCountdown() {
 
       <h1 id="coming-soon-title" className="font-black tracking-tight drop-shadow-lg">
         <span className="block text-2xl font-semibold tracking-normal text-white/85 sm:text-4xl">
-          {finished ? "The wait is over." : "Coming in"}
+          {finished ? t("The wait is over.") : t("Coming in")}
         </span>
         <span className="mt-2 block bg-gradient-to-b from-white via-white to-pink-200 bg-clip-text text-[clamp(3.5rem,12vw,8rem)] leading-[1.08] text-transparent">
-          {finished ? "December is here." : "December."}
+          {finished ? t("December is here.") : t("December.")}
         </span>
       </h1>
 
       <p className="mx-auto mt-6 max-w-lg text-lg leading-relaxed text-white/75 sm:text-xl">
-        {finished ? "Stay tuned for what's next." : "Something new is on the way. Stay tuned."}
+        {finished ? t("Stay tuned for what's next.") : t("Something new is on the way. Stay tuned.")}
       </p>
 
       <div className="mt-10 overflow-hidden rounded-3xl border border-white/15 bg-black/35 shadow-2xl shadow-black/20 backdrop-blur-xl sm:mt-14">
         <div className="border-b border-white/10 px-4 py-4 text-sm font-medium tracking-wide text-white/65">
-          <time dateTime={DECEMBER_LAUNCH}>December 1, 2026</time>
+          <time dateTime={DECEMBER_LAUNCH}>{t("December 1, 2026")}</time>
           <span aria-hidden="true" className="mx-3 text-pink-200/60">/</span>
           00:00 CET
         </div>
 
         <dl
           role="timer"
-          aria-label="Countdown to December 1, 2026 at midnight Copenhagen time"
+          aria-label={t("Countdown to December 1, 2026 at midnight Copenhagen time")}
           aria-live="off"
           className="grid grid-cols-4 divide-x divide-white/10 py-7 sm:py-10"
         >
           {units.map((unit) => (
             <div key={unit} className="flex min-w-0 flex-col-reverse gap-3 px-1 sm:px-4">
               <dt className="text-xs font-medium capitalize tracking-wide text-white/60 sm:text-sm sm:uppercase sm:tracking-[0.2em]">
-                {unit}
+                {t(unit)}
               </dt>
               <dd className="font-mono text-[clamp(2rem,7vw,4.5rem)] font-semibold leading-none tracking-tight text-white tabular-nums">
                 {countdown ? String(countdown[unit]).padStart(2, "0") : "--"}
@@ -86,7 +88,7 @@ export default function DecemberCountdown() {
       </div>
 
       <p role="status" className="mt-7 text-sm tracking-wide text-pink-100/70">
-        {finished ? "December has arrived." : "The countdown is on."}
+        {finished ? t("December has arrived.") : t("The countdown is on.")}
       </p>
     </section>
   );

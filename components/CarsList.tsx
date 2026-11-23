@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
+
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -34,10 +36,7 @@ const CACHE_TTL_MS = 1000 * 60 * 10;
 const CARS_CACHE_KEY = "dyrene-cars-pages-cache";
 const CARS_UI_CACHE_KEY = "dyrene-cars-ui-cache";
 
-function formatPrice(price?: number | null) {
-  if (typeof price !== "number") return null;
-  return `$${price.toLocaleString()}`;
-}
+
 
 function prettyStatus(status?: string | null) {
   if (status === "vin-scratch") return "VIN-Scratch";
@@ -143,6 +142,7 @@ function CarsGridSkeleton({ count = PAGE_SIZE }: { count?: number }) {
 }
 
 function CarImage({ src, alt }: { src?: string | null; alt: string }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -160,9 +160,7 @@ function CarImage({ src, alt }: { src?: string | null; alt: string }) {
 
   if (!src || failed) {
     return (
-      <div className="w-full h-full bg-elevated flex items-center justify-center text-muted">
-        No image
-      </div>
+      <div className="w-full h-full bg-elevated flex items-center justify-center text-muted">{t("No image")}</div>
     );
   }
 
@@ -191,6 +189,7 @@ function CarImage({ src, alt }: { src?: string | null; alt: string }) {
 }
 
 function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [name, setName] = useState(car.name || "");
   const [brand, setBrand] = useState(car.brand || "");
@@ -229,7 +228,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
       const json = await res.json();
 
       if (!res.ok) {
-        alert("Failed to update car: " + (json?.error || "unknown"));
+        alert(t("Failed to update car: " + (json?.error || "unknown")));
         return;
       }
 
@@ -240,14 +239,14 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Network error updating car");
+      alert(t("Network error updating car"));
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete() {
-    const ok = window.confirm(`Delete ${car.name}?`);
+    const ok = window.confirm(t("Delete {name}?", { name: car.name }));
     if (!ok) return;
 
     setDeleting(true);
@@ -261,7 +260,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
       const json = await res.json();
 
       if (!res.ok) {
-        alert("Failed to delete car: " + (json?.error || "unknown"));
+        alert(t("Failed to delete car: " + (json?.error || "unknown")));
         return;
       }
 
@@ -272,7 +271,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Network error deleting car");
+      alert(t("Network error deleting car"));
     } finally {
       setDeleting(false);
     }
@@ -294,10 +293,8 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-line">
           <div>
-            <h2 className="text-xl font-bold text-white">Edit Car</h2>
-            <p className="text-sm text-muted">
-              Update or delete this listing
-            </p>
+            <h2 className="text-xl font-bold text-white">{t("Edit Car")}</h2>
+            <p className="text-sm text-muted">{t("Update or delete this listing")}</p>
           </div>
 
           <button
@@ -313,14 +310,14 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Car name"
+              placeholder={t("Car name")}
               className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
               required
             />
             <input
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
-              placeholder="Brand"
+              placeholder={t("Brand")}
               className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
             />
           </div>
@@ -329,14 +326,14 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
             <input
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder="Price"
+              placeholder={t("Price")}
               type="number"
               className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
             />
             <input
               value={image}
               onChange={(e) => setImage(e.target.value)}
-              placeholder="Image URL"
+              placeholder={t("Image URL")}
               className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20 md:col-span-2"
             />
           </div>
@@ -347,8 +344,8 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
               onChange={(e) => setStatus(e.target.value)}
               className="px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none focus:border-white/20"
             >
-              <option value="store">store</option>
-              <option value="vin-scratch">vin-scratch</option>
+              <option value="store">{t("store")}</option>
+              <option value="vin-scratch">{t("vin-scratch")}</option>
             </select>
 
             <label className="inline-flex items-center gap-2 text-sm text-gray-200">
@@ -357,9 +354,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
                 checked={featured}
                 onChange={(e) => setFeatured(e.target.checked)}
                 className="w-4 h-4"
-              />
-              Featured
-            </label>
+              />{t("Featured")}</label>
 
             <div className="md:ml-auto flex gap-3">
               <button
@@ -371,7 +366,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
                   background: "linear-gradient(90deg,#dc2626,#ef4444)",
                 }}
               >
-                {deleting ? "Deleting…" : "Delete"}
+                {deleting ? t("Deleting…") : t("Delete")}
               </button>
 
               <button
@@ -382,7 +377,7 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
                   background: "var(--accent)", color: "var(--inset)",
                 }}
               >
-                {saving ? "Saving…" : "Save changes"}
+                {saving ? t("Saving…") : t("Save changes")}
               </button>
             </div>
           </div>
@@ -395,6 +390,13 @@ function EditCarModal({ car, onClose, onSaved }: EditModalProps) {
 }
 
 export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
+  const { t, locale } = useTranslation();
+
+function formatPrice(price?: number | null) {
+  if (typeof price !== "number") return null;
+  return `$${price.toLocaleString(locale)}`;
+}
+
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -694,17 +696,16 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
     return () => observer.disconnect();
   }, [fetchCarsPage, hasMore, hasUserInteracted, loading, loadingMore, page]);
 
-  const resultText = useMemo(() => {
-    if (!cars.length) return "No cars loaded yet";
-    return `${cars.length} car${cars.length === 1 ? "" : "s"} loaded`;
-  }, [cars]);
+  const resultText = cars.length
+    ? t(cars.length === 1 ? "{count} car loaded" : "{count} cars loaded", { count: cars.length })
+    : t("No cars loaded yet");
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>Loading cars…</p>
-          <p>Showing highest price first</p>
+          <p>{t("Loading cars…")}</p>
+          <p>{t("Showing highest price first")}</p>
         </div>
         <CarsGridSkeleton />
       </div>
@@ -712,7 +713,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
   }
 
   if (error && !cars.length)
-    return <div className="p-4 text-red-400">Error: {error}</div>;
+    return <div className="p-4 text-red-400">{t("Error:")} {t(error)}</div>;
 
   return (
     <div className="space-y-6">
@@ -721,7 +722,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or brand..."
+            placeholder={t("Search by name or brand...")}
             className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
           />
         </div>
@@ -739,9 +740,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                 ? { background: "var(--accent)", color: "var(--inset)", }
                 : undefined
             }
-          >
-            All
-          </button>
+          >{t("All")}</button>
 
           <button
             onClick={() => setFilter("store")}
@@ -755,9 +754,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                 ? { background: "var(--accent)", color: "var(--inset)", }
                 : undefined
             }
-          >
-            Store
-          </button>
+          >{t("Store")}</button>
 
           <button
             onClick={() => setFilter("vin-scratch")}
@@ -771,21 +768,17 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                 ? { background: "var(--accent)", color: "var(--inset)", }
                 : undefined
             }
-          >
-            VIN-Scratch
-          </button>
+          >{t("VIN-Scratch")}</button>
         </div>
       </div>
 
       <div className="flex flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-        <p>{isRefreshing ? "Updating results…" : resultText}</p>
-        <p>Showing highest price first</p>
+        <p>{isRefreshing ? t("Updating results…") : resultText}</p>
+        <p>{t("Showing highest price first")}</p>
       </div>
 
       {!cars.length ? (
-        <div className="p-6 rounded-xl border border-line bg-elevated text-muted">
-          No cars found.
-        </div>
+        <div className="p-6 rounded-xl border border-line bg-elevated text-muted">{t("No cars found.")}</div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -819,7 +812,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                           : "border-sky-400/30 bg-sky-500/20"
                       }`}
                     >
-                      {prettyStatus(car.status)}
+                      {t(prettyStatus(car.status))}
                     </span>
                   </div>
 
@@ -833,9 +826,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
 
                   {car.featured ? (
                     <div className="absolute bottom-3 left-3">
-                      <span className="rounded-full border border-yellow-400/30 bg-yellow-500/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-                        Featured
-                      </span>
+                      <span className="rounded-full border border-yellow-400/30 bg-yellow-500/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">{t("Featured")}</span>
                     </div>
                   ) : null}
                 </div>
@@ -846,7 +837,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                       {car.name}
                     </h3>
                     <p className="mt-1 text-sm text-muted">
-                      {prettyStatus(car.status)}
+                      {t(prettyStatus(car.status))}
                     </p>
                   </div>
 
@@ -857,9 +848,7 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
                       style={{
                         background: "var(--accent)", color: "var(--inset)",
                       }}
-                    >
-                      Edit
-                    </button>
+                    >{t("Edit")}</button>
                   ) : null}
                 </div>
               </div>
@@ -871,15 +860,13 @@ export default function CarsList({ isAdmin = false }: { isAdmin?: boolean }) {
       )}
 
       {error ? (
-        <div className="text-sm text-red-400">Error: {error}</div>
+        <div className="text-sm text-red-400">{t("Error:")} {t(error)}</div>
       ) : null}
 
       <div ref={loadMoreRef} className="h-1" />
 
       {!hasMore && cars.length ? (
-        <div className="rounded-xl border border-line bg-elevated px-4 py-3 text-center text-muted">
-          You’ve reached the end of the garage.
-        </div>
+        <div className="rounded-xl border border-line bg-elevated px-4 py-3 text-center text-muted">{t("You’ve reached the end of the garage.")}</div>
       ) : null}
 
       {isAdmin && editingCar ? (

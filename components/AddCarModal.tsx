@@ -1,10 +1,13 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
+
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import AddCarForm from "@/components/AddCarForm";
 
 export default function AddCarModal() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -28,8 +31,8 @@ export default function AddCarModal() {
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-line">
           <div>
-            <h2 className="text-xl font-bold text-white">Add Car</h2>
-            <p className="text-sm text-muted">Create a new car listing</p>
+            <h2 className="text-xl font-bold text-white">{t("Add Car")}</h2>
+            <p className="text-sm text-muted">{t("Create a new car listing")}</p>
           </div>
 
           <button
@@ -55,9 +58,7 @@ export default function AddCarModal() {
         style={{
           background: "var(--accent)", color: "var(--inset)",
         }}
-      >
-        Add Car
-      </button>
+      >{t("Add Car")}</button>
 
       {mounted ? createPortal(modal, document.body) : null}
     </>

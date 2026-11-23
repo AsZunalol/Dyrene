@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
+import type { Translate } from "@/lib/i18n";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import PageHeader from "@/components/PageHeader";
@@ -127,6 +129,7 @@ function expandCraftingCost(
   itemsMap: Map<string, CraftingItem>,
   rawTotals: Map<string, number>,
   subCraftedTotals: Map<string, number>,
+  t: Translate,
   visited: Set<string> = new Set(),
   isRoot = true,
 ) {
@@ -134,7 +137,7 @@ function expandCraftingCost(
   if (!item) return;
 
   if (visited.has(itemId)) {
-    throw new Error(`Recipe loop detected for "${item.name}"`);
+    throw new Error(t('Recipe loop detected for "{name}"', { name: item.name }));
   }
 
   const itemIngredients = item.crafting_recipe_ingredients || [];
@@ -163,6 +166,7 @@ function expandCraftingCost(
         itemsMap,
         rawTotals,
         subCraftedTotals,
+        t,
         nextVisited,
         false,
       );
@@ -173,6 +177,7 @@ function expandCraftingCost(
 }
 
 export default function CraftingManager({ isAdmin }: Props) {
+  const { t } = useTranslation();
   const [items, setItems] = useState<CraftingItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -458,12 +463,13 @@ export default function CraftingManager({ isAdmin }: Props) {
           itemsMap,
           expandedTotals,
           subCraftedTotals,
+          t,
         );
       } catch (error) {
         errors.push(
           error instanceof Error
             ? error.message
-            : `Failed to expand "${item.name}"`,
+            : t('Failed to expand "{name}"', { name: item.name }),
         );
       }
     }
@@ -493,7 +499,7 @@ export default function CraftingManager({ isAdmin }: Props) {
 
       errors,
     };
-  }, [cart, items]);
+  }, [cart, items, t]);
 
   const linkableItems = useMemo(() => {
     return items
@@ -660,7 +666,7 @@ export default function CraftingManager({ isAdmin }: Props) {
         .upload(fileName, file);
 
       if (uploadError) {
-        alert(uploadError.message);
+        alert(t(uploadError.message));
         return;
       }
 
@@ -695,11 +701,11 @@ export default function CraftingManager({ isAdmin }: Props) {
       : [];
 
     if (!name.trim()) {
-      return alert("Enter an item name");
+      return alert(t("Enter an item name"));
     }
 
     if (needsIngredients && !cleanIngredients.length) {
-      return alert("Add at least one valid ingredient");
+      return alert(t("Add at least one valid ingredient"));
     }
 
     setSaving(true);
@@ -723,7 +729,7 @@ export default function CraftingManager({ isAdmin }: Props) {
       const json = await res.json();
 
       if (!res.ok) {
-        alert(json?.error || "Failed to save recipe");
+        alert(t(json?.error || "Failed to save recipe"));
         return;
       }
 
@@ -732,14 +738,14 @@ export default function CraftingManager({ isAdmin }: Props) {
       closeRecipeModal();
     } catch (err) {
       console.error(err);
-      alert("Network error while saving recipe");
+      alert(t("Network error while saving recipe"));
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDeleteRecipe(id: string) {
-    const ok = window.confirm("Delete this crafting recipe?");
+    const ok = window.confirm(t("Delete this crafting recipe?"));
     if (!ok) return;
 
     try {
@@ -754,7 +760,7 @@ export default function CraftingManager({ isAdmin }: Props) {
       const json = await res.json();
 
       if (!res.ok) {
-        alert(json?.error || "Failed to delete recipe");
+        alert(t(json?.error || "Failed to delete recipe"));
         return;
       }
 
@@ -769,7 +775,7 @@ export default function CraftingManager({ isAdmin }: Props) {
       resetForm();
     } catch (err) {
       console.error(err);
-      alert("Network error while deleting recipe");
+      alert(t("Network error while deleting recipe"));
     }
   }
 
@@ -814,32 +820,32 @@ export default function CraftingManager({ isAdmin }: Props) {
   return (
     <div className="mx-auto flex min-h-[calc(100vh-7rem)] w-full max-w-none flex-col space-y-8">
       <div>
-        <PageHeader icon="crafting" eyebrow="Workshop" title="Crafting" description="Browse recipes, calculate materials, and build your crafting list." actions={isAdmin ? <button type="button" className="hub-primary" onClick={() => openAddRecipeModal("recipe")}>Add recipe</button> : undefined} />
+        <PageHeader icon="crafting" eyebrow={t("Workshop")} title={t("Crafting")} description="Browse recipes, calculate materials, and build your crafting list." actions={isAdmin ? <button type="button" className="hub-primary" onClick={() => openAddRecipeModal("recipe")}>{t("Add recipe")}</button> : undefined} />
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <div className="rounded-xl border border-line bg-inset p-4">
             <div className="text-2xl font-semibold text-white">
               {dashboardStats.totalRecipes}
             </div>
-            <div className="mt-1 text-sm text-muted">Recipes</div>
+            <div className="mt-1 text-sm text-muted">{t("Recipes")}</div>
           </div>
           <div className="rounded-xl border border-line bg-inset p-4">
             <div className="text-2xl font-semibold text-white">
               {dashboardStats.withImages}
             </div>
-            <div className="mt-1 text-sm text-muted">With images</div>
+            <div className="mt-1 text-sm text-muted">{t("With images")}</div>
           </div>
           <div className="rounded-xl border border-line bg-inset p-4">
             <div className="text-2xl font-semibold text-white">
               {dashboardStats.craftableInputs}
             </div>
-            <div className="mt-1 text-sm text-muted">Linked recipes</div>
+            <div className="mt-1 text-sm text-muted">{t("Linked recipes")}</div>
           </div>
           <div className="rounded-xl border border-line bg-inset p-4">
             <div className="text-2xl font-semibold text-white">
               {dashboardStats.rawIngredients}
             </div>
-            <div className="mt-1 text-sm text-muted">Raw materials</div>
+            <div className="mt-1 text-sm text-muted">{t("Raw materials")}</div>
           </div>
         </div>
       </div>
@@ -849,13 +855,11 @@ export default function CraftingManager({ isAdmin }: Props) {
           <div className="sticky top-20 z-20 rounded-xl border border-line bg-[var(--surface)]/90 p-4 shadow-xl shadow-black/20 backdrop-blur md:p-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
               <div className="flex-1">
-                <label className="mb-2 block text-sm font-semibold text-gray-200">
-                  Search recipes or ingredients
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-gray-200">{t("Search recipes or ingredients")}</label>
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search pistol, plastic, spring..."
+                  placeholder={t("Search pistol, plastic, spring...")}
                   className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none placeholder:text-muted focus:border-accent/50"
                 />
               </div>
@@ -880,7 +884,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                         : "border-line bg-elevated text-muted hover:bg-elevated"
                     }`}
                   >
-                    {filter.label}
+                    {t(filter.label)}
                   </button>
                 ))}
               </div>
@@ -890,20 +894,15 @@ export default function CraftingManager({ isAdmin }: Props) {
           <div className="min-h-[680px] rounded-xl border border-line bg-surface p-4 md:p-5">
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold text-white">Recipes</h2>
-                <p className="mt-1 text-sm text-muted">
-                  Showing {filteredItems.length} of {recipeItems.length} recipes.
-                </p>
+                <h2 className="text-2xl font-semibold text-white">{t("Recipes")}</h2>
+                <p className="mt-1 text-sm text-muted">{t("Showing")} {filteredItems.length} {t("of")} {recipeItems.length} {t("recipes.")}</p>
               </div>
 
-              <div className="rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted">
-                Click <span className="font-bold text-white">Add to list</span>{" "}
-                to calculate materials
-              </div>
+              <div className="rounded-xl border border-line bg-inset px-4 py-3 text-sm text-muted">{t("Click")} <span className="font-bold text-white">{t("Add to list")}</span>{" "}{t("to calculate materials")}</div>
             </div>
 
-            {loading && <div className="text-muted">Loading recipes...</div>}
-            {error && <div className="text-red-300">{error}</div>}
+            {loading && <div className="text-muted">{t("Loading recipes...")}</div>}
+            {error && <div className="text-red-300">{t(error)}</div>}
 
             {!loading && !error && (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 [@media(min-width:1900px)]:grid-cols-5">
@@ -920,13 +919,10 @@ export default function CraftingManager({ isAdmin }: Props) {
                           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-sm text-muted">
-                          No image
-                        </div>
+                        <div className="flex h-full w-full items-center justify-center text-sm text-muted">{t("No image")}</div>
                       )}
 
-                      <div className="absolute left-3 top-3 rounded-full border border-line bg-black/60 px-3 py-1 text-xs font-bold text-white backdrop-blur">
-                        Output: {item.craft_amount}
+                      <div className="absolute left-3 top-3 rounded-full border border-line bg-black/60 px-3 py-1 text-xs font-bold text-white backdrop-blur">{t("Output:")} {item.craft_amount}
                       </div>
                     </div>
 
@@ -937,9 +933,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                             {item.name}
                           </h3>
                           <p className="mt-1 text-sm text-muted">
-                            {item.crafting_recipe_ingredients.length}{" "}
-                            ingredients
-                          </p>
+                            {item.crafting_recipe_ingredients.length}{" "}{t("ingredients")}</p>
                         </div>
                       </div>
 
@@ -959,9 +953,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                   {ingredient.ingredient_name}
                                 </div>
                                 {ingredient.ingredient_item_id && (
-                                  <div className="text-xs text-amber-300">
-                                    Craftable ingredient
-                                  </div>
+                                  <div className="text-xs text-amber-300">{t("Craftable ingredient")}</div>
                                 )}
                               </div>
                               <span className="shrink-0 font-bold text-white">
@@ -972,9 +964,7 @@ export default function CraftingManager({ isAdmin }: Props) {
 
                         {item.crafting_recipe_ingredients.length > 4 && (
                           <div className="rounded-xl bg-surface px-3 py-2 text-sm text-muted">
-                            + {item.crafting_recipe_ingredients.length - 4} more
-                            ingredients
-                          </div>
+                            + {item.crafting_recipe_ingredients.length - 4} {t("more ingredients")}</div>
                         )}
                       </div>
 
@@ -985,25 +975,19 @@ export default function CraftingManager({ isAdmin }: Props) {
                           style={{
                             background: "var(--accent)", color: "var(--inset)",
                           }}
-                        >
-                          Add to list
-                        </button>
+                        >{t("Add to list")}</button>
 
                         {isAdmin && (
                           <>
                             <button
                               onClick={() => startEdit(item)}
                               className="rounded-xl border border-amber-400/20 bg-amber-500/15 px-4 py-3 text-sm font-bold text-amber-100 hover:bg-amber-500/25"
-                            >
-                              Edit
-                            </button>
+                            >{t("Edit")}</button>
 
                             <button
                               onClick={() => handleDeleteRecipe(item.id)}
                               className="rounded-xl border border-red-400/20 bg-red-500/15 px-4 py-3 text-sm font-bold text-red-100 hover:bg-red-500/25"
-                            >
-                              Delete
-                            </button>
+                            >{t("Delete")}</button>
                           </>
                         )}
                       </div>
@@ -1012,9 +996,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                 ))}
 
                 {filteredItems.length === 0 && (
-                  <div className="rounded-xl border border-line bg-elevated p-8 text-center text-muted md:col-span-2 xl:col-span-3 2xl:col-span-4 [@media(min-width:1900px)]:col-span-5">
-                    No crafting recipes found.
-                  </div>
+                  <div className="rounded-xl border border-line bg-elevated p-8 text-center text-muted md:col-span-2 xl:col-span-3 2xl:col-span-4 [@media(min-width:1900px)]:col-span-5">{t("No crafting recipes found.")}</div>
                 )}
               </div>
             )}
@@ -1025,21 +1007,15 @@ export default function CraftingManager({ isAdmin }: Props) {
           <div className="rounded-xl border border-line bg-surface p-5 shadow-xl shadow-black/10">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-semibold text-white">
-                  Crafting List
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Choose recipes and the calculator totals everything.
-                </p>
+                <h2 className="text-2xl font-semibold text-white">{t("Crafting List")}</h2>
+                <p className="mt-1 text-sm text-muted">{t("Choose recipes and the calculator totals everything.")}</p>
               </div>
               {cart.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setCart([])}
                   className="rounded-xl border border-line bg-elevated px-3 py-2 text-sm font-semibold text-muted hover:bg-elevated"
-                >
-                  Clear
-                </button>
+                >{t("Clear")}</button>
               )}
             </div>
 
@@ -1050,9 +1026,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                 className="min-w-0 flex-1 appearance-none rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none"
                 style={{ colorScheme: "dark" }}
               >
-                <option value="" className="bg-[var(--surface)] text-white">
-                  Select item
-                </option>
+                <option value="" className="bg-[var(--surface)] text-white">{t("Select item")}</option>
                 {items.map((item) => (
                   <option
                     key={item.id}
@@ -1070,9 +1044,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                 style={{
                   background: "var(--accent)", color: "var(--inset)",
                 }}
-              >
-                Add
-              </button>
+              >{t("Add")}</button>
             </div>
 
             <div className="space-y-3">
@@ -1090,23 +1062,18 @@ export default function CraftingManager({ isAdmin }: Props) {
                         <div className="truncate font-bold text-white">
                           {item.name}
                         </div>
-                        <div className="mt-1 text-sm text-muted">
-                          Output per craft: {item.craft_amount}
+                        <div className="mt-1 text-sm text-muted">{t("Output per craft:")} {item.craft_amount}
                         </div>
                       </div>
 
                       <button
                         onClick={() => removeFromCart(entry.itemId)}
                         className="rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-100 hover:bg-red-500/20"
-                      >
-                        Remove
-                      </button>
+                      >{t("Remove")}</button>
                     </div>
 
                     <div className="mt-3">
-                      <label className="mb-2 block text-sm text-muted">
-                        Amount wanted
-                      </label>
+                      <label className="mb-2 block text-sm text-muted">{t("Amount wanted")}</label>
                       <input
                         type="number"
                         min="1"
@@ -1125,60 +1092,49 @@ export default function CraftingManager({ isAdmin }: Props) {
               })}
 
               {cart.length === 0 && (
-                <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted">
-                  Your crafting list is empty.
-                </div>
+                <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted">{t("Your crafting list is empty.")}</div>
               )}
             </div>
           </div>
 
           <div className="rounded-xl border border-line bg-surface p-5 shadow-xl shadow-black/10">
-            <h2 className="text-2xl font-semibold text-white">
-              Materials Needed
-            </h2>
-            <p className="mt-1 text-sm text-muted">
-              Open a clean popup with images and total amounts for everything in
-              your crafting list.
-            </p>
+            <h2 className="text-2xl font-semibold text-white">{t("Materials Needed")}</h2>
+            <p className="mt-1 text-sm text-muted">{t("Open a clean popup with images and total amounts for everything in your crafting list.")}</p>
 
             <button
               type="button"
               onClick={() => setIsTotalsModalOpen(true)}
               disabled={cart.length === 0}
               className="hub-primary mt-5 w-full"
-            >
-              Show total needed
-            </button>
+            >{t("Show total needed")}</button>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-line bg-inset p-4">
                 <div className="text-2xl font-semibold text-white">
                   {shoppingSummary.expandedIngredients.length}
                 </div>
-                <div className="mt-1 text-sm text-muted">Raw items</div>
+                <div className="mt-1 text-sm text-muted">{t("Raw items")}</div>
               </div>
               <div className="rounded-xl border border-line bg-inset p-4">
                 <div className="text-2xl font-semibold text-white">
                   {shoppingSummary.subCraftedIngredients.length}
                 </div>
-                <div className="mt-1 text-sm text-muted">Sub-crafts</div>
+                <div className="mt-1 text-sm text-muted">{t("Sub-crafts")}</div>
               </div>
             </div>
 
             {cart.length === 0 && (
-              <div className="mt-4 rounded-xl border border-line bg-inset p-4 text-sm text-muted">
-                Add recipes to the crafting list first.
-              </div>
+              <div className="mt-4 rounded-xl border border-line bg-inset p-4 text-sm text-muted">{t("Add recipes to the crafting list first.")}</div>
             )}
 
             {shoppingSummary.errors.length > 0 && (
               <div className="mt-4 space-y-2">
                 {shoppingSummary.errors.map((error, index) => (
                   <div
-                    key={`${error}-${index}`}
+                    key={`${t(error)}-${index}`}
                     className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200"
                   >
-                    {error}
+                    {t(error)}
                   </div>
                 ))}
               </div>
@@ -1193,7 +1149,7 @@ export default function CraftingManager({ isAdmin }: Props) {
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div
               role="button"
-              aria-label="Close materials popup"
+              aria-label={t("Close materials popup")}
               tabIndex={0}
               onClick={() => setIsTotalsModalOpen(false)}
               onKeyDown={(event) => {
@@ -1207,30 +1163,21 @@ export default function CraftingManager({ isAdmin }: Props) {
             <div className="relative z-[10000] max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-xl border border-line bg-[var(--surface)] p-5 shadow-lg shadow-black/50 md:p-7">
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.12em] text-accent/70">
-                    Crafting calculator
-                  </p>
-                  <h2 className="mt-2 text-3xl font-semibold text-white">
-                    Total Needed To Craft
-                  </h2>
-                  <p className="mt-2 text-sm text-muted">
-                    Full material breakdown for your current crafting list with
-                    saved item images.
-                  </p>
+                  <p className="text-sm uppercase tracking-[0.12em] text-accent/70">{t("Crafting calculator")}</p>
+                  <h2 className="mt-2 text-3xl font-semibold text-white">{t("Total Needed To Craft")}</h2>
+                  <p className="mt-2 text-sm text-muted">{t("Full material breakdown for your current crafting list with saved item images.")}</p>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setIsTotalsModalOpen(false)}
                   className="self-start rounded-xl border border-line bg-elevated px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
-                >
-                  Close
-                </button>
+                >{t("Close")}</button>
               </div>
 
               {cart.length > 0 && (
                 <div className="mb-6 rounded-xl border border-line bg-inset p-4">
-                  <h3 className="font-bold text-white">Crafting list</h3>
+                  <h3 className="font-bold text-white">{t("Crafting list")}</h3>
                   <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {cart.map((entry) => {
                       const item = items.find(
@@ -1251,17 +1198,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-xs text-muted">
-                                No image
-                              </div>
+                              <div className="flex h-full w-full items-center justify-center text-xs text-muted">{t("No image")}</div>
                             )}
                           </div>
                           <div className="min-w-0">
                             <div className="truncate font-bold text-white">
                               {item.name}
                             </div>
-                            <div className="text-sm text-muted">
-                              Amount wanted: {entry.quantity}
+                            <div className="text-sm text-muted">{t("Amount wanted:")} {entry.quantity}
                             </div>
                           </div>
                         </div>
@@ -1275,12 +1219,8 @@ export default function CraftingManager({ isAdmin }: Props) {
                 <div className="rounded-xl border border-accent/10 bg-accent-strong/5 p-4 md:p-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-xl font-semibold text-white">
-                        Raw materials
-                      </h3>
-                      <p className="mt-1 text-sm text-muted">
-                        Final items you need to farm, buy, or collect.
-                      </p>
+                      <h3 className="text-xl font-semibold text-white">{t("Raw materials")}</h3>
+                      <p className="mt-1 text-sm text-muted">{t("Final items you need to farm, buy, or collect.")}</p>
                     </div>
                     <div className="rounded-full border border-line bg-inset px-3 py-1 text-sm font-bold text-white">
                       {shoppingSummary.expandedIngredients.length}
@@ -1304,9 +1244,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-sm text-muted">
-                                No image
-                              </div>
+                              <div className="flex h-full w-full items-center justify-center text-sm text-muted">{t("No image")}</div>
                             )}
                           </div>
                           <div className="p-4">
@@ -1322,9 +1260,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                     })}
 
                     {shoppingSummary.expandedIngredients.length === 0 && (
-                      <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted sm:col-span-2 lg:col-span-3">
-                        Add recipes to see total raw materials.
-                      </div>
+                      <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted sm:col-span-2 lg:col-span-3">{t("Add recipes to see total raw materials.")}</div>
                     )}
                   </div>
                 </div>
@@ -1332,12 +1268,8 @@ export default function CraftingManager({ isAdmin }: Props) {
                 <div className="rounded-xl border border-amber-400/10 bg-amber-500/5 p-4 md:p-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-xl font-semibold text-white">
-                        Sub-crafts
-                      </h3>
-                      <p className="mt-1 text-sm text-muted">
-                        Items that are crafted along the way.
-                      </p>
+                      <h3 className="text-xl font-semibold text-white">{t("Sub-crafts")}</h3>
+                      <p className="mt-1 text-sm text-muted">{t("Items that are crafted along the way.")}</p>
                     </div>
                     <div className="rounded-full border border-line bg-inset px-3 py-1 text-sm font-bold text-white">
                       {shoppingSummary.subCraftedIngredients.length}
@@ -1361,9 +1293,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-xs text-muted">
-                                No image
-                              </div>
+                              <div className="flex h-full w-full items-center justify-center text-xs text-muted">{t("No image")}</div>
                             )}
                           </div>
 
@@ -1371,9 +1301,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                             <div className="truncate font-bold text-white">
                               {ingredient.name}
                             </div>
-                            <div className="text-sm text-muted">
-                              Needed before final craft
-                            </div>
+                            <div className="text-sm text-muted">{t("Needed before final craft")}</div>
                           </div>
 
                           <div className="rounded-xl bg-amber-500/10 px-3 py-2 text-xl font-semibold text-white">
@@ -1384,9 +1312,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                     })}
 
                     {shoppingSummary.subCraftedIngredients.length === 0 && (
-                      <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted">
-                        No sub-crafts needed.
-                      </div>
+                      <div className="rounded-xl border border-dashed border-line bg-inset p-6 text-center text-sm text-muted">{t("No sub-crafts needed.")}</div>
                     )}
                   </div>
                 </div>
@@ -1396,10 +1322,10 @@ export default function CraftingManager({ isAdmin }: Props) {
                 <div className="mt-6 space-y-2">
                   {shoppingSummary.errors.map((error, index) => (
                     <div
-                      key={`modal-error-${error}-${index}`}
+                      key={`modal-error-${t(error)}-${index}`}
                       className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200"
                     >
-                      {error}
+                      {t(error)}
                     </div>
                   ))}
                 </div>
@@ -1416,7 +1342,7 @@ export default function CraftingManager({ isAdmin }: Props) {
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div
               role="button"
-              aria-label="Close recipe popup"
+              aria-label={t("Close recipe popup")}
               tabIndex={0}
               onClick={closeRecipeModal}
               onKeyDown={(event) => {
@@ -1430,16 +1356,14 @@ export default function CraftingManager({ isAdmin }: Props) {
             <div className="relative z-[10000] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border border-line bg-[var(--surface)] p-5 md:p-7 shadow-lg shadow-black/50">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.12em] text-accent/70">
-                    Crafting admin
-                  </p>
+                  <p className="text-sm uppercase tracking-[0.12em] text-accent/70">{t("Crafting admin")}</p>
                   <h2 className="text-3xl font-bold text-white mt-2">
-                    {editingId ? "Edit Item" : "Add Recipe"}
+                    {editingId ? t("Edit Item") : t("Add Recipe")}
                   </h2>
                   <p className="text-sm text-muted mt-2">
                     {editingId
-                      ? "Update the selected recipe or item and save the changes."
-                      : "Create final recipes, raw materials, or non-raw sub-craft items with images and ingredients."}
+                      ? t("Update the selected recipe or item and save the changes.")
+                      : t("Create final recipes, raw materials, or non-raw sub-craft items with images and ingredients.")}
                   </p>
                 </div>
 
@@ -1447,9 +1371,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                   type="button"
                   onClick={closeRecipeModal}
                   className="self-start rounded-xl border border-line bg-elevated px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
-                >
-                  Close
-                </button>
+                >{t("Close")}</button>
               </div>
 
               {!editingId && (
@@ -1477,18 +1399,15 @@ export default function CraftingManager({ isAdmin }: Props) {
                           : "text-muted hover:bg-elevated"
                       }`}
                     >
-                      <div className="font-bold">{tab.label}</div>
-                      <div className="text-xs text-muted">{tab.desc}</div>
+                      <div className="font-bold">{t(tab.label)}</div>
+                      <div className="text-xs text-muted">{t(tab.desc)}</div>
                     </button>
                   ))}
                 </div>
               )}
 
               {editingId && (
-                <div className="mb-6 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                  Editing keeps the current item data. Items with ingredients are
-                  craftable; raw materials stay ingredient-free.
-                </div>
+                <div className="mb-6 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{t("Editing keeps the current item data. Items with ingredients are craftable; raw materials stay ingredient-free.")}</div>
               )}
 
               <form onSubmit={handleSaveRecipe} className="space-y-4">
@@ -1500,10 +1419,10 @@ export default function CraftingManager({ isAdmin }: Props) {
                     onChange={(e) => setName(e.target.value)}
                     placeholder={
                       adminModalTab === "raw"
-                        ? "Raw material name"
+                        ? t("Raw material name")
                         : adminModalTab === "nonRaw"
-                          ? "Non-raw craft item name"
-                          : "Final recipe name"
+                          ? t("Non-raw craft item name")
+                          : t("Final recipe name")
                     }
                     className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                     required
@@ -1515,7 +1434,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                       onChange={(e) => setCraftAmount(e.target.value)}
                       type="number"
                       min="1"
-                      placeholder="Output per craft"
+                      placeholder={t("Output per craft")}
                       className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                     />
                   )}
@@ -1523,13 +1442,8 @@ export default function CraftingManager({ isAdmin }: Props) {
 
                 <div className="rounded-xl border border-line bg-inset p-4 space-y-3">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Item image
-                    </label>
-                    <p className="text-sm text-muted mb-3">
-                      Upload an image to Supabase Storage so recipes, raw
-                      materials, and non-raw items can all have pictures.
-                    </p>
+                    <label className="block text-sm font-semibold text-white mb-2">{t("Item image")}</label>
+                    <p className="text-sm text-muted mb-3">{t("Upload an image to Supabase Storage so recipes, raw materials, and non-raw items can all have pictures.")}</p>
                   </div>
 
                   <input
@@ -1543,16 +1457,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                   />
 
                   {uploadingImage && (
-                    <p className="text-sm text-accent">
-                      Uploading image...
-                    </p>
+                    <p className="text-sm text-accent">{t("Uploading image...")}</p>
                   )}
 
                   {image && (
                     <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-3 items-center">
                       <img
                         src={image}
-                        alt="Item preview"
+                        alt={t("Item preview")}
                         className="h-32 w-full rounded-xl border border-line object-cover bg-elevated"
                       />
 
@@ -1560,16 +1472,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                         type="button"
                         onClick={() => setImage("")}
                         className="w-full rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100 hover:bg-red-500/20"
-                      >
-                        Remove image
-                      </button>
+                      >{t("Remove image")}</button>
                     </div>
                   )}
 
                   <input
                     value={image}
                     onChange={(e) => setImage(e.target.value)}
-                    placeholder="Or paste image URL manually"
+                    placeholder={t("Or paste image URL manually")}
                     className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                   />
                 </div>
@@ -1578,12 +1488,8 @@ export default function CraftingManager({ isAdmin }: Props) {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <h3 className="text-lg font-semibold text-white">
-                          Ingredients
-                        </h3>
-                        <p className="text-sm text-muted">
-                          Use the fast picker below, then adjust amounts in the selected list. Non-raw items can be built from raw materials or other craftable items.
-                        </p>
+                        <h3 className="text-lg font-semibold text-white">{t("Ingredients")}</h3>
+                        <p className="text-sm text-muted">{t("Use the fast picker below, then adjust amounts in the selected list. Non-raw items can be built from raw materials or other craftable items.")}</p>
                       </div>
 
                       <button
@@ -1593,9 +1499,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                         style={{
                           background: "var(--accent)", color: "var(--inset)",
                         }}
-                      >
-                        Manual row
-                      </button>
+                      >{t("Manual row")}</button>
                     </div>
 
                     <div className="rounded-xl border border-line bg-inset p-4 space-y-4">
@@ -1627,10 +1531,9 @@ export default function CraftingManager({ isAdmin }: Props) {
                                   : "text-muted hover:bg-elevated"
                               }`}
                             >
-                              <div className="font-bold">{tab.label}</div>
+                              <div className="font-bold">{t(tab.label)}</div>
                               <div className="text-xs text-muted">
-                                {tab.count} saved
-                              </div>
+                                {tab.count} {t("saved")}</div>
                             </button>
                           ))}
                         </div>
@@ -1640,7 +1543,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                           onChange={(e) =>
                             setIngredientPickerSearch(e.target.value)
                           }
-                          placeholder="Search items..."
+                          placeholder={t("Search items...")}
                           className="w-full rounded-xl border border-line bg-elevated px-4 py-3 text-white outline-none placeholder:text-muted"
                         />
                       </div>
@@ -1662,9 +1565,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                                     className="h-full w-full object-cover transition group-hover:scale-105"
                                   />
                                 ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-xs text-muted">
-                                    No image
-                                  </div>
+                                  <div className="flex h-full w-full items-center justify-center text-xs text-muted">{t("No image")}</div>
                                 )}
                               </div>
 
@@ -1672,27 +1573,22 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 <div className="truncate text-sm font-bold text-white">
                                   {item.name}
                                 </div>
-                                <div className="mt-1 text-xs text-muted">
-                                  Click to add
-                                </div>
+                                <div className="mt-1 text-xs text-muted">{t("Click to add")}</div>
                               </div>
                             </button>
                           ))}
                         </div>
 
                         {filteredIngredientPickerItems.length === 0 && (
-                          <div className="rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-muted">
-                            No items found in this tab.
-                          </div>
+                          <div className="rounded-xl border border-dashed border-line bg-surface p-6 text-center text-sm text-muted">{t("No items found in this tab.")}</div>
                         )}
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between gap-3 pt-2">
-                      <h4 className="font-bold text-white">Selected ingredients</h4>
+                      <h4 className="font-bold text-white">{t("Selected ingredients")}</h4>
                       <span className="text-sm text-muted">
-                        {ingredients.filter((ingredient) => ingredient.ingredient_name.trim()).length} selected
-                      </span>
+                        {ingredients.filter((ingredient) => ingredient.ingredient_name.trim()).length} {t("selected")}</span>
                     </div>
 
                     {ingredients.map((ingredient, index) => (
@@ -1702,9 +1598,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                       >
                         <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
                           <div>
-                            <label className="block text-sm text-muted mb-2">
-                              Browse existing material/item
-                            </label>
+                            <label className="block text-sm text-muted mb-2">{t("Browse existing material/item")}</label>
                             <select
                               value={ingredient.ingredient_item_id}
                               onChange={(e) =>
@@ -1716,9 +1610,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                               <option
                                 value=""
                                 className="bg-[var(--surface)] text-white"
-                              >
-                                Choose existing item / or type manually
-                              </option>
+                              >{t("Choose existing item / or type manually")}</option>
                               {linkableItems.map((item) => (
                                 <option
                                   key={item.id}
@@ -1726,8 +1618,8 @@ export default function CraftingManager({ isAdmin }: Props) {
                                   className="bg-[var(--surface)] text-white"
                                 >
                                   {item.crafting_recipe_ingredients.length === 0
-                                    ? "[Material] "
-                                    : "[Recipe] "}
+                                    ? t("[Material] ")
+                                    : t("[Recipe] ")}
                                   {item.name}
                                 </option>
                               ))}
@@ -1749,28 +1641,21 @@ export default function CraftingManager({ isAdmin }: Props) {
                                       className="h-24 w-full rounded-lg object-cover bg-inset"
                                     />
                                   ) : (
-                                    <div className="flex h-24 items-center justify-center rounded-lg bg-inset text-xs text-muted">
-                                      No image
-                                    </div>
+                                    <div className="flex h-24 items-center justify-center rounded-lg bg-inset text-xs text-muted">{t("No image")}</div>
                                   )}
                                   <div className="mt-2 truncate text-sm font-semibold text-white">
-                                    {linkedItem?.name || "Selected item"}
+                                    {linkedItem?.name || t("Selected item")}
                                   </div>
                                 </div>
                               );
                             })()
                           ) : (
-                            <div className="rounded-xl border border-dashed border-line bg-surface p-3 text-sm text-muted">
-                              Pick an existing material to use its saved image,
-                              or type a custom name below.
-                            </div>
+                            <div className="rounded-xl border border-dashed border-line bg-surface p-3 text-sm text-muted">{t("Pick an existing material to use its saved image, or type a custom name below.")}</div>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-sm text-muted mb-2">
-                            Ingredient name
-                          </label>
+                          <label className="block text-sm text-muted mb-2">{t("Ingredient name")}</label>
                           <input
                             value={ingredient.ingredient_name}
                             onChange={(e) =>
@@ -1780,16 +1665,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 e.target.value,
                               )
                             }
-                            placeholder="Ingredient name"
+                            placeholder={t("Ingredient name")}
                             className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                           />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-[1fr_140px] gap-3">
                           <div>
-                            <label className="block text-sm text-muted mb-2">
-                              Amount
-                            </label>
+                            <label className="block text-sm text-muted mb-2">{t("Amount")}</label>
                             <input
                               value={ingredient.ingredient_amount}
                               onChange={(e) =>
@@ -1802,7 +1685,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                               type="number"
                               min="0"
                               step="0.01"
-                              placeholder="Amount"
+                              placeholder={t("Amount")}
                               className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
                             />
                           </div>
@@ -1816,28 +1699,18 @@ export default function CraftingManager({ isAdmin }: Props) {
                                 background:
                                   "linear-gradient(90deg,#ef4444,#dc2626)",
                               }}
-                            >
-                              Remove
-                            </button>
+                            >{t("Remove")}</button>
                           </div>
                         </div>
 
                         {ingredient.ingredient_item_id && (
-                          <div className="rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
-                            This ingredient is linked to an existing item. Items
-                            with no recipe are treated as raw materials in the
-                            calculator; items with recipes are broken down.
-                          </div>
+                          <div className="rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">{t("This ingredient is linked to an existing item. Items with no recipe are treated as raw materials in the calculator; items with recipes are broken down.")}</div>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-accent/20 bg-accent-strong/10 p-4 text-sm text-accent">
-                    This will save as a true raw material with an image and no
-                    recipe ingredients. The calculator will use it as the final
-                    base material when breaking down crafting prices.
-                  </div>
+                  <div className="rounded-xl border border-accent/20 bg-accent-strong/10 p-4 text-sm text-accent">{t("This will save as a true raw material with an image and no recipe ingredients. The calculator will use it as the final base material when breaking down crafting prices.")}</div>
                 )}
 
                 <div className="sticky bottom-0 -mx-5 md:-mx-7 -mb-5 md:-mb-7 mt-6 border-t border-line bg-[var(--surface)]/95 p-5 md:p-7 backdrop-blur">
@@ -1846,9 +1719,7 @@ export default function CraftingManager({ isAdmin }: Props) {
                       type="button"
                       onClick={closeRecipeModal}
                       className="px-5 py-3 rounded-xl text-white font-semibold bg-elevated border border-line hover:bg-white/15"
-                    >
-                      Cancel
-                    </button>
+                    >{t("Cancel")}</button>
 
                     <button
                       type="submit"
@@ -1859,14 +1730,14 @@ export default function CraftingManager({ isAdmin }: Props) {
                       }}
                     >
                       {saving
-                        ? "Saving..."
+                        ? t("Saving...")
                         : editingId
-                          ? "Save item"
+                          ? t("Save item")
                           : adminModalTab === "raw"
-                            ? "Add raw material"
+                            ? t("Add raw material")
                             : adminModalTab === "nonRaw"
-                              ? "Add non-raw craft item"
-                              : "Add recipe"}
+                              ? t("Add non-raw craft item")
+                              : t("Add recipe")}
                     </button>
                   </div>
                 </div>

@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
+
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -136,19 +138,20 @@ function comboLabel(recipe: Recipe) {
 }
 
 function RecipesTableSkeleton({ isAdmin, rows = 12 }: { isAdmin: boolean; rows?: number }) {
+  const { t } = useTranslation();
   return (
     <div className="overflow-x-auto rounded-xl border border-line animate-pulse">
       <table className="w-full text-left text-sm text-white">
         <thead className="border-b border-line text-muted bg-elevated">
           <tr>
-            <th className="px-4 py-4">Color</th>
-            <th className="px-4 py-4">Fosfor</th>
-            <th className="px-4 py-4">Pseudoephedrin</th>
-            <th className="px-4 py-4">Lithium</th>
-            <th className="px-4 py-4">Renhed</th>
-            <th className="px-4 py-4">Stabiliseringstid</th>
-            <th className="px-4 py-4">Status</th>
-            {isAdmin && <th className="px-4 py-4">Actions</th>}
+            <th className="px-4 py-4">{t("Color")}</th>
+            <th className="px-4 py-4">{t("Fosfor")}</th>
+            <th className="px-4 py-4">{t("Pseudoephedrin")}</th>
+            <th className="px-4 py-4">{t("Lithium")}</th>
+            <th className="px-4 py-4">{t("Renhed")}</th>
+            <th className="px-4 py-4">{t("Stabiliseringstid")}</th>
+            <th className="px-4 py-4">{t("Status")}</th>
+            {isAdmin && <th className="px-4 py-4">{t("Actions")}</th>}
           </tr>
         </thead>
 
@@ -172,6 +175,7 @@ function RecipesTableSkeleton({ isAdmin, rows = 12 }: { isAdmin: boolean; rows?:
 }
 
 export default function MethRecipesTable({ isAdmin }: Props) {
+  const { t } = useTranslation();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -684,7 +688,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
       clearMethCache();
       cancelEdit();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to save recipe");
+      alert(t(err instanceof Error ? err.message : "Failed to save recipe"));
     }
   }
 
@@ -727,7 +731,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
       const winner = json?.item as Recipe | null;
 
       if (!winner) {
-        alert("No missing recipes left for this color.");
+        alert(t("No missing recipes left for this color."));
         return;
       }
 
@@ -788,17 +792,15 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         });
       }, 4300);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to pick a missing recipe");
+      alert(t(err instanceof Error ? err.message : "Failed to pick a missing recipe"));
     }
   }
 
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white">Recipes</h2>
-        <p className="text-muted mt-2">
-          Browse recipes 50 at a time for the selected fosfor color.
-        </p>
+        <h2 className="text-2xl font-bold text-white">{t("Recipes")}</h2>
+        <p className="text-muted mt-2">{t("Browse recipes 50 at a time for the selected fosfor color.")}</p>
       </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
@@ -811,87 +813,78 @@ export default function MethRecipesTable({ isAdmin }: Props) {
               tabColor
             )}`}
           >
-            {tabColor.charAt(0).toUpperCase() + tabColor.slice(1)}
+            {t(tabColor.charAt(0).toUpperCase() + tabColor.slice(1))}
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         <div>
-          <label className="block text-sm text-muted mb-2">Sort by</label>
+          <label className="block text-sm text-muted mb-2">{t("Sort by")}</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
             className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none appearance-none"
             style={{ colorScheme: "dark" }}
           >
-            <option value="default" className="bg-[var(--surface)] text-white">Default</option>
-            <option value="renhed-desc" className="bg-[var(--surface)] text-white">Highest renhed</option>
-            <option value="renhed-asc" className="bg-[var(--surface)] text-white">Lowest renhed</option>
-            <option value="stabiliseringstid-desc" className="bg-[var(--surface)] text-white">Highest stabiliseringstid</option>
-            <option value="stabiliseringstid-asc" className="bg-[var(--surface)] text-white">Lowest stabiliseringstid</option>
+            <option value="default" className="bg-[var(--surface)] text-white">{t("Default")}</option>
+            <option value="renhed-desc" className="bg-[var(--surface)] text-white">{t("Highest renhed")}</option>
+            <option value="renhed-asc" className="bg-[var(--surface)] text-white">{t("Lowest renhed")}</option>
+            <option value="stabiliseringstid-desc" className="bg-[var(--surface)] text-white">{t("Highest stabiliseringstid")}</option>
+            <option value="stabiliseringstid-asc" className="bg-[var(--surface)] text-white">{t("Lowest stabiliseringstid")}</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm text-muted mb-2">Recipe status</label>
+          <label className="block text-sm text-muted mb-2">{t("Recipe status")}</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
             className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none appearance-none"
             style={{ colorScheme: "dark" }}
           >
-            <option value="all" className="bg-[var(--surface)] text-white">All recipes</option>
-            <option value="completed" className="bg-[var(--surface)] text-white">Only completed recipes</option>
-            <option value="missing" className="bg-[var(--surface)] text-white">Only missing renhed/stabiliseringstid</option>
+            <option value="all" className="bg-[var(--surface)] text-white">{t("All recipes")}</option>
+            <option value="completed" className="bg-[var(--surface)] text-white">{t("Only completed recipes")}</option>
+            <option value="missing" className="bg-[var(--surface)] text-white">{t("Only missing renhed/stabiliseringstid")}</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm text-muted mb-2">Search combo</label>
+          <label className="block text-sm text-muted mb-2">{t("Search combo")}</label>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Example: 100-20-50"
+            placeholder={t("Example: 100-20-50")}
             className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none"
           />
         </div>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-3">
-        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">
-          Loaded: <span className="font-bold text-white">{recipes.length}</span>
+        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">{t("Loaded:")} <span className="font-bold text-white">{recipes.length}</span>
           <span className="text-muted"> / {total}</span>
         </div>
 
-        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">
-          Completed: <span className="font-bold text-white">{completedCount}</span>
+        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">{t("Completed:")} <span className="font-bold text-white">{completedCount}</span>
         </div>
 
-        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">
-          Missing: <span className="font-bold text-white">{missingCount}</span>
+        <div className="rounded-xl bg-elevated border border-line px-4 py-3 text-sm text-gray-200">{t("Missing:")} <span className="font-bold text-white">{missingCount}</span>
         </div>
 
         {isAdmin && (
-          <div className="rounded-xl bg-amber-500/10 border border-amber-400/20 px-4 py-3 text-sm text-amber-200">
-            Admin mode: you can edit renhed and stabiliseringstid
-          </div>
+          <div className="rounded-xl bg-amber-500/10 border border-amber-400/20 px-4 py-3 text-sm text-amber-200">{t("Admin mode: you can edit renhed and stabiliseringstid")}</div>
         )}
 
         {isSyncing && (
-          <div className="rounded-xl bg-sky-500/10 border border-sky-400/20 px-4 py-3 text-sm text-sky-200">
-            Live update received. Refreshing visible recipes…
-          </div>
+          <div className="rounded-xl bg-sky-500/10 border border-sky-400/20 px-4 py-3 text-sm text-sky-200">{t("Live update received. Refreshing visible recipes…")}</div>
         )}
       </div>
 
       <div className="mb-8 rounded-xl border border-line bg-elevated p-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-xl font-bold text-white">Random Missing Picker</h3>
-            <p className="text-sm text-muted mt-1">
-              Picks a random recipe that still needs renhed or stabiliseringstid.
-            </p>
+            <h3 className="text-xl font-bold text-white">{t("Random Missing Picker")}</h3>
+            <p className="text-sm text-muted mt-1">{t("Picks a random recipe that still needs renhed or stabiliseringstid.")}</p>
           </div>
 
           <button
@@ -899,7 +892,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
             disabled={isRolling || missingCount === 0}
             className="hub-primary"
           >
-            {isRolling ? "Rolling..." : "Pick random missing recipe"}
+            {isRolling ? t("Rolling...") : t("Pick random missing recipe")}
           </button>
         </div>
 
@@ -946,8 +939,8 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
                       <span className="text-xs text-muted">
                         {recipe.renhed === null || recipe.stabiliseringstid === null
-                          ? "Missing"
-                          : "Done"}
+                          ? t("Missing")
+                          : t("Done")}
                       </span>
                     </div>
 
@@ -955,8 +948,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                       {comboLabel(recipe)}
                     </div>
 
-                    <div className="mt-2 text-xs text-muted">
-                      Renhed: {recipe.renhed ?? "—"} · Stabiliseringstid:{" "}
+                    <div className="mt-2 text-xs text-muted">{t("Renhed:")} {recipe.renhed ?? "—"} {t("· Stabiliseringstid:")}{" "}
                       {recipe.stabiliseringstid ?? "—"}
                     </div>
                   </div>
@@ -967,14 +959,12 @@ export default function MethRecipesTable({ isAdmin }: Props) {
         </div>
 
         {selectedRecipeId && (
-          <div className="mt-4 rounded-xl border border-yellow-400/20 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-            Winner selected. The table will highlight the picked missing recipe.
-          </div>
+          <div className="mt-4 rounded-xl border border-yellow-400/20 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">{t("Winner selected. The table will highlight the picked missing recipe.")}</div>
         )}
       </div>
 
       {loading ? <RecipesTableSkeleton isAdmin={isAdmin} /> : null}
-      {error ? <div className="text-red-300 mb-4">{error}</div> : null}
+      {error ? <div className="text-red-300 mb-4">{t(error)}</div> : null}
 
       {!loading && !error && (
         <>
@@ -982,14 +972,14 @@ export default function MethRecipesTable({ isAdmin }: Props) {
             <table className="w-full text-left text-sm text-white">
               <thead className="border-b border-line text-muted bg-elevated">
                 <tr>
-                  <th className="px-4 py-4">Color</th>
-                  <th className="px-4 py-4">Fosfor</th>
-                  <th className="px-4 py-4">Pseudoephedrin</th>
-                  <th className="px-4 py-4">Lithium</th>
-                  <th className="px-4 py-4">Renhed</th>
-                  <th className="px-4 py-4">Stabiliseringstid</th>
-                  <th className="px-4 py-4">Status</th>
-                  {isAdmin && <th className="px-4 py-4">Actions</th>}
+                  <th className="px-4 py-4">{t("Color")}</th>
+                  <th className="px-4 py-4">{t("Fosfor")}</th>
+                  <th className="px-4 py-4">{t("Pseudoephedrin")}</th>
+                  <th className="px-4 py-4">{t("Lithium")}</th>
+                  <th className="px-4 py-4">{t("Renhed")}</th>
+                  <th className="px-4 py-4">{t("Stabiliseringstid")}</th>
+                  <th className="px-4 py-4">{t("Status")}</th>
+                  {isAdmin && <th className="px-4 py-4">{t("Actions")}</th>}
                 </tr>
               </thead>
 
@@ -1057,13 +1047,9 @@ export default function MethRecipesTable({ isAdmin }: Props) {
 
                       <td className="px-4 py-4">
                         {isCompleted ? (
-                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-accent-strong/20 text-accent border-accent/20">
-                            Completed
-                          </span>
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-accent-strong/20 text-accent border-accent/20">{t("Completed")}</span>
                         ) : (
-                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-yellow-500/20 text-yellow-300 border-yellow-400/20">
-                            Missing data
-                          </span>
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold border bg-yellow-500/20 text-yellow-300 border-yellow-400/20">{t("Missing data")}</span>
                         )}
                       </td>
 
@@ -1077,15 +1063,11 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                                 style={{
                                   background: "var(--accent)", color: "var(--inset)",
                                 }}
-                              >
-                                Save
-                              </button>
+                              >{t("Save")}</button>
                               <button
                                 onClick={cancelEdit}
                                 className="px-3 py-2 rounded-lg text-sm font-semibold text-white bg-elevated border border-line"
-                              >
-                                Cancel
-                              </button>
+                              >{t("Cancel")}</button>
                             </div>
                           ) : (
                             <button
@@ -1094,9 +1076,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                               style={{
                                 background: "var(--accent)", color: "var(--inset)",
                               }}
-                            >
-                              Edit
-                            </button>
+                            >{t("Edit")}</button>
                           )}
                         </td>
                       )}
@@ -1109,9 +1089,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
                     <td
                       colSpan={isAdmin ? 8 : 7}
                       className="px-4 py-8 text-center text-muted"
-                    >
-                      No recipes match your filters.
-                    </td>
+                    >{t("No recipes match your filters.")}</td>
                   </tr>
                 )}
               </tbody>
@@ -1127,9 +1105,7 @@ export default function MethRecipesTable({ isAdmin }: Props) {
           <div ref={loadMoreRef} className="h-1" />
 
           {!hasMore && recipes.length > 0 ? (
-            <div className="mt-4 rounded-xl border border-line bg-elevated px-4 py-3 text-center text-muted">
-              You’ve reached the end of the recipes for this filter.
-            </div>
+            <div className="mt-4 rounded-xl border border-line bg-elevated px-4 py-3 text-center text-muted">{t("You’ve reached the end of the recipes for this filter.")}</div>
           ) : null}
         </>
       )}

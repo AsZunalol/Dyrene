@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import {
   ChangeEvent,
@@ -85,13 +86,9 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function money(value: number) {
-  return `$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-}
 
-function percent(value: number) {
-  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
-}
+
+
 
 function ImageBox({
   src,
@@ -140,6 +137,16 @@ const subtleButtonClass =
   "rounded-xl border border-line bg-elevated px-4 py-2 text-sm font-bold text-gray-200 transition hover:bg-elevated";
 
 export default function AsZunaFishingTracker() {
+  const { t, locale } = useTranslation();
+
+function percent(value: number) {
+  return `${value.toLocaleString(locale, { maximumFractionDigits: 1 })}%`;
+}
+
+function money(value: number) {
+  return `$${value.toLocaleString(locale, { maximumFractionDigits: 2 })}`;
+}
+
   const supabase = useMemo(() => createClient(), []);
   const [data, setData] = useState<FishingData>(emptyData);
   const [loading, setLoading] = useState(true);
@@ -467,7 +474,7 @@ export default function AsZunaFishingTracker() {
   }
 
   async function deleteRow(type: "session" | "bait" | "fish", id: string) {
-    if (!window.confirm(`Delete this ${type}?`)) return;
+    if (!window.confirm(t(type === "session" ? "Delete this session?" : type === "bait" ? "Delete this bait?" : "Delete this fish?"))) return;
     setError("");
     try {
       const res = await fetch(
@@ -477,7 +484,7 @@ export default function AsZunaFishingTracker() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Could not delete row.");
       await loadData();
-      showNotice(`${type} deleted.`);
+      showNotice(type === "session" ? "Session deleted." : type === "bait" ? "Bait deleted." : "Fish deleted.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete row.");
     }
@@ -739,43 +746,35 @@ export default function AsZunaFishingTracker() {
       <div className="rounded-xl border border-line bg-surface p-6 shadow-lg shadow-black/30 backdrop-blur-xl lg:p-8">
         <div className="flex flex-col gap-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
-              AsZuna Tool
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-foreground">
-              Fishing Data Tracker
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-              Track bait sessions, fish drops, locations, drop chances, bait costs, and
-              real profit per bait. We calculate by sessions because bait used is the
-              real attempt count.
-            </p>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">{t("AsZuna Tool")}</p>
+            <h2 className="mt-2 text-2xl font-semibold text-foreground">{t("Fishing Data Tracker")}</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">{t("Track bait sessions, fish drops, locations, drop chances, bait costs, and real profit per bait. We calculate by sessions because bait used is the real attempt count.")}</p>
           </div>
           <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-5">
             <div className="rounded-xl border border-line bg-inset p-4">
-              <p className="text-xs text-muted">Sessions</p>
+              <p className="text-xs text-muted">{t("Sessions")}</p>
               <p className="text-2xl font-semibold text-white">
                 {data.sessions.length}
               </p>
             </div>
             <div className="rounded-xl border border-line bg-inset p-4">
-              <p className="text-xs text-muted">Bait Used</p>
+              <p className="text-xs text-muted">{t("Bait Used")}</p>
               <p className="text-2xl font-semibold text-white">{totalBaitsUsed}</p>
             </div>
             <div className="rounded-xl border border-line bg-inset p-4">
-              <p className="text-xs text-muted">Caught</p>
+              <p className="text-xs text-muted">{t("Caught")}</p>
               <p className="text-2xl font-semibold text-white">
                 {totalFishCaught}
               </p>
             </div>
             <div className="rounded-xl border border-line bg-inset p-4">
-              <p className="text-xs text-muted">Bait Cost</p>
+              <p className="text-xs text-muted">{t("Bait Cost")}</p>
               <p className="text-2xl font-semibold text-white">
                 {money(totalBaitCost)}
               </p>
             </div>
             <div className="rounded-xl border border-line bg-inset p-4">
-              <p className="text-xs text-muted">Net Profit</p>
+              <p className="text-xs text-muted">{t("Net Profit")}</p>
               <p className="text-2xl font-semibold text-accent">
                 {money(totalProfit)}
               </p>
@@ -783,18 +782,16 @@ export default function AsZunaFishingTracker() {
           </div>
         </div>
         {!data.isAdmin && (
-          <p className="mt-5 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-4 text-sm text-yellow-100">
-            View-only mode. Only admins can add, edit, delete, or import data.
-          </p>
+          <p className="mt-5 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-4 text-sm text-yellow-100">{t("View-only mode. Only admins can add, edit, delete, or import data.")}</p>
         )}
         {error && (
           <p className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
-            {error}
+            {t(error)}
           </p>
         )}
         {notice && (
           <p className="mt-5 rounded-xl border border-accent/20 bg-accent/10 p-4 text-sm text-accent-hover">
-            {notice}
+            {t(notice)}
           </p>
         )}
       </div>
@@ -804,12 +801,12 @@ export default function AsZunaFishingTracker() {
           <div className="mb-5 grid grid-cols-4 gap-2">
             {(["session", "bait", "fish", "tools"] as const).map((tab) => (
               <button
-                key={tab}
+                key={t(tab)}
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={`rounded-xl px-3 py-2 text-sm font-semibold capitalize transition ${activeTab === tab ? "bg-accent text-black" : "bg-inset text-muted hover:bg-elevated"}`}
               >
-                {tab}
+                {t(tab)}
               </button>
             ))}
           </div>
@@ -822,15 +819,12 @@ export default function AsZunaFishingTracker() {
               <div>
                 <p className="text-lg font-semibold text-white">
                   {editingSession
-                    ? "Edit fishing session"
-                    : "Add fishing session"}
+                    ? t("Edit fishing session")
+                    : t("Add fishing session")}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Pick bait, enter how many baits you used, then add the fish
-                  you got.
-                </p>
+                <p className="mt-2 text-sm leading-6 text-muted">{t("Pick bait, enter how many baits you used, then add the fish you got.")}</p>
               </div>
-              <Field label="Bait used">
+              <Field label={t("Bait used")}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {data.baits.map((bait) => (
                     <button
@@ -846,15 +840,14 @@ export default function AsZunaFishingTracker() {
                           {bait.name}
                         </span>
                         <span className="block text-xs text-muted">
-                          {money(Number(bait.buy_price || 0))} each
-                        </span>
+                          {money(Number(bait.buy_price || 0))} {t("each")}</span>
                       </span>
                     </button>
                   ))}
                 </div>
               </Field>
               <div className="grid gap-4 md:grid-cols-3">
-                <Field label="Baits used">
+                <Field label={t("Baits used")}>
                   <input
                     disabled={!data.isAdmin}
                     type="number"
@@ -864,7 +857,7 @@ export default function AsZunaFishingTracker() {
                     className={inputClass}
                   />
                 </Field>
-                <Field label="Date">
+                <Field label={t("Date")}>
                   <input
                     disabled={!data.isAdmin}
                     type="date"
@@ -873,12 +866,12 @@ export default function AsZunaFishingTracker() {
                     className={inputClass}
                   />
                 </Field>
-                <Field label="Location">
+                <Field label={t("Location")}>
                   <input
                     disabled={!data.isAdmin}
                     value={sessionLocation}
                     onChange={(e) => setSessionLocation(e.target.value)}
-                    placeholder="Pier, lake, ocean..."
+                    placeholder={t("Pier, lake, ocean...")}
                     className={inputClass}
                   />
                 </Field>
@@ -886,34 +879,25 @@ export default function AsZunaFishingTracker() {
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                      Fish caught
-                    </p>
-                    <p className="mt-1 text-xs text-muted">
-                      Click a fish image, then set how many you got.
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">{t("Fish caught")}</p>
+                    <p className="mt-1 text-xs text-muted">{t("Click a fish image, then set how many you got.")}</p>
                   </div>
                   <p className="shrink-0 text-xs text-muted">
-                    {filteredSessionFish.length} shown
-                  </p>
+                    {filteredSessionFish.length} {t("shown")}</p>
                 </div>
                 <input
                   disabled={!data.isAdmin}
                   value={sessionFishSearch}
                   onChange={(e) => setSessionFishSearch(e.target.value)}
-                  placeholder="Search fish by name..."
+                  placeholder={t("Search fish by name...")}
                   className={inputClass}
                 />
                 {data.fish.length === 0 ? (
-                  <p className="rounded-xl border border-line bg-inset p-4 text-sm text-muted">
-                    Add fish/results first before you can log a session.
-                  </p>
+                  <p className="rounded-xl border border-line bg-inset p-4 text-sm text-muted">{t("Add fish/results first before you can log a session.")}</p>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2">
                     {filteredSessionFish.length === 0 && (
-                      <p className="rounded-xl border border-line bg-inset p-4 text-sm text-muted sm:col-span-2">
-                        No fish match your search.
-                      </p>
+                      <p className="rounded-xl border border-line bg-inset p-4 text-sm text-muted sm:col-span-2">{t("No fish match your search.")}</p>
                     )}
                     {filteredSessionFish.map((fish) => {
                       const amount = getCatchAmount(fish.id);
@@ -935,13 +919,12 @@ export default function AsZunaFishingTracker() {
                                 {fish.name}
                               </p>
                               <p className="text-xs text-muted">
-                                {money(Number(fish.sell_price || 0))} each
-                              </p>
+                                {money(Number(fish.sell_price || 0))} {t("each")}</p>
                             </div>
                             <span
                               className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${selected ? "bg-accent text-black" : "bg-elevated text-muted"}`}
                             >
-                              {selected ? "Picked" : "Pick"}
+                              {selected ? t("Picked") : t("Pick")}
                             </span>
                           </button>
                           <div className="mt-3 grid grid-cols-[36px_1fr_36px] gap-2">
@@ -985,12 +968,12 @@ export default function AsZunaFishingTracker() {
                   </div>
                 )}
               </div>
-              <Field label="Notes">
+              <Field label={t("Notes")}>
                 <textarea
                   disabled={!data.isAdmin}
                   value={sessionNotes}
                   onChange={(e) => setSessionNotes(e.target.value)}
-                  placeholder="Weather, time, anything useful..."
+                  placeholder={t("Weather, time, anything useful...")}
                   rows={3}
                   className={inputClass}
                 />
@@ -1003,10 +986,10 @@ export default function AsZunaFishingTracker() {
                     className={buttonClass}
                   >
                     {saving
-                      ? "Saving..."
+                      ? t("Saving...")
                       : editingSession
-                        ? "Update Session"
-                        : "Save Session"}
+                        ? t("Update Session")
+                        : t("Save Session")}
                   </button>
                   {editingSession && (
                     <button
@@ -1020,9 +1003,7 @@ export default function AsZunaFishingTracker() {
                         setCatches([{ fish_id: "", amount: 1 }]);
                       }}
                       className={subtleButtonClass}
-                    >
-                      Cancel edit
-                    </button>
+                    >{t("Cancel edit")}</button>
                   )}
                 </div>
               )}
@@ -1032,21 +1013,19 @@ export default function AsZunaFishingTracker() {
           {activeTab === "bait" && (
             <form onSubmit={addBait} className="space-y-5">
               <div>
-                <p className="text-lg font-semibold text-white">Add bait</p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Add your 3 bait types here with images and buy price.
-                </p>
+                <p className="text-lg font-semibold text-white">{t("Add bait")}</p>
+                <p className="mt-2 text-sm leading-6 text-muted">{t("Add your 3 bait types here with images and buy price.")}</p>
               </div>
-              <Field label="Bait name">
+              <Field label={t("Bait name")}>
                 <input
                   disabled={!data.isAdmin}
                   value={baitName}
                   onChange={(e) => setBaitName(e.target.value)}
-                  placeholder="Bait name"
+                  placeholder={t("Bait name")}
                   className={inputClass}
                 />
               </Field>
-              <Field label="Buy price per bait">
+              <Field label={t("Buy price per bait")}>
                 <input
                   disabled={!data.isAdmin}
                   type="number"
@@ -1057,12 +1036,12 @@ export default function AsZunaFishingTracker() {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Image">
+              <Field label={t("Image")}>
                 <input
                   disabled={!data.isAdmin}
                   value={baitImage}
                   onChange={(e) => setBaitImage(e.target.value)}
-                  placeholder="Image URL, or upload below"
+                  placeholder={t("Image URL, or upload below")}
                   className={inputClass}
                 />
               </Field>
@@ -1087,10 +1066,10 @@ export default function AsZunaFishingTracker() {
                   className={buttonClass}
                 >
                   {uploading
-                    ? "Uploading..."
+                    ? t("Uploading...")
                     : saving
-                      ? "Saving..."
-                      : "Add Bait"}
+                      ? t("Saving...")
+                      : t("Add Bait")}
                 </button>
               )}
             </form>
@@ -1099,21 +1078,19 @@ export default function AsZunaFishingTracker() {
           {activeTab === "fish" && (
             <form onSubmit={addFish} className="space-y-5">
               <div>
-                <p className="text-lg font-semibold text-white">Add fish/result</p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Add image and sell price so profit per bait works.
-                </p>
+                <p className="text-lg font-semibold text-white">{t("Add fish/result")}</p>
+                <p className="mt-2 text-sm leading-6 text-muted">{t("Add image and sell price so profit per bait works.")}</p>
               </div>
-              <Field label="Fish/result name">
+              <Field label={t("Fish/result name")}>
                 <input
                   disabled={!data.isAdmin}
                   value={fishName}
                   onChange={(e) => setFishName(e.target.value)}
-                  placeholder="Fish/result name"
+                  placeholder={t("Fish/result name")}
                   className={inputClass}
                 />
               </Field>
-              <Field label="Sell price">
+              <Field label={t("Sell price")}>
                 <input
                   disabled={!data.isAdmin}
                   type="number"
@@ -1124,12 +1101,12 @@ export default function AsZunaFishingTracker() {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Image">
+              <Field label={t("Image")}>
                 <input
                   disabled={!data.isAdmin}
                   value={fishImage}
                   onChange={(e) => setFishImage(e.target.value)}
-                  placeholder="Image URL, or upload below"
+                  placeholder={t("Image URL, or upload below")}
                   className={inputClass}
                 />
               </Field>
@@ -1154,10 +1131,10 @@ export default function AsZunaFishingTracker() {
                   className={buttonClass}
                 >
                   {uploading
-                    ? "Uploading..."
+                    ? t("Uploading...")
                     : saving
-                      ? "Saving..."
-                      : "Add Fish"}
+                      ? t("Saving...")
+                      : t("Add Fish")}
                 </button>
               )}
             </form>
@@ -1166,28 +1143,21 @@ export default function AsZunaFishingTracker() {
           {activeTab === "tools" && (
             <div className="space-y-5">
               <div>
-                <p className="text-lg font-semibold text-white">Backup tools</p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Export your data before big changes. Import supports the JSON
-                  file exported here.
-                </p>
+                <p className="text-lg font-semibold text-white">{t("Backup tools")}</p>
+                <p className="mt-2 text-sm leading-6 text-muted">{t("Export your data before big changes. Import supports the JSON file exported here.")}</p>
               </div>
               <button
                 type="button"
                 onClick={exportData}
                 className={buttonClass}
-              >
-                Export JSON
-              </button>
+              >{t("Export JSON")}</button>
               <button
                 type="button"
                 onClick={exportCsv}
                 className={subtleButtonClass}
-              >
-                Export CSV
-              </button>
+              >{t("Export CSV")}</button>
               {data.isAdmin && (
-                <Field label="Import JSON">
+                <Field label={t("Import JSON")}>
                   <input
                     type="file"
                     accept="application/json,.json"
@@ -1204,31 +1174,25 @@ export default function AsZunaFishingTracker() {
           <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-lg font-semibold text-white">
-                  Best bait overview
-                </p>
-                <p className="mt-1 text-sm text-muted">
-                  Sorted by profit per bait.
-                </p>
+                <p className="text-lg font-semibold text-white">{t("Best bait overview")}</p>
+                <p className="mt-1 text-sm text-muted">{t("Sorted by profit per bait.")}</p>
               </div>
               {bestMoneyBait && (
-                <p className="rounded-xl border border-accent/20 bg-accent/10 px-4 py-2 text-sm font-semibold text-accent">
-                  Best: {bestMoneyBait.bait.name} ·{" "}
-                  {money(bestMoneyBait.profitPerBait)}/bait net
-                </p>
+                <p className="rounded-xl border border-accent/20 bg-accent/10 px-4 py-2 text-sm font-semibold text-accent">{t("Best:")} {bestMoneyBait.bait.name} ·{" "}
+                  {money(bestMoneyBait.profitPerBait)}{t("/bait net")}</p>
               )}
             </div>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[650px] text-left text-sm">
                 <thead className="text-xs uppercase tracking-[0.18em] text-muted">
                   <tr>
-                    <th className="py-3">Bait</th>
-                    <th>Baits Used</th>
-                    <th>Best Fish</th>
-                    <th>Revenue</th>
-                    <th>Bait Cost</th>
-                    <th>Net Profit</th>
-                    <th>Profit / Bait</th>
+                    <th className="py-3">{t("Bait")}</th>
+                    <th>{t("Baits Used")}</th>
+                    <th>{t("Best Fish")}</th>
+                    <th>{t("Revenue")}</th>
+                    <th>{t("Bait Cost")}</th>
+                    <th>{t("Net Profit")}</th>
+                    <th>{t("Profit / Bait")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1273,17 +1237,13 @@ export default function AsZunaFishingTracker() {
           <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-lg font-semibold text-white">
-                  Drop chance by bait
-                </p>
-                <p className="mt-1 text-sm text-muted">
-                  Chance = fish caught ÷ baits used.
-                </p>
+                <p className="text-lg font-semibold text-white">{t("Drop chance by bait")}</p>
+                <p className="mt-1 text-sm text-muted">{t("Chance = fish caught ÷ baits used.")}</p>
               </div>
               <input
                 value={targetFish}
                 onChange={(e) => setTargetFish(e.target.value)}
-                placeholder="Best bait for fish..."
+                placeholder={t("Best bait for fish...")}
                 className={inputClass}
               />
             </div>
@@ -1294,25 +1254,20 @@ export default function AsZunaFishingTracker() {
                   name={bestBait.bait.name}
                 />
                 <div>
-                  <p className="text-sm text-muted">
-                    Best bait for {bestBait.fish.name}
+                  <p className="text-sm text-muted">{t("Best bait for")} {bestBait.fish.name}
                   </p>
                   <p className="text-lg font-semibold text-white">
                     {bestBait.bait.name} · {percent(bestBait.chance)} ·{" "}
-                    {money(bestBait.profitPerBait)}/bait net
-                  </p>
+                    {money(bestBait.profitPerBait)}{t("/bait net")}</p>
                 </div>
               </div>
             )}
             <div className="mt-5 space-y-4">
               {loading && (
-                <p className="text-sm text-muted">Loading fishing data...</p>
+                <p className="text-sm text-muted">{t("Loading fishing data...")}</p>
               )}
               {!loading && statsByBait.length === 0 && (
-                <p className="text-sm text-muted">
-                  No session stats yet. Add baits, fish, then save your first
-                  session.
-                </p>
+                <p className="text-sm text-muted">{t("No session stats yet. Add baits, fish, then save your first session.")}</p>
               )}
               {statsByBait.map((rows) => (
                 <div
@@ -1329,8 +1284,7 @@ export default function AsZunaFishingTracker() {
                         {rows[0].bait.name}
                       </p>
                       <p className="text-xs text-muted">
-                        {rows[0].baitsUsed} baits tested
-                      </p>
+                        {rows[0].baitsUsed} {t("baits tested")}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -1359,9 +1313,7 @@ export default function AsZunaFishingTracker() {
                             />
                           </div>
                           <p className="mt-1 text-xs text-muted">
-                            {row.caught} caught · {money(row.profitPerBait)}
-                            /bait net · {money(row.revenue)} revenue
-                          </p>
+                            {row.caught} {t("caught ·")} {money(row.profitPerBait)}{t("/bait net ·")} {money(row.revenue)} {t("revenue")}</p>
                         </div>
                       </div>
                     ))}
@@ -1375,7 +1327,7 @@ export default function AsZunaFishingTracker() {
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
-          <p className="text-lg font-semibold text-white">Latest sessions</p>
+          <p className="text-lg font-semibold text-white">{t("Latest sessions")}</p>
           <div className="mt-4 space-y-3">
             {data.sessions.slice(0, 10).map((session) => (
               <div
@@ -1390,10 +1342,10 @@ export default function AsZunaFishingTracker() {
                     />
                     <div>
                       <p className="font-semibold text-white">
-                        {session.aszuna_fishing_baits?.name || "Deleted bait"}
+                        {session.aszuna_fishing_baits?.name || t("Deleted bait")}
                       </p>
                       <p className="text-xs text-muted">
-                        {session.baits_used} baits ·{" "}
+                        {session.baits_used} {t("baits ·")}{" "}
                         {session.session_date ||
                           session.created_at.slice(0, 10)}
                         {session.location ? ` · ${session.location}` : ""}
@@ -1406,16 +1358,12 @@ export default function AsZunaFishingTracker() {
                         type="button"
                         onClick={() => startEditSession(session)}
                         className="rounded-xl border border-line bg-elevated px-3 py-2 text-xs font-bold text-gray-200"
-                      >
-                        Edit
-                      </button>
+                      >{t("Edit")}</button>
                       <button
                         type="button"
                         onClick={() => deleteRow("session", session.id)}
                         className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-200"
-                      >
-                        Delete
-                      </button>
+                      >{t("Delete")}</button>
                     </div>
                   )}
                 </div>
@@ -1427,7 +1375,7 @@ export default function AsZunaFishingTracker() {
                         className="rounded-full border border-line bg-elevated px-3 py-1 text-xs text-muted"
                       >
                         {catchRow.amount}x{" "}
-                        {catchRow.aszuna_fishing_fish?.name || "Deleted fish"}
+                        {catchRow.aszuna_fishing_fish?.name || t("Deleted fish")}
                       </span>
                     ),
                   )}
@@ -1442,7 +1390,7 @@ export default function AsZunaFishingTracker() {
 
         <div className="space-y-6">
           <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
-            <p className="text-lg font-semibold text-white">Baits</p>
+            <p className="text-lg font-semibold text-white">{t("Baits")}</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {data.baits.map((bait) => (
                 <div
@@ -1454,8 +1402,7 @@ export default function AsZunaFishingTracker() {
                     <div>
                       <p className="font-bold text-white">{bait.name}</p>
                       <p className="text-xs text-muted">
-                        {money(Number(bait.buy_price || 0))} each
-                      </p>
+                        {money(Number(bait.buy_price || 0))} {t("each")}</p>
                     </div>
                   </div>
                   {data.isAdmin && (
@@ -1464,16 +1411,12 @@ export default function AsZunaFishingTracker() {
                         type="button"
                         onClick={() => setEditingBait(bait)}
                         className={subtleButtonClass}
-                      >
-                        Edit
-                      </button>
+                      >{t("Edit")}</button>
                       <button
                         type="button"
                         onClick={() => deleteRow("bait", bait.id)}
                         className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-200"
-                      >
-                        Delete
-                      </button>
+                      >{t("Delete")}</button>
                     </div>
                   )}
                 </div>
@@ -1481,7 +1424,7 @@ export default function AsZunaFishingTracker() {
             </div>
           </div>
           <div className="rounded-[1.75rem] border border-line bg-inset p-5 lg:p-6">
-            <p className="text-lg font-semibold text-white">Fish / results</p>
+            <p className="text-lg font-semibold text-white">{t("Fish / results")}</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {data.fish.map((fish) => (
                 <div
@@ -1492,8 +1435,7 @@ export default function AsZunaFishingTracker() {
                     <ImageBox src={fish.image_url} name={fish.name} />
                     <div>
                       <p className="font-bold text-white">{fish.name}</p>
-                      <p className="text-xs text-muted">
-                        Sell price: {money(Number(fish.sell_price || 0))}
+                      <p className="text-xs text-muted">{t("Sell price:")} {money(Number(fish.sell_price || 0))}
                       </p>
                     </div>
                   </div>
@@ -1503,16 +1445,12 @@ export default function AsZunaFishingTracker() {
                         type="button"
                         onClick={() => setEditingFish(fish)}
                         className={subtleButtonClass}
-                      >
-                        Edit
-                      </button>
+                      >{t("Edit")}</button>
                       <button
                         type="button"
                         onClick={() => deleteRow("fish", fish.id)}
                         className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-200"
-                      >
-                        Delete
-                      </button>
+                      >{t("Delete")}</button>
                     </div>
                   )}
                 </div>
@@ -1528,9 +1466,9 @@ export default function AsZunaFishingTracker() {
             onSubmit={updateBait}
             className="w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 shadow-lg"
           >
-            <h3 className="text-2xl font-semibold text-white">Edit bait</h3>
+            <h3 className="text-2xl font-semibold text-white">{t("Edit bait")}</h3>
             <div className="mt-5 space-y-4">
-              <Field label="Name">
+              <Field label={t("Name")}>
                 <input
                   value={editingBait.name}
                   onChange={(e) =>
@@ -1539,7 +1477,7 @@ export default function AsZunaFishingTracker() {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Buy price per bait">
+              <Field label={t("Buy price per bait")}>
                 <input
                   type="number"
                   min="0"
@@ -1554,7 +1492,7 @@ export default function AsZunaFishingTracker() {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Image">
+              <Field label={t("Image")}>
                 <input
                   value={editingBait.image_url || ""}
                   onChange={(e) =>
@@ -1588,16 +1526,12 @@ export default function AsZunaFishingTracker() {
                 type="submit"
                 disabled={saving || uploading}
                 className={buttonClass}
-              >
-                Save
-              </button>
+              >{t("Save")}</button>
               <button
                 type="button"
                 onClick={() => setEditingBait(null)}
                 className={subtleButtonClass}
-              >
-                Cancel
-              </button>
+              >{t("Cancel")}</button>
             </div>
           </form>
         </div>
@@ -1609,9 +1543,9 @@ export default function AsZunaFishingTracker() {
             onSubmit={updateFish}
             className="w-full max-w-lg rounded-xl border border-line bg-[var(--surface)] p-6 shadow-lg"
           >
-            <h3 className="text-2xl font-semibold text-white">Edit fish</h3>
+            <h3 className="text-2xl font-semibold text-white">{t("Edit fish")}</h3>
             <div className="mt-5 space-y-4">
-              <Field label="Name">
+              <Field label={t("Name")}>
                 <input
                   value={editingFish.name}
                   onChange={(e) =>
@@ -1620,7 +1554,7 @@ export default function AsZunaFishingTracker() {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Sell price">
+              <Field label={t("Sell price")}>
                 <input
                   type="number"
                   min="0"
@@ -1635,7 +1569,7 @@ export default function AsZunaFishingTracker() {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Image">
+              <Field label={t("Image")}>
                 <input
                   value={editingFish.image_url || ""}
                   onChange={(e) =>
@@ -1669,16 +1603,12 @@ export default function AsZunaFishingTracker() {
                 type="submit"
                 disabled={saving || uploading}
                 className={buttonClass}
-              >
-                Save
-              </button>
+              >{t("Save")}</button>
               <button
                 type="button"
                 onClick={() => setEditingFish(null)}
                 className={subtleButtonClass}
-              >
-                Cancel
-              </button>
+              >{t("Cancel")}</button>
             </div>
           </form>
         </div>

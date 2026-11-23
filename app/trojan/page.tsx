@@ -1,3 +1,4 @@
+import { getTranslations } from "@/lib/i18n/server";
 import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
@@ -30,6 +31,7 @@ function getDiscordDisplayName(profile?: Profile) {
 
 
 export default async function TrojanPage() {
+  const { t } = await getTranslations();
   const supabase = await createServerClient();
 
   const {
@@ -79,7 +81,7 @@ export default async function TrojanPage() {
 
   return (
     <main className="hub-page">
-      <PageHeader icon="terminal" eyebrow="Knowledge base" title="Trojan guides" description="Your shared library of roleplay guides, screenshots, commands, and walkthroughs." />
+      <PageHeader icon="terminal" eyebrow={t("Knowledge base")} title={t("Trojan guides")} description={t("Your shared library of roleplay guides, screenshots, commands, and walkthroughs.")} />
       <TrojanGuides initialGuides={guidesWithAuthors} isAdmin={isAdmin} />
     </main>
   );

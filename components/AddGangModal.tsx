@@ -1,10 +1,12 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AddGangModal() {
+  const { t } = useTranslation();
   const supabase = createClient();
 
   const [open, setOpen] = useState(false);
@@ -29,7 +31,7 @@ export default function AddGangModal() {
 
     if (error) {
       setUploadingImage(false);
-      alert("Image upload failed");
+      alert(t("Image upload failed"));
       return;
     }
 
@@ -59,7 +61,7 @@ export default function AddGangModal() {
     if (res.ok) {
       window.location.reload();
     } else {
-      alert("Failed to add gang");
+      alert(t("Failed to add gang"));
     }
   }
 
@@ -83,29 +85,23 @@ export default function AddGangModal() {
           </button>
 
           <div className="mb-6 pr-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-              New relation
-            </p>
-            <h2 className="mt-2 text-3xl font-semibold">Add Gang</h2>
-            <p className="mt-2 text-sm text-muted">
-              Add a gang profile with image, relation status and short notes.
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">{t("New relation")}</p>
+            <h2 className="mt-2 text-3xl font-semibold">{t("Add Gang")}</h2>
+            <p className="mt-2 text-sm text-muted">{t("Add a gang profile with image, relation status and short notes.")}</p>
           </div>
 
           <div className="space-y-4">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Gang name"
+              placeholder={t("Gang name")}
               className={inputClass}
               required
             />
 
             <label className="block rounded-xl border border-dashed border-line bg-surface p-4 transition hover:bg-surface">
-              <span className="text-sm font-semibold text-white">Gang image</span>
-              <span className="mt-1 block text-xs text-muted">
-                Upload a banner or logo for the card.
-              </span>
+              <span className="text-sm font-semibold text-white">{t("Gang image")}</span>
+              <span className="mt-1 block text-xs text-muted">{t("Upload a banner or logo for the card.")}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -118,13 +114,13 @@ export default function AddGangModal() {
             </label>
 
             {uploadingImage && (
-              <p className="text-sm text-muted">Uploading image...</p>
+              <p className="text-sm text-muted">{t("Uploading image...")}</p>
             )}
 
             {image && (
               <img
                 src={image}
-                alt="Gang preview"
+                alt={t("Gang preview")}
                 className="h-40 w-full rounded-xl border border-line object-cover"
               />
             )}
@@ -132,7 +128,7 @@ export default function AddGangModal() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Short description"
+              placeholder={t("Short description")}
               className={`${inputClass} min-h-28 resize-none`}
             />
 
@@ -141,12 +137,8 @@ export default function AddGangModal() {
               onChange={(e) => setStatus(e.target.value)}
               className="w-full rounded-xl border border-line bg-[var(--surface)] px-4 py-3 text-white outline-none transition focus:border-accent/50"
             >
-              <option className="bg-[var(--surface)] text-white" value="friendly">
-                Friendly
-              </option>
-              <option className="bg-[var(--surface)] text-white" value="conflict">
-                In Conflict
-              </option>
+              <option className="bg-[var(--surface)] text-white" value="friendly">{t("Friendly")}</option>
+              <option className="bg-[var(--surface)] text-white" value="conflict">{t("In Conflict")}</option>
             </select>
 
             <button
@@ -154,7 +146,7 @@ export default function AddGangModal() {
               disabled={loading || uploadingImage}
               className="w-full rounded-xl bg-accent-strong px-4 py-3 font-bold text-white shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:translate-y-0 disabled:opacity-60"
             >
-              {loading ? "Adding..." : "Add Gang"}
+              {loading ? t("Adding...") : t("Add Gang")}
             </button>
           </div>
         </form>
@@ -167,9 +159,7 @@ export default function AddGangModal() {
       <button
         onClick={() => setOpen(true)}
         className="inline-flex items-center justify-center rounded-xl bg-accent-strong px-5 py-3 font-bold text-white shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong"
-      >
-        + Add Gang
-      </button>
+      >{t("+ Add Gang")}</button>
 
       {modal}
     </>

@@ -1,10 +1,13 @@
 // app/components/SignOutButton.tsx
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
+
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignOutButton() {
+  const { t } = useTranslation();
   const router = useRouter();
   const supabase = createClient();
 
@@ -17,9 +20,7 @@ export default function SignOutButton() {
     <button
       onClick={handleSignOut}
       className="ml-4 px-3 py-2 rounded-md bg-white/6 border border-line text-sm"
-    >
-      Sign out
-    </button>
+    >{t("Sign out")}</button>
   );
 }
 

@@ -1,3 +1,4 @@
+import { getTranslations } from "@/lib/i18n/server";
 import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -45,6 +46,7 @@ const assignableRoles: RoleOption[] = [
 ];
 
 export default async function AdminPage() {
+  const { t } = await getTranslations();
   const supabase = await createClient();
 
   const {
@@ -85,7 +87,7 @@ export default async function AdminPage() {
 
     return (
     <main className="hub-page">
-      <PageHeader icon="shield" eyebrow="Management" title="Administration" description="Manage members, review recent activity, and update Discord roles." />
+      <PageHeader icon="shield" eyebrow={t("Management")} title={t("Administration")} description={t("Manage members, review recent activity, and update Discord roles.")} />
       <section className="hub-panel p-4 sm:p-6"><AdminUsersTable
               users={usersWithoutDiscordRoles}
               assignableRoles={assignableRoles}
@@ -141,7 +143,7 @@ export default async function AdminPage() {
 
   return (
     <main className="hub-page">
-      <PageHeader icon="shield" eyebrow="Management" title="Administration" description="Manage members, review recent activity, and update Discord roles." />
+      <PageHeader icon="shield" eyebrow={t("Management")} title={t("Administration")} description={t("Manage members, review recent activity, and update Discord roles.")} />
       <section className="hub-panel p-4 sm:p-6"><AdminUsersTable users={users} assignableRoles={assignableRoles} /></section>
     </main>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -123,6 +124,7 @@ function PinSvg({
 }
 
 export default function GtaMap({ isAdmin }: GtaMapProps) {
+  const { t } = useTranslation();
   const viewportRef = useRef<HTMLDivElement | null>(null);
 
   const draggingRef = useRef(false);
@@ -412,10 +414,10 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
         setNewPinPosition(null);
         resetForm();
       } else {
-        alert(data.error || "Failed to create pin");
+        alert(t(data.error || "Failed to create pin"));
       }
     } catch {
-      alert("Failed to create pin");
+      alert(t("Failed to create pin"));
     }
 
     setSaving(false);
@@ -456,17 +458,17 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
         setNewPinPosition(null);
         resetForm();
       } else {
-        alert(data.error || "Failed to update pin");
+        alert(t(data.error || "Failed to update pin"));
       }
     } catch {
-      alert("Failed to update pin");
+      alert(t("Failed to update pin"));
     }
 
     setSaving(false);
   }
 
   async function deletePin(id: string) {
-    if (!confirm("Delete this pin?")) return;
+    if (!confirm(t("Delete this pin?"))) return;
 
     try {
       const res = await fetch("/api/map-pins", {
@@ -484,10 +486,10 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
         setHoveredPin(null);
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to delete pin");
+        alert(t(data.error || "Failed to delete pin"));
       }
     } catch {
-      alert("Failed to delete pin");
+      alert(t("Failed to delete pin"));
     }
   }
 
@@ -595,7 +597,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
         >
           <img
             src={MAP_IMAGE}
-            alt="GTA map"
+            alt={t("GTA map")}
             draggable={false}
             className="pointer-events-none absolute left-0 top-0 h-full w-full max-w-none select-none"
           />
@@ -661,25 +663,19 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             type="button"
             onClick={resetView}
             className="rounded-xl bg-elevated px-3 py-2 text-sm font-semibold transition hover:bg-white/20"
-          >
-            Reset
-          </button>
+          >{t("Reset")}</button>
         </div>
 
-        <p className="mt-2 text-xs text-muted">
-          Drag to move · Scroll to zoom
-        </p>
+        <p className="mt-2 text-xs text-muted">{t("Drag to move · Scroll to zoom")}</p>
 
         {isAdmin && (
-          <p className="mt-1 text-xs text-yellow-300">
-            Right click map to add a pin
-          </p>
+          <p className="mt-1 text-xs text-yellow-300">{t("Right click map to add a pin")}</p>
         )}
       </div>
 
       <div className="absolute left-4 top-40 z-30 hidden w-[250px] rounded-xl border border-line bg-surface/95 p-3 shadow-lg backdrop-blur md:block">
         <div className="mb-2 flex items-center justify-between gap-3">
-          <h3 className="text-sm font-bold">Categories</h3>
+          <h3 className="text-sm font-bold">{t("Categories")}</h3>
           <span className="text-xs text-muted">
             {filteredPins.length}/{pins.length}
           </span>
@@ -710,50 +706,48 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             className="space-y-4"
           >
             <h2 className="text-xl font-bold">
-              {editingPin ? "Edit Pin" : "Add New Pin"}
+              {editingPin ? t("Edit Pin") : t("Add New Pin")}
             </h2>
 
             <div>
-              <label className="mb-1 block text-sm text-muted">Title</label>
+              <label className="mb-1 block text-sm text-muted">{t("Title")}</label>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
-                placeholder="Example: Black market"
+                placeholder={t("Example: Black market")}
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-muted">
-                Category
-              </label>
+              <label className="mb-1 block text-sm text-muted">{t("Category")}</label>
               <input
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
                 className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
-                placeholder="Example: Dealer, Mechanic, Stash, Hideout"
+                placeholder={t("Example: Dealer, Mechanic, Stash, Hideout")}
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-muted">Icon</label>
+              <label className="mb-1 block text-sm text-muted">{t("Icon")}</label>
               <select
                 value={icon}
                 onChange={(event) => setIcon(event.target.value)}
                 className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
               >
-                <option value="pin">Pin</option>
-                <option value="car">Car</option>
-                <option value="house">House</option>
-                <option value="shop">Shop</option>
-                <option value="star">Star</option>
-                <option value="warning">Warning</option>
-                <option value="man">Man</option>
+                <option value="pin">{t("Pin")}</option>
+                <option value="car">{t("Car")}</option>
+                <option value="house">{t("House")}</option>
+                <option value="shop">{t("Shop")}</option>
+                <option value="star">{t("Star")}</option>
+                <option value="warning">{t("Warning")}</option>
+                <option value="man">{t("Man")}</option>
               </select>
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-muted">Color</label>
+              <label className="mb-1 block text-sm text-muted">{t("Color")}</label>
               <div className="flex flex-wrap gap-2">
                 {[
                   "#ef4444",
@@ -788,9 +782,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-muted">
-                Image URL
-              </label>
+              <label className="mb-1 block text-sm text-muted">{t("Image URL")}</label>
               <input
                 value={imageUrl}
                 onChange={(event) => setImageUrl(event.target.value)}
@@ -801,27 +793,24 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
               {imageUrl.trim() && (
                 <img
                   src={imageUrl}
-                  alt="Pin preview"
+                  alt={t("Pin preview")}
                   className="mt-3 max-h-40 w-full rounded-xl object-cover"
                 />
               )}
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-muted">
-                Description
-              </label>
+              <label className="mb-1 block text-sm text-muted">{t("Description")}</label>
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 className="min-h-24 w-full rounded-xl border border-line bg-inset px-3 py-2 text-white outline-none focus:border-accent"
-                placeholder="Write notes about this place..."
+                placeholder={t("Write notes about this place...")}
               />
             </div>
 
             {newPinPosition && (
-              <div className="text-xs text-muted">
-                Position: {newPinPosition.x_position}%,{" "}
+              <div className="text-xs text-muted">{t("Position:")} {newPinPosition.x_position}%,{" "}
                 {newPinPosition.y_position}%
               </div>
             )}
@@ -833,19 +822,17 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                 className="rounded-xl bg-accent-strong px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:opacity-60"
               >
                 {saving
-                  ? "Saving..."
+                  ? t("Saving...")
                   : editingPin
-                    ? "Save Changes"
-                    : "Save Pin"}
+                    ? t("Save Changes")
+                    : t("Save Pin")}
               </button>
 
               <button
                 type="button"
                 onClick={cancelForm}
                 className="rounded-xl bg-elevated px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-              >
-                Cancel
-              </button>
+              >{t("Cancel")}</button>
             </div>
           </form>
         ) : selectedPin ? (
@@ -855,7 +842,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
 
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted">
-                  {selectedPin.category || "General"}
+                  {selectedPin.category || t("General")}
                 </p>
                 <h2 className="text-2xl font-bold">{selectedPin.title}</h2>
               </div>
@@ -870,11 +857,10 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             )}
 
             <p className="whitespace-pre-wrap text-sm text-muted">
-              {selectedPin.description || "No description added."}
+              {selectedPin.description || t("No description added.")}
             </p>
 
-            <div className="text-xs text-muted">
-              Position: {selectedPin.x_position}%, {selectedPin.y_position}%
+            <div className="text-xs text-muted">{t("Position:")} {selectedPin.x_position}%, {selectedPin.y_position}%
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -882,9 +868,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                 type="button"
                 onClick={() => goToPin(selectedPin)}
                 className="rounded-xl bg-elevated px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-              >
-                Go To
-              </button>
+              >{t("Go To")}</button>
 
               {isAdmin && (
                 <>
@@ -892,17 +876,13 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                     type="button"
                     onClick={() => startEditPin(selectedPin)}
                     className="rounded-xl bg-accent-strong px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-strong"
-                  >
-                    Edit
-                  </button>
+                  >{t("Edit")}</button>
 
                   <button
                     type="button"
                     onClick={() => deletePin(selectedPin.id)}
                     className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500"
-                  >
-                    Delete
-                  </button>
+                  >{t("Delete")}</button>
                 </>
               )}
 
@@ -910,25 +890,22 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                 type="button"
                 onClick={() => setSelectedPin(null)}
                 className="rounded-xl bg-elevated px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-              >
-                Close
-              </button>
+              >{t("Close")}</button>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
             <div>
-              <h2 className="text-xl font-bold">Locations</h2>
+              <h2 className="text-xl font-bold">{t("Locations")}</h2>
               <p className="text-xs text-muted">
-                {filteredPins.length} of {pins.length} pins shown
-              </p>
+                {filteredPins.length} {t("of")} {pins.length} {t("pins shown")}</p>
             </div>
 
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-sm text-white outline-none placeholder:text-muted focus:border-accent"
-              placeholder="Search title, category or description..."
+              placeholder={t("Search title, category or description...")}
             />
 
             <div className="flex max-h-28 flex-wrap gap-2 overflow-y-auto pr-1">
@@ -949,9 +926,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             </div>
 
             {filteredPins.length === 0 ? (
-              <p className="rounded-xl border border-line bg-elevated p-4 text-sm text-muted">
-                No pins match your search/filter.
-              </p>
+              <p className="rounded-xl border border-line bg-elevated p-4 text-sm text-muted">{t("No pins match your search/filter.")}</p>
             ) : (
               <div className="max-h-[500px] space-y-2 overflow-y-auto pr-1">
                 {filteredPins.map((pin) => (
@@ -966,7 +941,7 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold">{pin.title}</p>
                       <p className="truncate text-xs text-muted">
-                        {pin.category || "General"}
+                        {pin.category || t("General")}
                       </p>
                       {pin.description && (
                         <p className="mt-1 line-clamp-2 text-xs text-muted">
@@ -1012,13 +987,13 @@ export default function GtaMap({ isAdmin }: GtaMapProps) {
             <div>
               <h3 className="font-bold leading-tight">{hoveredPin.title}</h3>
               <p className="text-xs uppercase tracking-wide text-muted">
-                {hoveredPin.category || "General"}
+                {hoveredPin.category || t("General")}
               </p>
             </div>
           </div>
 
           <p className="mt-2 max-h-24 overflow-hidden whitespace-pre-wrap text-sm text-muted">
-            {hoveredPin.description || "No description added."}
+            {hoveredPin.description || t("No description added.")}
           </p>
         </div>
       )}

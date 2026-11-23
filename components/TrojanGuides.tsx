@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -33,6 +34,7 @@ function RichTextEditor({
   onChange: (value: string) => void;
   onUploadImage: (file: File) => Promise<string | null>;
 }) {
+  const { t } = useTranslation();
   const [uploadingInlineImage, setUploadingInlineImage] = useState(false);
   const updateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -152,7 +154,7 @@ function RichTextEditor({
   }
 
   function insertImageUrl() {
-    const url = prompt("Paste image URL");
+    const url = prompt(t("Paste image URL"));
     if (!url?.trim()) return;
 
     activeEditor.chain().focus().setImage({ src: url.trim() }).run();
@@ -177,9 +179,7 @@ function RichTextEditor({
           type="button"
           onClick={() => activeEditor.chain().focus().toggleBold().run()}
           className={activeEditor.isActive("bold") ? activeButtonClass : buttonClass}
-        >
-          Bold
-        </button>
+        >{t("Bold")}</button>
 
         <button
           type="button"
@@ -187,9 +187,7 @@ function RichTextEditor({
           className={
             activeEditor.isActive("italic") ? activeButtonClass : buttonClass
           }
-        >
-          Italic
-        </button>
+        >{t("Italic")}</button>
 
         <button
           type="button"
@@ -201,9 +199,7 @@ function RichTextEditor({
               ? activeButtonClass
               : buttonClass
           }
-        >
-          Heading
-        </button>
+        >{t("Heading")}</button>
 
         <button
           type="button"
@@ -211,9 +207,7 @@ function RichTextEditor({
           className={
             activeEditor.isActive("bulletList") ? activeButtonClass : buttonClass
           }
-        >
-          Bullet List
-        </button>
+        >{t("Bullet List")}</button>
 
         <button
           type="button"
@@ -221,17 +215,13 @@ function RichTextEditor({
           className={
             activeEditor.isActive("orderedList") ? activeButtonClass : buttonClass
           }
-        >
-          Number List
-        </button>
+        >{t("Number List")}</button>
 
         <button
           type="button"
           onClick={() => activeEditor.chain().focus().toggleCode().run()}
           className={activeEditor.isActive("code") ? activeButtonClass : buttonClass}
-        >
-          Inline Code
-        </button>
+        >{t("Inline Code")}</button>
 
         <button
           type="button"
@@ -239,12 +229,10 @@ function RichTextEditor({
           className={
             activeEditor.isActive("codeBlock") ? activeButtonClass : buttonClass
           }
-        >
-          Code Block
-        </button>
+        >{t("Code Block")}</button>
 
         <label className={buttonClass}>
-          {uploadingInlineImage ? "Uploading..." : "Insert Image"}
+          {uploadingInlineImage ? t("Uploading...") : t("Insert Image")}
           <input
             type="file"
             accept="image/*"
@@ -257,9 +245,7 @@ function RichTextEditor({
           />
         </label>
 
-        <button type="button" onClick={insertImageUrl} className={buttonClass}>
-          Image URL
-        </button>
+        <button type="button" onClick={insertImageUrl} className={buttonClass}>{t("Image URL")}</button>
 
         <button
           type="button"
@@ -267,17 +253,12 @@ function RichTextEditor({
             activeEditor.chain().focus().unsetAllMarks().clearNodes().run()
           }
           className={buttonClass}
-        >
-          Clear
-        </button>
+        >{t("Clear")}</button>
       </div>
 
       <EditorContent editor={activeEditor} />
 
-      <p className="mt-2 text-xs text-accent/60">
-        Tip: Code Block now only converts the current line and puts your cursor
-        back in normal text underneath it.
-      </p>
+      <p className="mt-2 text-xs text-accent/60">{t("Tip: Code Block now only converts the current line and puts your cursor back in normal text underneath it.")}</p>
     </div>
   );
 }
@@ -293,17 +274,7 @@ function getAuthorName(guide: TrojanGuide) {
   return guide.author_name || "Unknown operator";
 }
 
-function formatLastUpdated(value?: string | null) {
-  if (!value) return "Unknown";
 
-  return new Intl.DateTimeFormat("da-DK", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
 
 function difficultyClass(difficulty?: string | null) {
   const clean = (difficulty || "Normal").toLowerCase();
@@ -325,6 +296,20 @@ export default function TrojanGuides({
   initialGuides: TrojanGuide[];
   isAdmin: boolean;
 }) {
+  const { t, locale } = useTranslation();
+
+function formatLastUpdated(value?: string | null) {
+  if (!value) return t("Unknown");
+
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
   const supabase = createClient();
 
   const [guides, setGuides] = useState<TrojanGuide[]>(initialGuides);
@@ -414,7 +399,7 @@ export default function TrojanGuides({
     if (error) {
       setUploadingCover(false);
       setUploadingImages(false);
-      alert(error.message);
+      alert(t(error.message));
       return;
     }
 
@@ -449,7 +434,7 @@ export default function TrojanGuides({
 
       if (error) {
         setUploadingImages(false);
-        alert(error.message);
+        alert(t(error.message));
         return;
       }
 
@@ -477,7 +462,7 @@ export default function TrojanGuides({
       .upload(fileName, file);
 
     if (error) {
-      alert(error.message);
+      alert(t(error.message));
       return null;
     }
 
@@ -491,7 +476,7 @@ export default function TrojanGuides({
   async function saveGuide(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!title.trim()) return alert("Enter a guide title");
+    if (!title.trim()) return alert(t("Enter a guide title"));
 
     setSaving(true);
 
@@ -516,7 +501,7 @@ export default function TrojanGuides({
 
     if (!res.ok) {
       const json = await res.json();
-      alert(json?.error || "Failed to save guide");
+      alert(t(json?.error || "Failed to save guide"));
       return;
     }
 
@@ -526,7 +511,7 @@ export default function TrojanGuides({
   }
 
   async function deleteGuide(guide: TrojanGuide) {
-    const confirmed = confirm(`Delete guide "${guide.title}"?`);
+    const confirmed = confirm(t('Delete guide "{name}"?', { name: guide.title }));
     if (!confirmed) return;
 
     setDeletingId(guide.id);
@@ -539,7 +524,7 @@ export default function TrojanGuides({
 
     if (!res.ok) {
       const json = await res.json();
-      alert(json?.error || "Failed to delete guide");
+      alert(t(json?.error || "Failed to delete guide"));
       return;
     }
 
@@ -564,16 +549,14 @@ export default function TrojanGuides({
             <h2 className="font-mono text-2xl font-semibold text-white">
               ./guide-library
             </h2>
-            <p className="mt-1 text-muted">
-              Select a guide card to open the full terminal-style tutorial.
-            </p>
+            <p className="mt-1 text-muted">{t("Select a guide card to open the full terminal-style tutorial.")}</p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="search --guides"
+              placeholder={t("search --guides")}
               className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 font-mono text-accent outline-none placeholder:text-accent sm:w-72"
             />
 
@@ -581,18 +564,14 @@ export default function TrojanGuides({
               <button
                 onClick={openAddGuide}
                 className="rounded-xl border border-accent/30 bg-accent-strong px-5 py-3 font-mono font-bold text-black shadow-[0_0_18px_rgba(16,185,129,0.24)] hover:bg-accent-strong"
-              >
-                + Add Guide
-              </button>
+              >{t("+ Add Guide")}</button>
             ) : null}
           </div>
         </div>
       </div>
 
       {filteredGuides.length === 0 ? (
-        <div className="rounded-xl border border-accent/20 bg-black/45 p-8 text-center font-mono text-accent/70">
-          No Trojan guides found.
-        </div>
+        <div className="rounded-xl border border-accent/20 bg-black/45 p-8 text-center font-mono text-accent/70">{t("No Trojan guides found.")}</div>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredGuides.map((guide) => (
@@ -626,7 +605,7 @@ export default function TrojanGuides({
                         guide.difficulty,
                       )}`}
                     >
-                      {guide.difficulty || "Normal"}
+                      {t(guide.difficulty || "Normal")}
                     </span>
                   </div>
 
@@ -643,7 +622,7 @@ export default function TrojanGuides({
                   <div className="mt-4 flex flex-wrap gap-2">
                     <div className="inline-flex items-center gap-2 rounded-lg border border-accent/20 bg-black/45 px-3 py-2 font-mono text-xs text-accent/75">
                       <span className="h-2 w-2 rounded-full bg-accent-strong shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
-                      <span className="text-accent/80">LAST UPDATED</span>
+                      <span className="text-accent/80">{t("LAST UPDATED")}</span>
                       <span>
                         {formatLastUpdated(
                           guide.updated_at || guide.created_at,
@@ -663,7 +642,7 @@ export default function TrojanGuides({
                           @
                         </span>
                       )}
-                      <span className="text-accent/80">AUTHOR</span>
+                      <span className="text-accent/80">{t("AUTHOR")}</span>
                       <span className="truncate">{getAuthorName(guide)}</span>
                     </div>
                   </div>
@@ -675,16 +654,14 @@ export default function TrojanGuides({
                   <button
                     onClick={() => openEditGuide(guide)}
                     className="w-full rounded-xl border border-accent/20 px-4 py-2 font-mono text-sm font-semibold text-accent hover:bg-accent-strong/10"
-                  >
-                    Edit
-                  </button>
+                  >{t("Edit")}</button>
 
                   <button
                     onClick={() => deleteGuide(guide)}
                     disabled={deletingId === guide.id}
                     className="w-full rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/20 disabled:opacity-50"
                   >
-                    {deletingId === guide.id ? "Deleting..." : "Delete"}
+                    {deletingId === guide.id ? t("Deleting...") : t("Delete")}
                   </button>
                 </div>
               ) : null}
@@ -699,12 +676,9 @@ export default function TrojanGuides({
             <div className="sticky top-0 z-40 flex shrink-0 items-center justify-between gap-4 border-b border-accent/20 bg-[var(--surface)] px-5 py-4 lg:px-7">
               <div>
                 <h2 className="font-mono text-2xl font-semibold text-white">
-                  {editingGuide ? "Edit Trojan Guide" : "Add Trojan Guide"}
+                  {editingGuide ? t("Edit Trojan Guide") : t("Add Trojan Guide")}
                 </h2>
-                <p className="mt-1 text-sm text-accent/60">
-                  Fullscreen editor mode. The toolbar stays sticky while you
-                  write long guides with screenshots and command blocks.
-                </p>
+                <p className="mt-1 text-sm text-accent/60">{t("Fullscreen editor mode. The toolbar stays sticky while you write long guides with screenshots and command blocks.")}</p>
               </div>
 
               <button
@@ -726,14 +700,14 @@ export default function TrojanGuides({
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Guide title"
+                  placeholder={t("Guide title")}
                   className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
 
                 <input
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  placeholder="Category"
+                  placeholder={t("Category")}
                   className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
 
@@ -742,30 +716,28 @@ export default function TrojanGuides({
                   onChange={(e) => setDifficulty(e.target.value)}
                   className="w-full rounded-xl border border-accent/20 bg-black/70 px-4 py-3 text-accent outline-none"
                 >
-                  <option value="Easy">Easy</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Hard">Hard</option>
-                  <option value="Expert">Expert</option>
+                  <option value="Easy">{t("Easy")}</option>
+                  <option value="Normal">{t("Normal")}</option>
+                  <option value="Hard">{t("Hard")}</option>
+                  <option value="Expert">{t("Expert")}</option>
                 </select>
               </div>
 
               <textarea
                 value={shortDescription}
                 onChange={(e) => setShortDescription(e.target.value)}
-                placeholder="Short description shown on the guide card"
+                placeholder={t("Short description shown on the guide card")}
                 rows={3}
                 className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
               />
 
               <div className="space-y-2 rounded-xl border border-accent/20 bg-inset p-4">
-                <label className="block text-sm font-semibold text-accent">
-                  Cover image for the guide card
-                </label>
+                <label className="block text-sm font-semibold text-accent">{t("Cover image for the guide card")}</label>
 
                 <input
                   value={coverImage}
                   onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="Paste image URL or upload below"
+                  placeholder={t("Paste image URL or upload below")}
                   className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
 
@@ -780,23 +752,19 @@ export default function TrojanGuides({
                 />
 
                 {uploadingCover ? (
-                  <p className="text-sm text-accent/60">
-                    Uploading cover...
-                  </p>
+                  <p className="text-sm text-accent/60">{t("Uploading cover...")}</p>
                 ) : null}
                 {coverImage ? (
                   <img
                     src={coverImage}
-                    alt="Cover preview"
+                    alt={t("Cover preview")}
                     className="h-36 w-full rounded-xl object-cover"
                   />
                 ) : null}
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-accent">
-                  Guide content
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-accent">{t("Guide content")}</label>
                 <RichTextEditor
                   value={content}
                   onChange={setContent}
@@ -805,14 +773,12 @@ export default function TrojanGuides({
               </div>
 
               <div className="space-y-2 rounded-xl border border-accent/20 bg-inset p-4">
-                <label className="block text-sm font-semibold text-accent">
-                  Optional gallery images at bottom
-                </label>
+                <label className="block text-sm font-semibold text-accent">{t("Optional gallery images at bottom")}</label>
 
                 <textarea
                   value={imageUrls}
                   onChange={(e) => setImageUrls(e.target.value)}
-                  placeholder="Optional: one image URL per line, or upload below. For images inside the guide text, use Insert Image in the editor above."
+                  placeholder={t("Optional: one image URL per line, or upload below. For images inside the guide text, use Insert Image in the editor above.")}
                   rows={4}
                   className="w-full rounded-xl border border-accent/20 bg-black/50 px-4 py-3 text-accent outline-none placeholder:text-accent"
                 />
@@ -826,9 +792,7 @@ export default function TrojanGuides({
                 />
 
                 {uploadingImages ? (
-                  <p className="text-sm text-accent/60">
-                    Uploading images...
-                  </p>
+                  <p className="text-sm text-accent/60">{t("Uploading images...")}</p>
                 ) : null}
               </div>
 
@@ -840,19 +804,17 @@ export default function TrojanGuides({
                     resetForm();
                   }}
                   className="w-full rounded-xl border border-accent/20 px-4 py-3 font-mono font-semibold hover:bg-accent-strong/10"
-                >
-                  Cancel
-                </button>
+                >{t("Cancel")}</button>
 
                 <button
                   disabled={saving || uploadingCover || uploadingImages}
                   className="w-full rounded-xl bg-accent-strong px-4 py-3 font-mono font-bold text-black hover:bg-accent-strong disabled:opacity-50"
                 >
                   {saving
-                    ? "Saving..."
+                    ? t("Saving...")
                     : editingGuide
-                      ? "Save Changes"
-                      : "Create Guide"}
+                      ? t("Save Changes")
+                      : t("Create Guide")}
                 </button>
               </div>
             </form>

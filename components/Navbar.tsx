@@ -1,4 +1,5 @@
 ﻿"use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import Image from "next/image";
 import LoadingLink from "@/components/LoadingLink";
@@ -11,6 +12,7 @@ import styles from "./Navbar.module.css";
 
 type NavItem = { name: string; path: string; icon: HubIconName };
 const workspaceItems: NavItem[] = [
+  { name: "Rules & etiquette", path: "/rules", icon: "shield" },
   { name: "Trojan guides", path: "/trojan", icon: "terminal" },
   { name: "Crafting", path: "/crafting", icon: "crafting" },
   { name: "Gang network", path: "/gangs", icon: "gangs" },
@@ -24,6 +26,7 @@ const personalItem: NavItem = { name: "AsZuna", path: "/aszuna", icon: "user" };
 const adminItem: NavItem = { name: "Administration", path: "/admin", icon: "shield" };
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
@@ -86,7 +89,7 @@ export default function Navbar() {
   const navLink = (item: NavItem) => (
     <LoadingLink key={item.path} href={item.path} className={`${styles.link} ${isActive(item.path) ? styles.active : ""}`} aria-current={isActive(item.path) ? "page" : undefined} onClick={() => setOpenPath(null)}>
       <span className={styles.linkIcon}><HubIcon name={item.icon} /></span>
-      <span>{item.name}</span>
+      <span>{t(item.name)}</span>
     </LoadingLink>
   );
 
@@ -94,32 +97,32 @@ export default function Navbar() {
 
   return (
     <div data-app-navigation>
-      {mobileOpen && <button className={styles.scrim} aria-label="Close navigation" onClick={() => setOpenPath(null)} />}
+      {mobileOpen && <button className={styles.scrim} aria-label={t("Close navigation")} onClick={() => setOpenPath(null)} />}
       <aside id="workspace-navigation" className={`${styles.sidebar} ${mobileOpen ? styles.sidebarOpen : ""}`}>
-        <LoadingLink href="/" aria-label="Dyrene home" className={styles.brand} onClick={() => setOpenPath(null)}>
+        <LoadingLink href="/" aria-label={t("Dyrene home")} className={styles.brand} onClick={() => setOpenPath(null)}>
           <Image src={dyreneLogo} alt="Dyrene" loading="eager" fetchPriority="high" sizes="164px" className={styles.logo} />
         </LoadingLink>
-        <nav aria-label="Main navigation" className={styles.navigation}>
+        <nav aria-label={t("Main navigation")} className={styles.navigation}>
           <div className={styles.group}>
-            <p className={styles.groupLabel}>Overview</p>
+            <p className={styles.groupLabel}>{t("Overview")}</p>
             {navLink(homeItem)}
           </div>
           <div className={styles.group}>
-            <p className={styles.groupLabel}>Workspace</p>
+            <p className={styles.groupLabel}>{t("Workspace")}</p>
             {workspaceItems.map(navLink)}
           </div>
           <div className={styles.group}>
-            <p className={styles.groupLabel}>Personal</p>
+            <p className={styles.groupLabel}>{t("Personal")}</p>
             {navLink(personalItem)}
             {isAdmin && navLink(adminItem)}
           </div>
         </nav>
         <div className={styles.sidebarFooter}>
-          <div className={styles.memberLabel}><HubIcon name="shield" width="17" height="17" /><span>Dyrene member space</span></div>
-          {signedIn ? <button type="button" className="hub-secondary" onClick={handleLogout} disabled={loggingOut}>{loggingOut ? "Signing out…" : "Sign out"}</button> : <LoadingLink href="/login" className="hub-primary" onClick={() => setOpenPath(null)}>Sign in</LoadingLink>}
+          <div className={styles.memberLabel}><HubIcon name="shield" width="17" height="17" /><span>{t("Dyrene member space")}</span></div>
+          {signedIn ? <button type="button" className="hub-secondary" onClick={handleLogout} disabled={loggingOut}>{loggingOut ? t("Signing out…") : t("Sign out")}</button> : <LoadingLink href="/login" className="hub-primary" onClick={() => setOpenPath(null)}>{t("Sign in")}</LoadingLink>}
         </div>
       </aside>
-      <button ref={menuButtonRef} type="button" className={styles.menuButton} aria-label={mobileOpen ? "Close navigation" : "Open navigation"} aria-expanded={mobileOpen} aria-controls="workspace-navigation" onClick={() => setOpenPath(mobileOpen ? null : pathname)}>
+      <button ref={menuButtonRef} type="button" className={styles.menuButton} aria-label={mobileOpen ? t("Close navigation") : t("Open navigation")} aria-expanded={mobileOpen} aria-controls="workspace-navigation" onClick={() => setOpenPath(mobileOpen ? null : pathname)}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d={mobileOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"} /></svg>
       </button>
     </div>

@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
+
 
 import { useState } from "react";
 
@@ -29,6 +31,7 @@ export default function AdminUsersTable({
   users,
   assignableRoles,
 }: Props) {
+  const { t, locale } = useTranslation();
   const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
@@ -76,7 +79,7 @@ export default function AdminUsersTable({
         data = JSON.parse(text);
       } catch {
         console.error("Non-JSON response from /api/admin/roles:", text);
-        throw new Error("Server returned HTML instead of JSON.");
+        throw new Error(t("Server returned HTML instead of JSON."));
       }
 
       if (!res.ok) {
@@ -106,7 +109,7 @@ export default function AdminUsersTable({
     >
       {message && (
         <div className="px-6 py-4 border-b border-line text-sm text-white bg-elevated">
-          {message}
+          {t(message)}
         </div>
       )}
 
@@ -114,13 +117,13 @@ export default function AdminUsersTable({
         <table className="w-full text-left text-sm text-white">
           <thead className="border-b border-line text-muted">
             <tr>
-              <th className="px-6 py-4">User</th>
-              <th className="px-6 py-4">Discord ID</th>
-              <th className="px-6 py-4">Admin</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">Current Roles</th>
-              <th className="px-6 py-4">Last Seen</th>
-              <th className="px-6 py-4">Manage Role</th>
+              <th className="px-6 py-4">{t("User")}</th>
+              <th className="px-6 py-4">{t("Discord ID")}</th>
+              <th className="px-6 py-4">{t("Admin")}</th>
+              <th className="px-6 py-4">{t("Status")}</th>
+              <th className="px-6 py-4">{t("Current Roles")}</th>
+              <th className="px-6 py-4">{t("Last Seen")}</th>
+              <th className="px-6 py-4">{t("Manage Role")}</th>
             </tr>
           </thead>
           <tbody>
@@ -137,7 +140,7 @@ export default function AdminUsersTable({
                       {profile.avatar_url ? (
                         <img
                           src={profile.avatar_url}
-                          alt={profile.discord_username || "User avatar"}
+                          alt={profile.discord_username || t("User avatar")}
                           className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
@@ -148,7 +151,7 @@ export default function AdminUsersTable({
 
                       <div>
                         <div className="font-semibold text-white">
-                          {profile.global_name || profile.discord_username || "Unknown"}
+                          {profile.global_name || profile.discord_username || t("Unknown")}
                         </div>
                         <div className="text-xs text-muted">
                           @{profile.discord_username || "unknown"}
@@ -163,25 +166,17 @@ export default function AdminUsersTable({
 
                   <td className="px-6 py-4">
                     {profile.is_admin ? (
-                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/20">
-                        Admin
-                      </span>
+                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/20">{t("Admin")}</span>
                     ) : (
-                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-elevated text-muted border border-line">
-                        Member
-                      </span>
+                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-elevated text-muted border border-line">{t("Member")}</span>
                     )}
                   </td>
 
                   <td className="px-6 py-4">
                     {profile.online ? (
-                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-accent-strong/20 text-accent border border-accent/20">
-                        Online
-                      </span>
+                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-accent-strong/20 text-accent border border-accent/20">{t("Online")}</span>
                     ) : (
-                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-elevated text-muted border border-line">
-                        Offline
-                      </span>
+                      <span className="rounded-full px-3 py-1 text-xs font-semibold bg-elevated text-muted border border-line">{t("Offline")}</span>
                     )}
                   </td>
 
@@ -198,13 +193,13 @@ export default function AdminUsersTable({
                         ))}
                       </div>
                     ) : (
-                      <span className="text-muted">No assignable roles</span>
+                      <span className="text-muted">{t("No assignable roles")}</span>
                     )}
                   </td>
 
                   <td className="px-6 py-4 text-muted">
                     {profile.last_seen
-                      ? new Date(profile.last_seen).toLocaleString()
+                      ? new Date(profile.last_seen).toLocaleString(locale)
                       : "—"}
                   </td>
 
@@ -218,9 +213,7 @@ export default function AdminUsersTable({
                           }
                           className="px-3 py-2 rounded-lg bg-elevated text-white border border-line outline-none"
                         >
-                          <option value="" className="text-black">
-                            Select role
-                          </option>
+                          <option value="" className="text-black">{t("Select role")}</option>
                           {assignableRoles.map((role) => (
                             <option
                               key={role.id}
@@ -243,7 +236,7 @@ export default function AdminUsersTable({
                               background: "var(--accent)", color: "var(--inset)",
                             }}
                           >
-                            {isLoading ? "Working..." : "Add"}
+                            {isLoading ? t("Working...") : t("Add")}
                           </button>
 
                           <button
@@ -260,12 +253,12 @@ export default function AdminUsersTable({
                               background: "linear-gradient(90deg,#ef4444,#dc2626)",
                             }}
                           >
-                            {isLoading ? "Working..." : "Remove"}
+                            {isLoading ? t("Working...") : t("Remove")}
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <span className="text-muted">No Discord ID</span>
+                      <span className="text-muted">{t("No Discord ID")}</span>
                     )}
                   </td>
                 </tr>
@@ -274,9 +267,7 @@ export default function AdminUsersTable({
 
             {users.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-muted">
-                  No users found yet.
-                </td>
+                <td colSpan={7} className="px-6 py-10 text-center text-muted">{t("No users found yet.")}</td>
               </tr>
             )}
           </tbody>

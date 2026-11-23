@@ -1,3 +1,4 @@
+import { getTranslations } from "@/lib/i18n/server";
 import PageHeader from "@/components/PageHeader";
 import HubIcon from "@/components/HubIcon";
 import { cookies } from "next/headers";
@@ -39,6 +40,7 @@ async function lockAsZunaPage() {
 }
 
 export default async function AsZunaPage() {
+  const { t } = await getTranslations();
   const cookieStore = await cookies();
   const hasAccess = cookieStore.get(ACCESS_COOKIE)?.value === "true";
 
@@ -47,13 +49,13 @@ export default async function AsZunaPage() {
       <main className="hub-page flex min-h-[calc(100svh-var(--topbar-height))] items-center justify-center">
         <section className="hub-auth-card">
           <div className="hub-auth-mark"><HubIcon name="lock" width="26" height="26" /></div>
-          <p className="hub-eyebrow">Personal workspace</p>
+          <p className="hub-eyebrow">{t("Personal workspace")}</p>
           <h1>AsZuna</h1>
-          <p>Enter your passcode to open your private tools.</p>
+          <p>{t("Enter your passcode to open your private tools.")}</p>
           <form action={unlockAsZunaPage} className="mt-6">
-            <label htmlFor="passcode" className="mb-2 block text-sm text-muted">Passcode</label>
-            <input id="passcode" name="passcode" type="password" autoComplete="off" placeholder="Enter your passcode" required className="w-full rounded-lg border border-line bg-inset px-4 py-3 text-foreground outline-none focus:border-accent/60" />
-            <button type="submit" className="hub-primary">Unlock workspace</button>
+            <label htmlFor="passcode" className="mb-2 block text-sm text-muted">{t("Passcode")}</label>
+            <input id="passcode" name="passcode" type="password" autoComplete="off" placeholder={t("Enter your passcode")} required className="w-full rounded-lg border border-line bg-inset px-4 py-3 text-foreground outline-none focus:border-accent/60" />
+            <button type="submit" className="hub-primary">{t("Unlock workspace")}</button>
           </form>
         </section>
       </main>
@@ -62,7 +64,7 @@ export default async function AsZunaPage() {
 
   return (
     <main className="hub-page max-w-[1800px]">
-      <PageHeader icon="user" eyebrow="Personal workspace" title="AsZuna" description="Manage your fishing sessions, compare catches, and track returns." actions={<form action={lockAsZunaPage}><button type="submit" className="hub-secondary">Lock workspace</button></form>} />
+      <PageHeader icon="user" eyebrow={t("Personal workspace")} title="AsZuna" description={t("Manage your fishing sessions, compare catches, and track returns.")} actions={<form action={lockAsZunaPage}><button type="submit" className="hub-secondary">{t("Lock workspace")}</button></form>} />
       <AsZunaFishingTracker />
     </main>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -44,23 +45,24 @@ type ConfirmAction =
   | { type: "event"; id: string; name?: string }
   | { type: "member"; id: string; name?: string };
 
-function timeAgo(date: string) {
+function timeAgo(date: string, locale: string) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return "just now";
+  const relative = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  if (seconds < 60) return relative.format(0, "second");
 
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  if (minutes < 60) return relative.format(-minutes, "minute");
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (hours < 24) return relative.format(-hours, "hour");
 
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+  if (days < 7) return relative.format(-days, "day");
 
   const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+  if (weeks < 5) return relative.format(-weeks, "week");
 
-  return new Date(date).toLocaleDateString("en-GB", {
+  return new Date(date).toLocaleDateString(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -122,6 +124,7 @@ function RichTextEditor({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { t } = useTranslation();
   const editor = useEditor({
     extensions: [StarterKit],
     content: value || "",
@@ -164,9 +167,7 @@ function RichTextEditor({
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={editor.isActive("bold") ? activeButtonClass : buttonClass}
-        >
-          Bold
-        </button>
+        >{t("Bold")}</button>
 
         <button
           type="button"
@@ -174,9 +175,7 @@ function RichTextEditor({
           className={
             editor.isActive("italic") ? activeButtonClass : buttonClass
           }
-        >
-          Italic
-        </button>
+        >{t("Italic")}</button>
 
         <button
           type="button"
@@ -188,9 +187,7 @@ function RichTextEditor({
               ? activeButtonClass
               : buttonClass
           }
-        >
-          Heading
-        </button>
+        >{t("Heading")}</button>
 
         <button
           type="button"
@@ -198,9 +195,7 @@ function RichTextEditor({
           className={
             editor.isActive("bulletList") ? activeButtonClass : buttonClass
           }
-        >
-          Bullet List
-        </button>
+        >{t("Bullet List")}</button>
 
         <button
           type="button"
@@ -208,9 +203,7 @@ function RichTextEditor({
           className={
             editor.isActive("orderedList") ? activeButtonClass : buttonClass
           }
-        >
-          Number List
-        </button>
+        >{t("Number List")}</button>
 
         <button
           type="button"
@@ -218,9 +211,7 @@ function RichTextEditor({
             editor.chain().focus().unsetAllMarks().clearNodes().run()
           }
           className={buttonClass}
-        >
-          Clear
-        </button>
+        >{t("Clear")}</button>
       </div>
 
       <EditorContent editor={editor} />
@@ -271,6 +262,7 @@ export default function GangsList({
   gangs: Gang[];
   isAdmin?: boolean;
 }) {
+  const { t, locale } = useTranslation();
   const supabase = createClient();
 
   const [gangList, setGangList] = useState<Gang[]>(gangs);
@@ -370,7 +362,7 @@ export default function GangsList({
 
     if (error) {
       setUploadingImage(false);
-      alert(error.message);
+      alert(t(error.message));
       return;
     }
 
@@ -401,7 +393,7 @@ export default function GangsList({
 
       if (error) {
         setUploadingEventImage(false);
-        alert(error.message);
+        alert(t(error.message));
         return;
       }
 
@@ -430,7 +422,7 @@ export default function GangsList({
 
     if (error) {
       setUploadingAvatar(false);
-      alert(error.message);
+      alert(t(error.message));
       return;
     }
 
@@ -503,7 +495,7 @@ export default function GangsList({
 
     setSaving(false);
 
-    if (!res.ok) return alert("Failed to update gang");
+    if (!res.ok) return alert(t("Failed to update gang"));
 
     const updatedGang: Gang = {
       ...editingGang,
@@ -542,7 +534,7 @@ export default function GangsList({
 
     if (!res.ok) {
       const data = await res.json();
-      return alert(data.error || "Failed to update member");
+      return alert(t(data.error || "Failed to update member"));
     }
 
     setEditingMember(null);
@@ -575,7 +567,7 @@ export default function GangsList({
 
     if (!res.ok) {
       const data = await res.json();
-      return alert(data.error || "Failed to update event");
+      return alert(t(data.error || "Failed to update event"));
     }
 
     setEditingEvent(null);
@@ -599,7 +591,7 @@ export default function GangsList({
 
     setDeleting(false);
 
-    if (!res.ok) return alert("Failed to delete gang");
+    if (!res.ok) return alert(t("Failed to delete gang"));
 
     setGangList((prev) => prev.filter((gang) => gang.id !== id));
 
@@ -654,7 +646,7 @@ export default function GangsList({
       }),
     });
 
-    if (!res.ok) return alert("Failed to add event");
+    if (!res.ok) return alert(t("Failed to add event"));
 
     setEventTitle("");
     setEventDescription("");
@@ -677,7 +669,7 @@ export default function GangsList({
 
     setDeleting(false);
 
-    if (!res.ok) return alert("Failed to delete event");
+    if (!res.ok) return alert(t("Failed to delete event"));
 
     setEvents((prev) => prev.filter((event) => event.id !== id));
     setConfirmAction(null);
@@ -702,7 +694,7 @@ export default function GangsList({
 
     if (!res.ok) {
       const data = await res.json();
-      return alert(data.error || "Failed to add member");
+      return alert(t(data.error || "Failed to add member"));
     }
 
     setMemberName("");
@@ -724,7 +716,7 @@ export default function GangsList({
 
     setDeleting(false);
 
-    if (!res.ok) return alert("Failed to delete member");
+    if (!res.ok) return alert(t("Failed to delete member"));
 
     setMembers((prev) => prev.filter((member) => member.id !== id));
     setEvents((prev) =>
@@ -772,7 +764,7 @@ export default function GangsList({
       <input
         value={eventTitle}
         onChange={(e) => setEventTitle(e.target.value)}
-        placeholder="Event title"
+        placeholder={t("Event title")}
         className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
       />
 
@@ -783,24 +775,12 @@ export default function GangsList({
         onChange={(e) => setEventCategory(e.target.value)}
         className="w-full rounded-xl border border-line bg-[var(--surface)] px-4 py-3 text-white outline-none"
       >
-        <option className="bg-[var(--surface)] text-white" value="Intel">
-          Intel
-        </option>
-        <option className="bg-[var(--surface)] text-white" value="Meeting">
-          Meeting
-        </option>
-        <option className="bg-[var(--surface)] text-white" value="Fight">
-          Fight
-        </option>
-        <option className="bg-[var(--surface)] text-white" value="Alliance">
-          Alliance
-        </option>
-        <option className="bg-[var(--surface)] text-white" value="Warning">
-          Warning
-        </option>
-        <option className="bg-[var(--surface)] text-white" value="Screenshot">
-          Screenshot
-        </option>
+        <option className="bg-[var(--surface)] text-white" value="Intel">{t("Intel")}</option>
+        <option className="bg-[var(--surface)] text-white" value="Meeting">{t("Meeting")}</option>
+        <option className="bg-[var(--surface)] text-white" value="Fight">{t("Fight")}</option>
+        <option className="bg-[var(--surface)] text-white" value="Alliance">{t("Alliance")}</option>
+        <option className="bg-[var(--surface)] text-white" value="Warning">{t("Warning")}</option>
+        <option className="bg-[var(--surface)] text-white" value="Screenshot">{t("Screenshot")}</option>
       </select>
 
       <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-yellow-400/20 bg-yellow-500/10 px-4 py-3 text-sm font-semibold text-yellow-200">
@@ -811,7 +791,7 @@ export default function GangsList({
           className="h-4 w-4 accent-yellow-400"
         />
 
-        <span>Pin this event to the top</span>
+        <span>{t("Pin this event to the top")}</span>
       </label>
 
       <div className="space-y-2">
@@ -824,7 +804,7 @@ export default function GangsList({
         />
 
         {uploadingEventImage && (
-          <p className="text-sm text-muted">Uploading event images...</p>
+          <p className="text-sm text-muted">{t("Uploading event images...")}</p>
         )}
 
         {eventImages.length > 0 && (
@@ -838,7 +818,7 @@ export default function GangsList({
                 >
                   <img
                     src={imageUrl}
-                    alt={`Event preview ${index + 1}`}
+                    alt={t("Event preview {count}", { count: index + 1 })}
                     className="h-32 w-full object-cover transition hover:scale-[1.02]"
                   />
                 </button>
@@ -851,9 +831,7 @@ export default function GangsList({
                     )
                   }
                   className="absolute right-2 top-2 rounded-lg bg-black/70 px-3 py-1 text-xs font-semibold text-white hover:bg-red-600"
-                >
-                  Remove
-                </button>
+                >{t("Remove")}</button>
               </div>
             ))}
           </div>
@@ -861,7 +839,7 @@ export default function GangsList({
       </div>
 
       <div className="space-y-2">
-        <p className="text-sm font-semibold text-white">Linked Members</p>
+        <p className="text-sm font-semibold text-white">{t("Linked Members")}</p>
 
         <div className="max-h-40 space-y-2 overflow-y-auto rounded-xl border border-line bg-elevated p-3">
           {members.map((member) => (
@@ -890,7 +868,7 @@ export default function GangsList({
           ))}
 
           {members.length === 0 && (
-            <p className="text-sm text-muted">No members to link.</p>
+            <p className="text-sm text-muted">{t("No members to link.")}</p>
           )}
         </div>
       </div>
@@ -913,13 +891,13 @@ export default function GangsList({
             ×
           </button>
 
-          <h2 className="mb-5 text-2xl font-bold">Edit Gang</h2>
+          <h2 className="mb-5 text-2xl font-bold">{t("Edit Gang")}</h2>
 
           <div className="space-y-4">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Gang name"
+              placeholder={t("Gang name")}
               className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
@@ -935,13 +913,13 @@ export default function GangsList({
               />
 
               {uploadingImage && (
-                <p className="text-sm text-muted">Uploading image...</p>
+                <p className="text-sm text-muted">{t("Uploading image...")}</p>
               )}
 
               {image && (
                 <img
                   src={image}
-                  alt="Gang preview"
+                  alt={t("Gang preview")}
                   className="h-32 w-full rounded-xl object-cover"
                 />
               )}
@@ -950,7 +928,7 @@ export default function GangsList({
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Short description"
+              placeholder={t("Short description")}
               className="min-h-28 w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
@@ -961,12 +939,8 @@ export default function GangsList({
               }
               className="w-full rounded-xl border border-line bg-[var(--surface)] px-4 py-3 text-white outline-none"
             >
-              <option className="bg-[var(--surface)] text-white" value="friendly">
-                Friendly
-              </option>
-              <option className="bg-[var(--surface)] text-white" value="conflict">
-                In Conflict
-              </option>
+              <option className="bg-[var(--surface)] text-white" value="friendly">{t("Friendly")}</option>
+              <option className="bg-[var(--surface)] text-white" value="conflict">{t("In Conflict")}</option>
             </select>
 
             <button
@@ -974,7 +948,7 @@ export default function GangsList({
               disabled={saving || uploadingImage}
               className="w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? t("Saving...") : t("Save Changes")}
             </button>
           </div>
         </form>
@@ -998,16 +972,14 @@ export default function GangsList({
             ×
           </button>
 
-          <h2 className="mb-5 text-2xl font-bold">Add Event</h2>
+          <h2 className="mb-5 text-2xl font-bold">{t("Add Event")}</h2>
 
           {eventFormFields}
 
           <button
             disabled={uploadingEventImage}
             className="mt-4 w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
-          >
-            Add Event
-          </button>
+          >{t("Add Event")}</button>
         </form>
       </div>,
       document.body,
@@ -1029,16 +1001,14 @@ export default function GangsList({
             ×
           </button>
 
-          <h2 className="mb-5 text-2xl font-bold">Edit Event</h2>
+          <h2 className="mb-5 text-2xl font-bold">{t("Edit Event")}</h2>
 
           {eventFormFields}
 
           <button
             disabled={uploadingEventImage}
             className="mt-4 w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
-          >
-            Save Event
-          </button>
+          >{t("Save Event")}</button>
         </form>
       </div>,
       document.body,
@@ -1060,27 +1030,27 @@ export default function GangsList({
             ×
           </button>
 
-          <h2 className="mb-5 text-2xl font-bold">Add Member</h2>
+          <h2 className="mb-5 text-2xl font-bold">{t("Add Member")}</h2>
 
           <div className="space-y-4">
             <input
               value={memberName}
               onChange={(e) => setMemberName(e.target.value)}
-              placeholder="Member name"
+              placeholder={t("Member name")}
               className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberRole}
               onChange={(e) => setMemberRole(e.target.value)}
-              placeholder="Member role"
+              placeholder={t("Member role")}
               className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberPhone}
               onChange={(e) => setMemberPhone(e.target.value)}
-              placeholder="Phone number"
+              placeholder={t("Phone number")}
               className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
@@ -1096,13 +1066,13 @@ export default function GangsList({
               />
 
               {uploadingAvatar && (
-                <p className="text-sm text-muted">Uploading avatar...</p>
+                <p className="text-sm text-muted">{t("Uploading avatar...")}</p>
               )}
 
               {memberAvatar && (
                 <img
                   src={memberAvatar}
-                  alt="Member avatar preview"
+                  alt={t("Member avatar preview")}
                   className="h-24 w-24 rounded-full object-cover"
                 />
               )}
@@ -1111,9 +1081,7 @@ export default function GangsList({
             <button
               disabled={uploadingAvatar}
               className="w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
-            >
-              Add Member
-            </button>
+            >{t("Add Member")}</button>
           </div>
         </form>
       </div>,
@@ -1136,27 +1104,27 @@ export default function GangsList({
             ×
           </button>
 
-          <h2 className="mb-5 text-2xl font-bold">Edit Member</h2>
+          <h2 className="mb-5 text-2xl font-bold">{t("Edit Member")}</h2>
 
           <div className="space-y-4">
             <input
               value={memberName}
               onChange={(e) => setMemberName(e.target.value)}
-              placeholder="Member name"
+              placeholder={t("Member name")}
               className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberRole}
               onChange={(e) => setMemberRole(e.target.value)}
-              placeholder="Member role"
+              placeholder={t("Member role")}
               className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
             <input
               value={memberPhone}
               onChange={(e) => setMemberPhone(e.target.value)}
-              placeholder="Phone number"
+              placeholder={t("Phone number")}
               className="w-full rounded-xl border border-line bg-elevated px-4 py-3 outline-none"
             />
 
@@ -1172,13 +1140,13 @@ export default function GangsList({
               />
 
               {uploadingAvatar && (
-                <p className="text-sm text-muted">Uploading avatar...</p>
+                <p className="text-sm text-muted">{t("Uploading avatar...")}</p>
               )}
 
               {memberAvatar && (
                 <img
                   src={memberAvatar}
-                  alt="Member avatar preview"
+                  alt={t("Member avatar preview")}
                   className="h-24 w-24 rounded-full object-cover"
                 />
               )}
@@ -1187,9 +1155,7 @@ export default function GangsList({
             <button
               disabled={uploadingAvatar}
               className="w-full rounded-xl bg-accent-strong px-4 py-3 font-semibold text-white hover:bg-accent-strong disabled:opacity-60"
-            >
-              Save Member
-            </button>
+            >{t("Save Member")}</button>
           </div>
         </form>
       </div>,
@@ -1224,12 +1190,11 @@ export default function GangsList({
               selectedMember.role,
             )}`}
           >
-            {selectedMember.role || "No role"}
+            {selectedMember.role || t("No role")}
           </span>
 
           {selectedMember.phone && (
-            <p className="mt-4 text-sm text-muted">
-              Phone: {selectedMember.phone}
+            <p className="mt-4 text-sm text-muted">{t("Phone:")} {selectedMember.phone}
             </p>
           )}
 
@@ -1241,9 +1206,7 @@ export default function GangsList({
                   openEditMember(selectedMember);
                 }}
                 className="rounded-xl bg-accent-strong px-4 py-2 text-sm font-bold hover:bg-accent-strong"
-              >
-                Edit Member
-              </button>
+              >{t("Edit Member")}</button>
 
               <button
                 onClick={() =>
@@ -1254,9 +1217,7 @@ export default function GangsList({
                   })
                 }
                 className="rounded-xl bg-red-500/15 px-4 py-2 text-sm font-bold text-red-300 hover:bg-red-500/25"
-              >
-                Delete
-              </button>
+              >{t("Delete")}</button>
             </div>
           ) : null}
         </div>
@@ -1283,15 +1244,12 @@ export default function GangsList({
             !
           </div>
 
-          <h2 className="text-2xl font-bold">Confirm Delete</h2>
+          <h2 className="text-2xl font-bold">{t("Confirm Delete")}</h2>
 
-          <p className="mt-3 text-sm leading-6 text-muted">
-            Are you sure you want to delete{" "}
+          <p className="mt-3 text-sm leading-6 text-muted">{t("Are you sure you want to delete")}{" "}
             <span className="font-semibold text-white">
-              {confirmAction.name || `this ${confirmAction.type}`}
-            </span>
-            ? This action cannot be undone.
-          </p>
+              {confirmAction.name || t(`this ${confirmAction.type}`)}
+            </span>{t("? This action cannot be undone.")}</p>
 
           <div className="mt-6 flex gap-3">
             <button
@@ -1299,9 +1257,7 @@ export default function GangsList({
               disabled={deleting}
               onClick={() => setConfirmAction(null)}
               className="flex-1 rounded-xl bg-elevated px-4 py-3 text-sm font-semibold text-white hover:bg-white/20 disabled:opacity-60"
-            >
-              Cancel
-            </button>
+            >{t("Cancel")}</button>
 
             <button
               type="button"
@@ -1309,7 +1265,7 @@ export default function GangsList({
               onClick={runConfirmAction}
               className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-60"
             >
-              {deleting ? "Deleting..." : "Delete"}
+              {deleting ? t("Deleting...") : t("Delete")}
             </button>
           </div>
         </div>
@@ -1344,16 +1300,14 @@ export default function GangsList({
             <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-black/55 to-black/15" />
 
             <div className="relative z-10 flex h-full flex-col items-center justify-end px-4 pb-8 text-center">
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
-                Gang Profile
-              </p>
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">{t("Gang Profile")}</p>
 
               <h2 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">
                 {selectedGang.name}
               </h2>
 
               <p className="mt-3 max-w-3xl text-sm leading-6 text-muted sm:text-base">
-                {selectedGang.description || "No description"}
+                {selectedGang.description || t("No description")}
               </p>
             </div>
           </div>
@@ -1366,9 +1320,7 @@ export default function GangsList({
                   ? "bg-accent-strong text-white shadow-lg shadow-accent/30"
                   : "text-muted hover:bg-elevated hover:text-white"
               }`}
-            >
-              Timeline
-            </button>
+            >{t("Timeline")}</button>
 
             <button
               onClick={() => setActiveTab("members")}
@@ -1377,9 +1329,7 @@ export default function GangsList({
                   ? "bg-accent-strong text-white shadow-lg shadow-accent/30"
                   : "text-muted hover:bg-elevated hover:text-white"
               }`}
-            >
-              Members
-            </button>
+            >{t("Members")}</button>
           </div>
 
           {activeTab === "timeline" && (
@@ -1389,9 +1339,7 @@ export default function GangsList({
                   <button
                     onClick={openAddEvent}
                     className="rounded-xl bg-accent-strong px-6 py-3 font-bold shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong"
-                  >
-                    + Add Event
-                  </button>
+                  >{t("+ Add Event")}</button>
                 </div>
               ) : null}
 
@@ -1428,10 +1376,10 @@ export default function GangsList({
 
                           <div>
                             <p className="text-xs font-semibold text-white">
-                              {event.added_by_email || "Unknown author"}
+                              {event.added_by_email || t("Unknown author")}
                             </p>
                             <p className="text-xs uppercase tracking-[0.16em] text-accent">
-                              {timeAgo(event.created_at)}
+                              {timeAgo(event.created_at, locale)}
                             </p>
                           </div>
                         </div>
@@ -1444,9 +1392,7 @@ export default function GangsList({
                           }`}
                         >
                           {event.pinned && (
-                            <span className="rounded-full border border-yellow-400/30 bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-300">
-                              📌 Pinned
-                            </span>
+                            <span className="rounded-full border border-yellow-400/30 bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-300">{t("📌 Pinned")}</span>
                           )}
 
                           <span
@@ -1454,7 +1400,7 @@ export default function GangsList({
                               event.category,
                             )}`}
                           >
-                            {event.category || "Intel"}
+                            {t(event.category || "Intel")}
                           </span>
                         </div>
 
@@ -1468,9 +1414,7 @@ export default function GangsList({
                             }}
                           />
                         ) : (
-                          <p className="mt-2 text-sm leading-6 text-muted">
-                            No description
-                          </p>
+                          <p className="mt-2 text-sm leading-6 text-muted">{t("No description")}</p>
                         )}
 
                         {getEventImages(event).length > 0 && (
@@ -1489,14 +1433,11 @@ export default function GangsList({
 
                             {getEventImages(event).length > 1 && (
                               <div className="absolute bottom-3 right-3 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white">
-                                +{getEventImages(event).length - 1} more
-                              </div>
+                                +{getEventImages(event).length - 1} {t("more")}</div>
                             )}
 
                             {getEventImages(event).length > 1 && (
-                              <div className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white">
-                                Gallery
-                              </div>
+                              <div className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white">{t("Gallery")}</div>
                             )}
                           </button>
                         )}
@@ -1552,16 +1493,13 @@ export default function GangsList({
                                           </span>
 
                                           {member.phone && (
-                                            <p className="mt-1 text-sm text-muted">
-                                              Phone: {member.phone}
+                                            <p className="mt-1 text-sm text-muted">{t("Phone:")} {member.phone}
                                             </p>
                                           )}
                                         </div>
                                       </div>
 
-                                      <p className="mt-3 text-xs text-accent">
-                                        Click to open profile
-                                      </p>
+                                      <p className="mt-3 text-xs text-accent">{t("Click to open profile")}</p>
                                     </div>
                                   </div>
                                 ) : null,
@@ -1578,9 +1516,7 @@ export default function GangsList({
                             <button
                               onClick={() => openEditEvent(event)}
                               className="rounded-xl bg-elevated px-3 py-2 text-sm font-bold text-accent transition hover:bg-white/20"
-                            >
-                              Edit
-                            </button>
+                            >{t("Edit")}</button>
 
                             <button
                               onClick={() =>
@@ -1591,9 +1527,7 @@ export default function GangsList({
                                 })
                               }
                               className="rounded-xl bg-red-500/15 px-3 py-2 text-sm font-bold text-red-300 transition hover:bg-red-500/25"
-                            >
-                              Delete
-                            </button>
+                            >{t("Delete")}</button>
                           </div>
                         ) : null}
                       </div>
@@ -1601,9 +1535,7 @@ export default function GangsList({
                   ))}
 
                   {events.length === 0 && (
-                    <p className="text-center text-sm text-muted">
-                      No timeline events yet.
-                    </p>
+                    <p className="text-center text-sm text-muted">{t("No timeline events yet.")}</p>
                   )}
                 </div>
               </div>
@@ -1617,9 +1549,7 @@ export default function GangsList({
                   <button
                     onClick={() => setShowAddMember(true)}
                     className="rounded-xl bg-accent-strong px-6 py-3 font-bold shadow-lg shadow-accent/30 transition hover:-translate-y-0.5 hover:bg-accent-strong"
-                  >
-                    + Add Member
-                  </button>
+                  >{t("+ Add Member")}</button>
                 </div>
               ) : null}
 
@@ -1648,12 +1578,11 @@ export default function GangsList({
                             member.role,
                           )}`}
                         >
-                          {member.role || "No role"}
+                          {member.role || t("No role")}
                         </span>
 
                         {member.phone && (
-                          <p className="mt-1 text-sm text-muted">
-                            Phone: {member.phone}
+                          <p className="mt-1 text-sm text-muted">{t("Phone:")} {member.phone}
                           </p>
                         )}
                       </div>
@@ -1664,9 +1593,7 @@ export default function GangsList({
                         <button
                           onClick={() => openEditMember(member)}
                           className="rounded-xl bg-elevated px-3 py-2 text-sm font-bold text-accent transition hover:bg-white/20"
-                        >
-                          Edit
-                        </button>
+                        >{t("Edit")}</button>
 
                         <button
                           onClick={() =>
@@ -1677,16 +1604,14 @@ export default function GangsList({
                             })
                           }
                           className="rounded-xl bg-red-500/15 px-3 py-2 text-sm font-bold text-red-300 transition hover:bg-red-500/25"
-                        >
-                          Delete
-                        </button>
+                        >{t("Delete")}</button>
                       </div>
                     ) : null}
                   </div>
                 ))}
 
                 {members.length === 0 && (
-                  <p className="text-sm text-muted">No members yet.</p>
+                  <p className="text-sm text-muted">{t("No members yet.")}</p>
                 )}
               </div>
             </div>
@@ -1726,7 +1651,7 @@ export default function GangsList({
 
         <img
           src={lightboxImages[lightboxIndex]}
-          alt="Preview"
+          alt={t("Preview")}
           onClick={(e) => e.stopPropagation()}
           className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain"
         />
@@ -1758,23 +1683,17 @@ export default function GangsList({
       <div className="rounded-xl border border-line bg-white/[0.055] p-4 shadow-lg shadow-black/20 backdrop-blur-xl sm:p-6">
         <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-              Relations overview
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">
-              Active gang profiles
-            </h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">{t("Relations overview")}</p>
+            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">{t("Active gang profiles")}</h2>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative min-w-0 sm:w-72">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">
-                Search
-              </span>
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">{t("Search")}</span>
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search gangs..."
+                placeholder={t("Search gangs...")}
                 className="w-full rounded-xl border border-line bg-inset px-4 py-3 pl-20 text-sm text-white outline-none transition placeholder:text-muted focus:border-accent/50 focus:bg-inset"
               />
             </div>
@@ -1797,7 +1716,7 @@ export default function GangsList({
                       : "text-muted hover:bg-elevated hover:text-white"
                   }`}
                 >
-                  {item.label} <span className="opacity-70">{item.count}</span>
+                  {t(item.label)} <span className="opacity-70">{item.count}</span>
                 </button>
               ))}
             </div>
@@ -1833,26 +1752,22 @@ export default function GangsList({
                       : "border-red-400/30 bg-red-500/20 text-red-200"
                   }`}
                 >
-                  {gang.status === "friendly" ? "Friendly" : "In Conflict"}
+                  {gang.status === "friendly" ? t("Friendly") : t("In Conflict")}
                 </span>
               </div>
 
               <div className="p-5">
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-                      Gang profile
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{t("Gang profile")}</p>
                     <h2 className="mt-1 text-xl font-semibold text-white">{gang.name}</h2>
                   </div>
 
-                  <span className="rounded-full bg-elevated px-3 py-1 text-xs font-semibold text-muted transition group-hover:bg-accent-strong/20 group-hover:text-accent">
-                    Open
-                  </span>
+                  <span className="rounded-full bg-elevated px-3 py-1 text-xs font-semibold text-muted transition group-hover:bg-accent-strong/20 group-hover:text-accent">{t("Open")}</span>
                 </div>
 
                 <p className="min-h-[3.75rem] line-clamp-3 text-sm leading-6 text-muted">
-                  {gang.description || "No description added yet."}
+                  {gang.description || t("No description added yet.")}
                 </p>
 
                 {isAdmin ? (
@@ -1863,9 +1778,7 @@ export default function GangsList({
                         openEdit(gang);
                       }}
                       className="rounded-xl bg-elevated px-4 py-2 text-sm font-bold text-white transition hover:bg-white/20"
-                    >
-                      Edit
-                    </button>
+                    >{t("Edit")}</button>
 
                     <button
                       onClick={(e) => {
@@ -1877,9 +1790,7 @@ export default function GangsList({
                         });
                       }}
                       className="rounded-xl bg-red-500/15 px-4 py-2 text-sm font-bold text-red-300 transition hover:bg-red-500/25"
-                    >
-                      Delete
-                    </button>
+                    >{t("Delete")}</button>
                   </div>
                 ) : null}
               </div>
@@ -1889,10 +1800,8 @@ export default function GangsList({
 
         {filteredGangList.length === 0 && (
           <div className="rounded-xl border border-dashed border-line bg-inset p-10 text-center">
-            <p className="text-lg font-bold text-white">No gangs found</p>
-            <p className="mt-2 text-sm text-muted">
-              Try another search or change the relation filter.
-            </p>
+            <p className="text-lg font-bold text-white">{t("No gangs found")}</p>
+            <p className="mt-2 text-sm text-muted">{t("Try another search or change the relation filter.")}</p>
           </div>
         )}
       </div>

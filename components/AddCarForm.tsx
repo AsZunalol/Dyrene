@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/components/LanguageProvider";
+
 
 import { useState } from "react";
 
@@ -7,6 +9,7 @@ type AddCarFormProps = {
 };
 
 export default function AddCarForm({ onSuccess }: AddCarFormProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [price, setPrice] = useState("");
@@ -17,7 +20,7 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return alert("Enter a car name");
+    if (!name.trim()) return alert(t("Enter a car name"));
 
     setLoading(true);
     try {
@@ -38,7 +41,7 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
 
       if (!res.ok) {
         console.error("Add car failed", json);
-        alert("Failed to add car: " + (json?.error || "unknown"));
+        alert(t("Failed to add car: " + (json?.error || "unknown")));
         return;
       }
 
@@ -54,7 +57,7 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
       onSuccess?.();
     } catch (err) {
       console.error("Network error adding car", err);
-      alert("Network error");
+      alert(t("Network error"));
     } finally {
       setLoading(false);
     }
@@ -66,14 +69,14 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Car name"
+          placeholder={t("Car name")}
           className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
           required
         />
         <input
           value={brand}
           onChange={(e) => setBrand(e.target.value)}
-          placeholder="Brand"
+          placeholder={t("Brand")}
           className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
         />
       </div>
@@ -82,14 +85,14 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
         <input
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          placeholder="Price"
+          placeholder={t("Price")}
           type="number"
           className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20"
         />
         <input
           value={image}
           onChange={(e) => setImage(e.target.value)}
-          placeholder="Image URL"
+          placeholder={t("Image URL")}
           className="w-full px-4 py-3 rounded-xl bg-elevated border border-line text-white placeholder:text-muted outline-none focus:border-white/20 md:col-span-2"
         />
       </div>
@@ -100,8 +103,8 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
           onChange={(e) => setStatus(e.target.value)}
           className="px-4 py-3 rounded-xl bg-elevated border border-line text-white outline-none focus:border-white/20"
         >
-          <option value="store">store</option>
-          <option value="vin-scratch">vin-scratch</option>
+          <option value="store">{t("store")}</option>
+          <option value="vin-scratch">{t("vin-scratch")}</option>
         </select>
 
         <label className="inline-flex items-center gap-2 text-sm text-gray-200">
@@ -110,9 +113,7 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
             checked={featured}
             onChange={(e) => setFeatured(e.target.checked)}
             className="w-4 h-4"
-          />
-          Featured
-        </label>
+          />{t("Featured")}</label>
 
         <button
           type="submit"
@@ -122,7 +123,7 @@ export default function AddCarForm({ onSuccess }: AddCarFormProps) {
             background: "var(--accent)", color: "var(--inset)",
           }}
         >
-          {loading ? "Adding…" : "Add car"}
+          {loading ? t("Adding…") : t("Add car")}
         </button>
       </div>
     </form>
